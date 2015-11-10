@@ -9,6 +9,10 @@
 #include <fstream>
 #include <map>
 
+using namespace std;
+
+typedef pair<vertex_descriptor,vertex_descriptor> Match;
+
 Node::Node(Node* _parent, bool _visible) :
 	parent(_parent),
 	visible(_visible),
@@ -17,8 +21,8 @@ Node::Node(Node* _parent, bool _visible) :
 
 }
 
-void Node::load(std::string path) {
-	std::ifstream input;
+void Node::load(string path) {
+	ifstream input;
 	input.open(path);
 	input >> shape;
 	input.close();
@@ -70,8 +74,8 @@ void Node::extrude(Kernel::RT height) {
 
     for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
 
-    	std::vector<vertex_descriptor> indices;
-    	
+    	vector<vertex_descriptor> indices;
+
     	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
 	    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
 	        v != v_end; v++){
@@ -85,7 +89,7 @@ void Node::extrude(Kernel::RT height) {
 
 	    normal = normal * height;
 
-	    std::vector<vertex_descriptor> nIndices;
+	    vector<vertex_descriptor> nIndices;
 
 	    for (unsigned int i = 0 ; i < indices.size() ; i++) {
 	    	nIndices.push_back(shape.add_vertex(shape.point(indices[i]) + normal));
@@ -100,7 +104,7 @@ void Node::extrude(Kernel::RT height) {
 		    					indices[i]);
 
 	    	if (f == Mesh::null_face())
-				std::cout << "Extrude: Unable to add face" << std::endl;
+				cout << "Extrude: Unable to add face" << endl;
 	    }
 
 	    if (nIndices.size() == 3)
@@ -110,8 +114,267 @@ void Node::extrude(Kernel::RT height) {
 	    	f = shape.add_face(nIndices[0], nIndices[3], nIndices[2], nIndices[1]);
 
 	    else
-	    	std::cout << "Extrude: This face has more than 4 vertices" << std::endl;
+	    	cout << "Extrude: This face has more than 4 vertices" << endl;
     }
+}
+
+void Node::distributeX(
+	vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
+	vector<vector<vertex_descriptor> >* onBorderBackw,
+	vector<vector<vertex_descriptor> >* onBorderForthw,
+	vector<Mesh>* nShapes,
+	const vector<vertex_descriptor>& sortedVertices,
+	const vector<double>& weights) {
+
+	double minCoord, maxCoord;
+	minCoord = shape.point(sortedVertices.front()).x();
+	maxCoord = shape.point(sortedVertices.back()).x();
+
+	double totalWeight = 0.;
+	double cumWeight = 0;
+
+	for (auto it = weights.begin() ; it != weights.end() ; it++)
+		totalWeight += *it;
+
+	double prvSeparator, nxtSeparator;
+	unsigned int j = 0;
+
+	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
+		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		cumWeight += weights[i];
+		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+
+		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).x() <= nxtSeparator; j++) {
+			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
+			(*matchVertexIn)[i].insert( Match(sortedVertices[j], indexAdded) );
+
+			CGAL::Halfedge_around_target_iterator<Mesh> h, h_end;
+			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
+					h != h_end; h++){
+
+				if (shape.point(shape.source(*h)).x() > nxtSeparator) {
+
+					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+
+					crossingEdge = crossingEdge * Kernel::RT( // Thales
+						(nxtSeparator - shape.point(sortedVertices[j]).x()) /
+						(shape.point(shape.source(*h)).x() - shape.point(sortedVertices[j]).x()) );
+
+					(*onBorderForthw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderForthw)[i].back()) );
+
+					(*onBorderBackw)[i+1].push_back((*nShapes)[i+1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i+1].insert( Match(shape.source(*h), (*onBorderBackw)[i+1].back()) );
+				}
+
+				else if (shape.point(shape.source(*h)).x() < prvSeparator) {
+
+					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+
+					crossingEdge = crossingEdge * Kernel::RT( // Thales
+						(prvSeparator - shape.point(sortedVertices[j]).x()) /
+						(shape.point(shape.source(*h)).x() - shape.point(sortedVertices[j]).x()) );
+
+					(*onBorderBackw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderBackw)[i].back()) );
+
+					(*onBorderForthw)[i-1].push_back((*nShapes)[i-1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i-1].insert( Match(shape.source(*h), (*onBorderForthw)[i-1].back()) );
+				}
+			}
+		}
+	}
+}
+
+void Node::distributeY(
+	vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
+	vector<vector<vertex_descriptor> >* onBorderBackw,
+	vector<vector<vertex_descriptor> >* onBorderForthw,
+	vector<Mesh>* nShapes,
+	const vector<vertex_descriptor>& sortedVertices,
+	const vector<double>& weights) {
+
+	double minCoord, maxCoord;
+	minCoord = shape.point(sortedVertices.front()).y();
+	maxCoord = shape.point(sortedVertices.back()).y();
+
+	double totalWeight = 0.;
+	double cumWeight = 0;
+
+	for (auto it = weights.begin() ; it != weights.end() ; it++)
+		totalWeight += *it;
+
+	double prvSeparator, nxtSeparator;
+	unsigned int j = 0;
+
+	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
+		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		cumWeight += weights[i];
+		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+
+		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).y() <= nxtSeparator; j++) {
+			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
+			(*matchVertexIn)[i].insert( Match(sortedVertices[j], indexAdded) );
+
+			CGAL::Halfedge_around_target_iterator<Mesh> h, h_end;
+			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
+					h != h_end; h++){
+
+				if (shape.point(shape.source(*h)).y() > nxtSeparator) {
+
+					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+
+					crossingEdge = crossingEdge * Kernel::RT( // Thales
+						(nxtSeparator - shape.point(sortedVertices[j]).y()) /
+						(shape.point(shape.source(*h)).y() - shape.point(sortedVertices[j]).y()) );
+
+					(*onBorderForthw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderForthw)[i].back()) );
+
+					(*onBorderBackw)[i+1].push_back((*nShapes)[i+1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i+1].insert( Match(shape.source(*h), (*onBorderBackw)[i+1].back()) );
+				}
+
+				else if (shape.point(shape.source(*h)).y() < prvSeparator) {
+
+					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+
+					crossingEdge = crossingEdge * Kernel::RT( // Thales
+						(prvSeparator - shape.point(sortedVertices[j]).y()) /
+						(shape.point(shape.source(*h)).y() - shape.point(sortedVertices[j]).y()) );
+
+					(*onBorderBackw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderBackw)[i].back()) );
+
+					(*onBorderForthw)[i-1].push_back((*nShapes)[i-1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i-1].insert( Match(shape.source(*h), (*onBorderForthw)[i-1].back()) );
+				}
+			}
+		}
+	}
+}
+
+void Node::distributeZ(
+	vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
+	vector<vector<vertex_descriptor> >* onBorderBackw,
+	vector<vector<vertex_descriptor> >* onBorderForthw,
+	vector<Mesh>* nShapes,
+	const vector<vertex_descriptor>& sortedVertices,
+	const vector<double>& weights) {
+
+	double minCoord, maxCoord;
+	minCoord = shape.point(sortedVertices.front()).z();
+	maxCoord = shape.point(sortedVertices.back()).z();
+
+	double totalWeight = 0.;
+	double cumWeight = 0;
+
+	for (auto it = weights.begin() ; it != weights.end() ; it++)
+		totalWeight += *it;
+
+	double prvSeparator, nxtSeparator;
+	unsigned int j = 0;
+
+	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
+		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		cumWeight += weights[i];
+		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+
+		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).z() <= nxtSeparator; j++) {
+			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
+			(*matchVertexIn)[i].insert( Match(sortedVertices[j], indexAdded) );
+
+			CGAL::Halfedge_around_target_iterator<Mesh> h, h_end;
+			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
+					h != h_end; h++){
+
+				if (shape.point(shape.source(*h)).z() > nxtSeparator) {
+
+					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+
+					crossingEdge = crossingEdge * Kernel::RT( // Thales
+						(nxtSeparator - shape.point(sortedVertices[j]).z()) /
+						(shape.point(shape.source(*h)).z() - shape.point(sortedVertices[j]).z()) );
+
+					(*onBorderForthw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderForthw)[i].back()) );
+
+					(*onBorderBackw)[i+1].push_back((*nShapes)[i+1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i+1].insert( Match(shape.source(*h), (*onBorderBackw)[i+1].back()) );
+				}
+
+				else if (shape.point(shape.source(*h)).z() < prvSeparator) {
+
+					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+
+					crossingEdge = crossingEdge * Kernel::RT( // Thales
+						(prvSeparator - shape.point(sortedVertices[j]).z()) /
+						(shape.point(shape.source(*h)).z() - shape.point(sortedVertices[j]).z()) );
+
+					(*onBorderBackw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderBackw)[i].back()) );
+
+					(*onBorderForthw)[i-1].push_back((*nShapes)[i-1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
+					(*matchVertexIn)[i-1].insert( Match(shape.source(*h), (*onBorderForthw)[i-1].back()) );
+				}
+			}
+		}
+	}
+}
+
+void Node::reconstruct(
+	const vector<map<vertex_descriptor, vertex_descriptor> >& matchVertexIn,
+	const vector<vector<vertex_descriptor> >& onBorderBackw,
+	const vector<vector<vertex_descriptor> >& onBorderForthw,
+	vector<Mesh>* nShapes) {
+
+	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
+		Mesh::Face_range::iterator f, f_end;
+	    for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+	    	bool addFace = true;
+
+	    	vector<vertex_descriptor> aroundNewFace;
+
+	    	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+		    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+		        v != v_end; v++) {
+
+		    	if (matchVertexIn[i].find(*v) == matchVertexIn[i].end()) {
+		    		addFace = false;
+		    		break;
+		    	}
+
+		    	else {
+		    		aroundNewFace.push_back(matchVertexIn[i].at(*v));
+		    	}
+		    }
+
+		    if (addFace) {
+		    	if (aroundNewFace.size() == 3)
+			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2]);
+
+			    else if (aroundNewFace.size() == 4)
+			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[3], aroundNewFace[2], aroundNewFace[1]);
+
+			    else
+	    			cout << "Extrude: This face has more than 4 vertices" << endl;
+		    }
+	    }
+	}
+
+    // Faces on border
+
+	for (unsigned int i = 0 ; i < onBorderForthw.size() ; i++) {
+		if (onBorderForthw.size() == 4) {
+			(*nShapes)[i].add_face(onBorderForthw[i][0], onBorderForthw[i][3], onBorderForthw[i][2], onBorderForthw[i][1]);
+		}
+
+		if (onBorderBackw.size() == 4) {
+			(*nShapes)[i].add_face(onBorderBackw[i][0], onBorderBackw[i][3], onBorderBackw[i][2], onBorderBackw[i][1]);
+		}
+
+		// TODO : Else, do a delaunay triangulation to create the faces on a separator
+	}
 }
 
 struct CompX {
@@ -129,252 +392,61 @@ struct CompZ {
   	bool operator() (vertex_descriptor i,vertex_descriptor j) { return CGAL::compare_z(shape->point(i),shape->point(j)) == -1; }
 };
 
-typedef std::pair<vertex_descriptor,vertex_descriptor> Match;
-
-void Node::split(Axis axis, std::vector<Node*>& actions, std::vector<double> weights) {
+void Node::split(Axis axis, vector<Node*>& actions, vector<double> weights) {
 
 	// Sort vertices according to the axis
 
-	std::vector<vertex_descriptor> vertices;
+	vector<vertex_descriptor> vertices;
 
 	Mesh::Vertex_range::iterator v, v_end;
 	for (boost::tie(v,v_end) = shape.vertices(); v != v_end ; v++) {
 		vertices.push_back(*v);
 	}
 
-	double minCoord, maxCoord;
-
 	switch(axis) {
 		case X:
 			struct CompX compX; compX.shape = &shape;
-			std::sort(vertices.begin(), vertices.end(), compX);
-			minCoord = shape.point(vertices.front()).x();
-			maxCoord = shape.point(vertices.back()).x();
+			sort(vertices.begin(), vertices.end(), compX);
 			break;
 		case Y:
 			struct CompY compY; compY.shape = &shape;
-			std::sort(vertices.begin(), vertices.end(), compY);
-			minCoord = shape.point(vertices.front()).y();
-			maxCoord = shape.point(vertices.back()).y();
+			sort(vertices.begin(), vertices.end(), compY);
 			break;
 		case Z:
 			struct CompZ compZ; compZ.shape = &shape;
-			std::sort(vertices.begin(), vertices.end(), compZ);
-			minCoord = shape.point(vertices.front()).z();
-			maxCoord = shape.point(vertices.back()).z();
+			sort(vertices.begin(), vertices.end(), compZ);
 			break;
 	}
 
 	// Useful variables
 
-	std::vector<std::vector<vertex_descriptor> > onBorderForthw, onBorderBackw;
+	vector<vector<vertex_descriptor> > onBorderForthw, onBorderBackw;
 	onBorderForthw.resize(weights.size());
 	onBorderBackw.resize(weights.size());
-	std::vector<std::map<vertex_descriptor, vertex_descriptor> > matchVertexIn; // Matches a vertex of shape to a vertex of a sub shape
+
+	vector<map<vertex_descriptor, vertex_descriptor> > matchVertexIn; // Matches a vertex of shape to a vertex of a sub shape
 	matchVertexIn.resize(weights.size());
-	
-	std::vector<Mesh> nShapes;
+
+	vector<Mesh> nShapes;
 	nShapes.resize(weights.size());
-
-	double totalWeight = 0.;
-	double cumWeight = 0;
-
-	for (auto it = weights.begin() ; it != weights.end() ; it++)
-		totalWeight += *it;
-
-	double prvSeparator, nxtSeparator;
-	unsigned int j = 0;
 
 	// Distribute Vertices
 
-	for (unsigned int i = 0 ; i < nShapes.size() ; i++) {
-		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
-		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
-
-		switch(axis) {
-			case X:
-				for (; j < vertices.size() && shape.point(vertices[j]).x() <= nxtSeparator; j++) {
-					vertex_descriptor indexAdded = nShapes[i].add_vertex(shape.point(vertices[j]));
-					matchVertexIn[i].insert( Match(vertices[j], indexAdded) );
-
-					CGAL::Halfedge_around_target_iterator<Mesh> h, h_end;
-				    for(boost::tie(h, h_end) = halfedges_around_target(vertices[j], shape);
-				        h != h_end; h++){
-
-				    	if (shape.point(shape.source(*h)).x() > nxtSeparator) {
-
-				    		Vector_3 crossingEdge(shape.point(vertices[j]), shape.point(shape.source(*h)));
-
-				    		crossingEdge = crossingEdge * Kernel::RT( // Thales
-				    			(nxtSeparator - shape.point(vertices[j]).x()) /
-				    			(shape.point(shape.source(*h)).x() - shape.point(vertices[j]).x()) );
-
-				    		onBorderForthw[i].push_back(nShapes[i].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i].insert( Match(shape.source(*h), onBorderForthw[i].back()) );
-				    		
-				    		onBorderBackw[i+1].push_back(nShapes[i+1].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i+1].insert( Match(shape.source(*h), onBorderBackw[i+1].back()) );
-				    	}
-
-				    	else if (shape.point(shape.source(*h)).x() < prvSeparator) {
-
-				    		Vector_3 crossingEdge(shape.point(vertices[j]), shape.point(shape.source(*h)));
-
-				    		crossingEdge = crossingEdge * Kernel::RT( // Thales
-				    			(prvSeparator - shape.point(vertices[j]).x()) /
-				    			(shape.point(shape.source(*h)).x() - shape.point(vertices[j]).x()) );
-
-				    		onBorderBackw[i].push_back(nShapes[i].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i].insert( Match(shape.source(*h), onBorderBackw[i].back()) );
-				    		
-				    		onBorderForthw[i-1].push_back(nShapes[i-1].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i-1].insert( Match(shape.source(*h), onBorderForthw[i-1].back()) );
-				    	}
-				    }
-				}
-				break;
-
-			case Y:
-				for (; j < vertices.size() && shape.point(vertices[j]).y() <= nxtSeparator; j++) {
-					vertex_descriptor indexAdded = nShapes[i].add_vertex(shape.point(vertices[j]));
-					matchVertexIn[i].insert( Match(vertices[j], indexAdded) );
-
-					CGAL::Halfedge_around_target_iterator<Mesh> h, h_end;
-				    for(boost::tie(h, h_end) = halfedges_around_target(vertices[j], shape);
-				        h != h_end; h++){
-
-				    	if (shape.point(shape.source(*h)).y() > nxtSeparator) {
-
-				    		Vector_3 crossingEdge(shape.point(vertices[j]), shape.point(shape.source(*h)));
-
-				    		crossingEdge = crossingEdge * Kernel::RT( // Thales
-				    			(nxtSeparator - shape.point(vertices[j]).y()) /
-				    			(shape.point(shape.source(*h)).y() - shape.point(vertices[j]).y()) );
-
-				    		onBorderForthw[i].push_back(nShapes[i].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i].insert( Match(shape.source(*h), onBorderForthw[i].back()) );
-				    		
-				    		onBorderBackw[i+1].push_back(nShapes[i+1].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i+1].insert( Match(shape.source(*h), onBorderBackw[i+1].back()) );
-				    	}
-
-				    	else if (shape.point(shape.source(*h)).y() < prvSeparator) {
-
-				    		Vector_3 crossingEdge(shape.point(vertices[j]), shape.point(shape.source(*h)));
-
-				    		crossingEdge = crossingEdge * Kernel::RT( // Thales
-				    			(prvSeparator - shape.point(vertices[j]).y()) /
-				    			(shape.point(shape.source(*h)).y() - shape.point(vertices[j]).y()) );
-
-				    		onBorderBackw[i].push_back(nShapes[i].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i].insert( Match(shape.source(*h), onBorderBackw[i].back()) );
-				    		
-				    		onBorderForthw[i-1].push_back(nShapes[i-1].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i-1].insert( Match(shape.source(*h), onBorderForthw[i-1].back()) );
-				    	}
-				    }
-				}
-				break;
-
-			case Z:
-				for (; j < vertices.size() && shape.point(vertices[j]).z() <= nxtSeparator; j++) {
-					vertex_descriptor indexAdded = nShapes[i].add_vertex(shape.point(vertices[j]));
-					matchVertexIn[i].insert( Match(vertices[j], indexAdded) );
-
-					CGAL::Halfedge_around_target_iterator<Mesh> h, h_end;
-				    for(boost::tie(h, h_end) = halfedges_around_target(vertices[j], shape);
-				        h != h_end; h++){
-
-				    	if (shape.point(shape.source(*h)).z() > nxtSeparator) {
-
-				    		Vector_3 crossingEdge(shape.point(vertices[j]), shape.point(shape.source(*h)));
-
-				    		crossingEdge = crossingEdge * Kernel::RT( // Thales
-				    			(nxtSeparator - shape.point(vertices[j]).z()) /
-				    			(shape.point(shape.source(*h)).z() - shape.point(vertices[j]).z()) );
-
-				    		onBorderForthw[i].push_back(nShapes[i].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i].insert( Match(shape.source(*h), onBorderForthw[i].back()) );
-				    		
-				    		onBorderBackw[i+1].push_back(nShapes[i+1].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i+1].insert( Match(shape.source(*h), onBorderBackw[i+1].back()) );
-				    	}
-
-				    	else if (shape.point(shape.source(*h)).z() < prvSeparator) {
-
-				    		Vector_3 crossingEdge(shape.point(vertices[j]), shape.point(shape.source(*h)));
-
-				    		crossingEdge = crossingEdge * Kernel::RT( // Thales
-				    			(prvSeparator - shape.point(vertices[j]).z()) /
-				    			(shape.point(shape.source(*h)).z() - shape.point(vertices[j]).z()) );
-
-				    		onBorderBackw[i].push_back(nShapes[i].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i].insert( Match(shape.source(*h), onBorderBackw[i].back()) );
-				    		
-				    		onBorderForthw[i-1].push_back(nShapes[i-1].add_vertex(shape.point(vertices[j]) + crossingEdge));
-				    		matchVertexIn[i-1].insert( Match(shape.source(*h), onBorderForthw[i-1].back()) );
-				    	}
-				    }
-				}
-				break;
-		}
-
+	switch(axis) {
+		case X:
+			distributeX(&matchVertexIn, &onBorderBackw, &onBorderForthw, &nShapes, vertices, weights);
+			break;
+		case Y:
+			distributeY(&matchVertexIn, &onBorderBackw, &onBorderForthw, &nShapes, vertices, weights);
+			break;
+		case Z:
+			distributeZ(&matchVertexIn, &onBorderBackw, &onBorderForthw, &nShapes, vertices, weights);
+			break;
 	}
 
 	// Reconstruct faces
 
-	for (unsigned int i = 0 ; i < weights.size() ; i++) {
-		Mesh::Face_range::iterator f, f_end;
-	    for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
-	    	bool addFace = true;
-
-	    	std::vector<vertex_descriptor> aroundNewFace;
-
-	    	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-		    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
-		        v != v_end; v++) {
-
-		    	if (matchVertexIn[i].find(*v) == matchVertexIn[i].end()) {
-		    		addFace = false;
-		    		break;
-		    	}
-
-		    	else {
-		    		aroundNewFace.push_back(matchVertexIn[i][*v]);
-		    	}
-		    }
-
-		    if (addFace) {
-		    	if (aroundNewFace.size() == 3)
-			    	nShapes[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2]);
-
-			    else if (aroundNewFace.size() == 4)
-			    	nShapes[i].add_face(aroundNewFace[0], aroundNewFace[3], aroundNewFace[2], aroundNewFace[1]);
-			    
-			    else
-	    			std::cout << "Extrude: This face has more than 4 vertices" << std::endl;
-		    }
-	    }
-	}
-
-    // Faces on border
-
-	for (unsigned int i = 0 ; i < onBorderForthw.size() ; i++) {
-		if (onBorderForthw.size() == 4) {
-			nShapes[i].add_face(onBorderForthw[i][0], onBorderForthw[i][3], onBorderForthw[i][2], onBorderForthw[i][1]);
-		}
-
-		// TODO : Else, do a delaunay triangulation to create the faces on a separator
-	}
-
-	for (unsigned int i = 0 ; i < onBorderBackw.size() ; i++) {
-		if (onBorderBackw.size() == 4) {
-			nShapes[i].add_face(onBorderBackw[i][0], onBorderBackw[i][3], onBorderBackw[i][2], onBorderBackw[i][1]);
-		}
-
-		// TODO : Else, do a delaunay triangulation to create the faces on a separator
-	}
+	reconstruct(matchVertexIn, onBorderBackw, onBorderForthw, &nShapes);
 
 	// Store results
 
@@ -406,15 +478,15 @@ ShapeTree::ShapeTree() :
 }
 
 void ShapeTree::outputGeometry() {
-    std::ofstream output;
-	output.open("out.off", std::ios::trunc);
+    ofstream output;
+	output.open("out.off", ios::trunc);
 	output << root.getSubGeometry();
 	output.close();
 }
 
 void ShapeTree::displayGeometry() {
 	outputGeometry();
-	std::cout << std::endl;
+	cout << endl;
 	if (execl("./viewer", "./viewer") == -1)
-		std::cout << strerror(errno) << std::endl;
+		cout << strerror(errno) << endl;
 }
