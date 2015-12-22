@@ -3,6 +3,8 @@
 #include "rule.h"
 #include "shape_tree.h"
 
+#include "driver.h"
+
 int main() {
 
   ShapeTree shapeTree;
@@ -21,8 +23,9 @@ int main() {
 
   split1[1]->split(Y, split2, weights);*/
 
-  Rule* split = new Rule("Parcel",
+  /*Rule* split = new Rule("Parcel",
   "split(\"x\") {~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
+  // split("y") { floorH: set("floorIdx", get("split;index")) t(randShift(), 9, randShift()) Floor}*
 
   shapeTree.addRule(split);
   shapeTree.addRule(new Rule("BldArea", "extrude(5)"));
@@ -31,7 +34,11 @@ int main() {
 
   while (shapeTree.executeRule() != -1);
 
-  shapeTree.displayGeometry();
+  shapeTree.displayGeometry();*/
+
+  MC::MC_Driver driver;
+
+  driver.parse("{~1 : A | {0.3 : B | ~2 : C }* | 0.3 : B | ~1 : A}");
 
   return 0;
 }

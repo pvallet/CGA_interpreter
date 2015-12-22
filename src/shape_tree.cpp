@@ -25,7 +25,7 @@ void ShapeTree::displayGeometry() {
 }
 
 void ShapeTree::executeActions(Node* affectedNode, const string& actions) {
-
+	
 }
 
 int ShapeTree::executeRule() {
