@@ -38,7 +38,15 @@ int main() {
 
   MC::MC_Driver driver;
 
-  driver.parse("{~1 : A | {0.3 : B | ~2 : C }* | 0.3 : B | ~1 : A}");
+  driver.parse("{~1 : A | {0.3 : B | ~2 : C }* | 0.3 : B | {~1.5 : EDE | 0.5 : pok}* | ~1 : A}");
+  //driver.parse("{15:A}*");
+  driver.computePattern(20);
+  std::vector<float> weights = driver.getWeights();
+  std::vector<std::string> actions = driver.getActions();
+
+  for (unsigned int i = 0 ; i < weights.size() ; i++) {
+    std::cout << weights[i] << " " << actions[i] << std::endl;
+  }
 
   return 0;
 }

@@ -521,26 +521,55 @@ namespace MC {
         {
           switch (yyn)
             {
-  case 8:
-#line 58 "split_pattern.y" // lalr1.cc:847
-    { std::cout << "Relweight: '" << (yystack_[2].value.fval) << "' Actions: '" << (yystack_[0].value.sval) << "'" << std::endl; }
+  case 2:
+#line 43 "split_pattern.y" // lalr1.cc:847
+    {driver.wasConstScope();}
 #line 528 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
-  case 9:
-#line 59 "split_pattern.y" // lalr1.cc:847
-    { std::cout << "Absweight: '" << (yystack_[2].value.fval) << "' Actions: '" << (yystack_[0].value.sval) << "'" << std::endl; }
+  case 3:
+#line 44 "split_pattern.y" // lalr1.cc:847
+    {driver.exitSubScope();}
 #line 534 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
+  case 4:
+#line 48 "split_pattern.y" // lalr1.cc:847
+    {
+			Elmt* elmt = new Elmt();
+			elmt->type = SCOPE;
+			driver.addElement(elmt);
+			driver.enterSubScope();
+		}
+#line 545 "split_pattern_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 9:
+#line 64 "split_pattern.y" // lalr1.cc:847
+    {
+		Elmt* elmt = new Elmt();
+		elmt->type = RELWGHT;
+		elmt->value = (yystack_[2].value.fval);
+		elmt->actions = std::string((yystack_[0].value.sval));
+		driver.addElement(elmt);
+	}
+#line 557 "split_pattern_parser.cpp" // lalr1.cc:847
+    break;
+
   case 10:
-#line 63 "split_pattern.y" // lalr1.cc:847
-    { std::cout << "var_block" << std::endl; }
-#line 540 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 72 "split_pattern.y" // lalr1.cc:847
+    {
+		Elmt* elmt = new Elmt();
+		elmt->type = ABSWGHT;
+		elmt->value = (yystack_[2].value.fval);
+		elmt->actions = std::string((yystack_[0].value.sval));
+		driver.addElement(elmt);
+	}
+#line 569 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 544 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 573 "split_pattern_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -702,69 +731,69 @@ namespace MC {
   }
 
 
-  const signed char MC_Parser::yypact_ninf_ = -9;
+  const signed char MC_Parser::yypact_ninf_ = -10;
 
   const signed char MC_Parser::yytable_ninf_ = -1;
 
   const signed char
   MC_Parser::yypact_[] =
   {
-      -4,    -3,     4,    -1,    -9,     1,     2,    -9,    -2,    -9,
-      -9,    -9,     3,     7,    -9,    -3,    -9,    -9,    -9
+      -4,   -10,     4,    -1,   -10,    -3,   -10,   -10,     1,     2,
+     -10,    -2,   -10,     3,     7,   -10,    -3,   -10,   -10,   -10
   };
 
   const unsigned char
   MC_Parser::yydefact_[] =
   {
-       0,     0,     0,     2,     3,     0,     0,     7,     0,     5,
-       1,    10,     0,     0,     4,     0,     8,     9,     6
+       0,     4,     0,     2,     3,     0,     1,    11,     0,     0,
+       8,     0,     6,     0,     0,     5,     0,     9,    10,     7
   };
 
   const signed char
   MC_Parser::yypgoto_[] =
   {
-      -9,    13,    -9,    -9,    -8,    -9
+     -10,    13,   -10,   -10,   -10,    -9,   -10
   };
 
   const signed char
   MC_Parser::yydefgoto_[] =
   {
-      -1,     7,     3,     8,     9,     4
+      -1,    10,     3,     5,    11,    12,     4
   };
 
   const unsigned char
   MC_Parser::yytable_[] =
   {
-       5,     6,     1,     1,    10,    14,    15,    18,    16,    11,
-      12,    13,    17,     2
+       8,     9,     1,     1,     6,    15,    16,    19,    17,     7,
+      13,    14,    18,     2
   };
 
   const unsigned char
   MC_Parser::yycheck_[] =
   {
-       3,     4,     6,     6,     0,     7,     8,    15,     5,    10,
+       3,     4,     6,     6,     0,     7,     8,    16,     5,    10,
        9,     9,     5,     0
   };
 
   const unsigned char
   MC_Parser::yystos_[] =
   {
-       0,     6,    12,    13,    16,     3,     4,    12,    14,    15,
-       0,    10,     9,     9,     7,     8,     5,     5,    15
+       0,     6,    12,    13,    17,    14,     0,    10,     3,     4,
+      12,    15,    16,     9,     9,     7,     8,     5,     5,    16
   };
 
   const unsigned char
   MC_Parser::yyr1_[] =
   {
-       0,    11,    12,    12,    13,    14,    14,    15,    15,    15,
-      16
+       0,    11,    12,    12,    14,    13,    15,    15,    16,    16,
+      16,    17
   };
 
   const unsigned char
   MC_Parser::yyr2_[] =
   {
-       0,     2,     1,     1,     3,     1,     3,     1,     3,     3,
-       2
+       0,     2,     1,     1,     0,     4,     1,     3,     1,     3,
+       3,     2
   };
 
 
@@ -775,16 +804,16 @@ namespace MC {
   const MC_Parser::yytname_[] =
   {
   "$end", "error", "$undefined", "RELWGHT", "ABSWGHT", "ACTIONS", "'{'",
-  "'}'", "'|'", "':'", "'*'", "$accept", "block", "cst_block", "body",
-  "part", "var_block", YY_NULLPTR
+  "'}'", "'|'", "':'", "'*'", "$accept", "block", "cst_block", "$@1",
+  "body", "part", "var_block", YY_NULLPTR
   };
 
 
   const unsigned char
   MC_Parser::yyrline_[] =
   {
-       0,    43,    43,    44,    48,    52,    53,    57,    58,    59,
-      63
+       0,    43,    43,    44,    48,    48,    58,    59,    63,    64,
+      72,    82
   };
 
   // Print the state stack on the debug stream.
@@ -866,8 +895,8 @@ namespace MC {
 
 #line 5 "split_pattern.y" // lalr1.cc:1155
 } // MC
-#line 870 "split_pattern_parser.cpp" // lalr1.cc:1155
-#line 66 "split_pattern.y" // lalr1.cc:1156
+#line 899 "split_pattern_parser.cpp" // lalr1.cc:1155
+#line 85 "split_pattern.y" // lalr1.cc:1156
 
 
 void MC::MC_Parser::error( const std::string &err_message ) {

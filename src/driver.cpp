@@ -1,14 +1,37 @@
 #include <cctype>
+#include <cmath>
+#include <cfloat>
 #include <sstream>
 
 #include "driver.h"
 
-MC::MC_Driver::~MC_Driver()
-{
+MC::MC_Driver::MC_Driver() :
+  hasRelWeight(false) {
+   currentScope.push(&pattern);
+}
+
+MC::MC_Driver::~MC_Driver() {
    delete(scanner);
    scanner = nullptr;
    delete(parser);
    parser = nullptr;
+
+   deleteScope(pattern);
+}
+
+void MC::MC_Driver::deleteScope(std::list<Elmt*> scope) {
+  for (auto it = scope.begin() ; it != scope.end() ; it++) {
+    switch((*it)->type) {
+      case RELWGHT:
+      case ABSWGHT:
+        delete *it;
+        break;
+      case SCOPE:
+        deleteScope((*it)->subElmts);
+        delete *it;
+        break;
+    }
+  }
 }
 
 void MC::MC_Driver::parse( const char * const string ) {
@@ -43,4 +66,156 @@ void MC::MC_Driver::parse( const char * const string ) {
    {
       std::cerr << "Parse failed !\n";
    }
+}
+
+void MC::MC_Driver::addElement(Elmt* elmt) {
+  currentScope.top()->push_back(elmt);
+
+  if (currentScope.top()->back()->type == SCOPE) {
+    currentScope.top()->back()->value = repetitions.size();
+    repetitions.push_back(0);
+  }
+
+  else if (currentScope.top()->back()->type == RELWGHT)
+    hasRelWeight = true;
+}
+
+void MC::MC_Driver::enterSubScope() {
+  if (currentScope.top()->back()->type == SCOPE) {
+    currentScope.push(&(currentScope.top()->back()->subElmts));
+  }
+  else
+    std::cerr << "Error entering subscope : not a SCOPE element" << std::endl;
+}
+
+void MC::MC_Driver::wasConstScope() { // Append the subscope to the list
+  std::list<Elmt*>* subscope = currentScope.top();
+  currentScope.pop();
+  repetitions[currentScope.top()->back()->value] = -1; // Not to be repeated
+  currentScope.top()->pop_back();
+  currentScope.top()->splice(currentScope.top()->end(), *subscope);
+}
+
+void MC::MC_Driver::computePattern(float _totalLength) {
+  totalLength = _totalLength;
+
+  if (!hasRelWeight) {
+    /* In this case we only repeat the first star seen, all the other are
+     * merely removed. We adapt the repetitions so that it matches the total
+     * length
+     */
+     computeAbsPattern();
+  }
+
+  else
+    optimizeCoordinate(repetitions.size()-1);
+
+  instantiate();
+  computeFinalVectors();
+}
+
+void MC::MC_Driver::computeAbsPattern() {
+  float remainingLength = totalLength;
+  float repeatedLength = 0.f;
+  bool once = false;
+
+
+  for (auto it = pattern.begin() ; it != pattern.end() ; it++) {
+    if ((*it)->type == SCOPE) {
+      if (!once) {
+        once = true;
+        for (auto it2 = (*it)->subElmts.begin() ; it2 != (*it)->subElmts.end() ; it2++) {
+          if ((*it2)->type == ABSWGHT)
+            repeatedLength += (*it2)->value;
+        }
+      }
+    }
+
+    else
+      remainingLength -= (*it)->value;
+  }
+
+
+  if (remainingLength < 0.f)
+    std::cerr << "Error: total length is too small for given pattern" << std::endl;
+
+  else
+    repetitions[0] = remainingLength / repeatedLength; // All the others values are 0
+}
+
+// We only find a local minimum
+void MC::MC_Driver::optimizeCoordinate(int n) { // n = coord
+  if (repetitions[n] != -1) {
+    repetitions[n] = 0;
+    if (n != 0)
+      optimizeCoordinate(n-1);
+    else
+      instantiate();
+    float prevScore = FLT_MAX;
+    float newScore = fabs((totalLength - totalAbsLength) / totalRelWeight - 1.f);
+
+    std::vector<int> prevRepetitions;
+
+    while (newScore < prevScore && totalAbsLength <= totalLength) {
+      prevRepetitions = repetitions;
+      repetitions[n]++;
+      if (n != 0)
+        optimizeCoordinate(n-1);
+      else
+        instantiate();
+      prevScore = newScore;
+      newScore = fabs((totalLength - totalAbsLength) / totalRelWeight - 1.f);
+    }
+    
+    repetitions = prevRepetitions; // To match with prevScore
+  }
+
+  else if (n != 0)
+    optimizeCoordinate(n-1);
+
+  else
+    instantiate();
+}
+
+void MC::MC_Driver::computeFinalVectors() {
+  finalWeights.clear();
+  finalActions.clear();
+
+  float remainingRelLength = totalLength - totalAbsLength;
+
+  for (auto it = patternInstance.begin() ; it != patternInstance.end() ; it++) {
+    finalActions.push_back((*it)->actions);
+
+    if ((*it)->type == ABSWGHT)
+      finalWeights.push_back((*it)->value);
+
+    else // type = RELWGHT
+      finalWeights.push_back((*it)->value * remainingRelLength / totalRelWeight);
+  }
+}
+
+void MC::MC_Driver::instantiate() {
+  patternInstance.clear();
+  totalRelWeight = 0.f;
+  totalAbsLength = 0.f;
+  instantiateScope(pattern);
+}
+
+void MC::MC_Driver::instantiateScope(std::list<Elmt*> scope) {
+  for (auto it = scope.begin() ; it != scope.end() ; it++) {
+    switch((*it)->type) {
+      case RELWGHT:
+        totalRelWeight += (*it)->value;
+        patternInstance.push_back(*it);
+        break;
+      case ABSWGHT:
+        totalAbsLength += (*it)->value;
+        patternInstance.push_back(*it);
+        break;
+      case SCOPE:
+        for (int i = 0 ; i < repetitions[(*it)->value] ; i++)
+          instantiateScope((*it)->subElmts);
+        break;
+    }
+  }
 }

@@ -40,12 +40,18 @@
 
 %%
 block:
-	cst_block
-	| var_block
+	cst_block		{driver.wasConstScope();}
+	| var_block	{driver.exitSubScope();}
 	;
 
 cst_block:
-	'{' body '}'
+	'{' {
+			Elmt* elmt = new Elmt();
+			elmt->type = SCOPE;
+			driver.addElement(elmt);
+			driver.enterSubScope();
+		}
+		body '}'
 	;
 
 body:
@@ -55,12 +61,25 @@ body:
 
 part:
 	block
-	| RELWGHT ':' ACTIONS { std::cout << "Relweight: '" << $1 << "' Actions: '" << $3 << "'" << std::endl; }
-	| ABSWGHT ':' ACTIONS { std::cout << "Absweight: '" << $1 << "' Actions: '" << $3 << "'" << std::endl; }
+	| RELWGHT ':' ACTIONS {
+		Elmt* elmt = new Elmt();
+		elmt->type = RELWGHT;
+		elmt->value = $1;
+		elmt->actions = std::string($3);
+		driver.addElement(elmt);
+	}
+
+	| ABSWGHT ':' ACTIONS {
+		Elmt* elmt = new Elmt();
+		elmt->type = ABSWGHT;
+		elmt->value = $1;
+		elmt->actions = std::string($3);
+		driver.addElement(elmt);
+	}
 	;
 
 var_block:
-	cst_block '*' { std::cout << "var_block" << std::endl; }
+	cst_block '*'
 	;
 
 %%

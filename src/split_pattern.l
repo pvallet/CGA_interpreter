@@ -19,7 +19,7 @@
 
 [ \r\n\t]*				;
 [\{\}\|\*:]       { return yytext[0];}
-\~[0-9]+\.?[0-9]*  { yylval->fval = atof(&yytext[1]); return token::RELWGHT; }
+\~[0-9]+\.?[0-9]* { yylval->fval = atof(&yytext[1]); return token::RELWGHT; }
 [0-9]+\.?[0-9]*		{ yylval->fval = atof(yytext); return token::ABSWGHT; }
 [^\{\}\|\*: \r\n\t]([^\{\}\|\*:][^\{\}\|\*: \r\n\t])*			{
                   yylval->sval = strdup(yytext); return token::ACTIONS;

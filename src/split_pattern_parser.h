@@ -440,9 +440,9 @@ namespace MC {
     {
       yyeof_ = 0,
       yylast_ = 13,     ///< Last index in yytable_.
-      yynnts_ = 6,  ///< Number of nonterminal symbols.
+      yynnts_ = 7,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 10, ///< Termination state number.
+      yyfinal_ = 6, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 11  ///< Number of tokens.
