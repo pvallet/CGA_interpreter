@@ -277,7 +277,7 @@ int yyFlexLexer::yylex()
 	return 0;
 	}
 
-#define YY_DECL int MC::MC_Scanner::yylex()
+#define YY_DECL int SP::SP_Scanner::yylex()
 
 /* %if-c-only Standard (non-C++) definition */
 /* %endif */

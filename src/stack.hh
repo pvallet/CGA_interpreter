@@ -32,7 +32,7 @@
 
 /**
  ** \file stack.hh
- ** Define the MC::stack class.
+ ** Define the SP::stack class.
  */
 
 #ifndef YY_YY_STACK_HH_INCLUDED
@@ -41,7 +41,7 @@
 # include <vector>
 
 #line 5 "split_pattern.y" // stack.hh:133
-namespace MC {
+namespace SP {
 #line 46 "stack.hh" // stack.hh:133
   template <class T, class S = std::vector<T> >
   class stack
@@ -152,7 +152,7 @@ namespace MC {
   };
 
 #line 5 "split_pattern.y" // stack.hh:133
-} // MC
+} // SP
 #line 157 "stack.hh" // stack.hh:133
 
 #endif // !YY_YY_STACK_HH_INCLUDED

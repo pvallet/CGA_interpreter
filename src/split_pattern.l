@@ -1,9 +1,9 @@
 %{
   #include <iostream>
   #include "split_pattern_parser.h"
-  #include "scanner.h"
+  #include "split_pattern_scanner.h"
 
-  typedef MC::MC_Parser::token token;
+  typedef SP::SP_Parser::token token;
 
   #define YY_NO_UNISTD_H
 %}
@@ -13,7 +13,7 @@
 %option noyywrap
 %option c++
 %option nodefault
-%option yyclass="MC::MC_Scanner"
+%option yyclass="SP::SP_Scanner"
 
 %%
 

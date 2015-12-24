@@ -3,14 +3,14 @@
 #include <cfloat>
 #include <sstream>
 
-#include "driver.h"
+#include "split_pattern_driver.h"
 
-MC::MC_Driver::MC_Driver() :
+SP::SP_Driver::SP_Driver() :
   hasRelWeight(false) {
    currentScope.push(&pattern);
 }
 
-MC::MC_Driver::~MC_Driver() {
+SP::SP_Driver::~SP_Driver() {
    delete(scanner);
    scanner = nullptr;
    delete(parser);
@@ -19,7 +19,7 @@ MC::MC_Driver::~MC_Driver() {
    deleteScope(pattern);
 }
 
-void MC::MC_Driver::deleteScope(std::list<Elmt*> scope) {
+void SP::SP_Driver::deleteScope(std::list<Elmt*> scope) {
   for (auto it = scope.begin() ; it != scope.end() ; it++) {
     switch((*it)->type) {
       case RELWGHT:
@@ -34,13 +34,13 @@ void MC::MC_Driver::deleteScope(std::list<Elmt*> scope) {
   }
 }
 
-void MC::MC_Driver::parse( const char * const string ) {
+void SP::SP_Driver::parse( const char * const string ) {
    std::stringstream ss( string );
 
    delete(scanner);
    try
    {
-      scanner = new MC::MC_Scanner( &ss );
+      scanner = new SP::SP_Scanner( &ss );
    }
    catch( std::bad_alloc &ba )
    {
@@ -52,7 +52,7 @@ void MC::MC_Driver::parse( const char * const string ) {
    delete(parser);
    try
    {
-      parser = new MC::MC_Parser( (*scanner) /* scanner */,
+      parser = new SP::SP_Parser( (*scanner) /* scanner */,
                                   (*this) /* driver */ );
    }
    catch( std::bad_alloc &ba )
@@ -68,7 +68,7 @@ void MC::MC_Driver::parse( const char * const string ) {
    }
 }
 
-void MC::MC_Driver::addElement(Elmt* elmt) {
+void SP::SP_Driver::addElement(Elmt* elmt) {
   currentScope.top()->push_back(elmt);
 
   if (currentScope.top()->back()->type == SCOPE) {
@@ -80,7 +80,7 @@ void MC::MC_Driver::addElement(Elmt* elmt) {
     hasRelWeight = true;
 }
 
-void MC::MC_Driver::enterSubScope() {
+void SP::SP_Driver::enterSubScope() {
   if (currentScope.top()->back()->type == SCOPE) {
     currentScope.push(&(currentScope.top()->back()->subElmts));
   }
@@ -88,7 +88,7 @@ void MC::MC_Driver::enterSubScope() {
     std::cerr << "Error entering subscope : not a SCOPE element" << std::endl;
 }
 
-void MC::MC_Driver::wasConstScope() { // Append the subscope to the list
+void SP::SP_Driver::wasConstScope() { // Append the subscope to the list
   std::list<Elmt*>* subscope = currentScope.top();
   currentScope.pop();
   repetitions[currentScope.top()->back()->value] = -1; // Not to be repeated
@@ -96,7 +96,7 @@ void MC::MC_Driver::wasConstScope() { // Append the subscope to the list
   currentScope.top()->splice(currentScope.top()->end(), *subscope);
 }
 
-void MC::MC_Driver::computePattern(float _totalLength) {
+void SP::SP_Driver::computePattern(float _totalLength) {
   totalLength = _totalLength;
 
   if (!hasRelWeight) {
@@ -114,7 +114,7 @@ void MC::MC_Driver::computePattern(float _totalLength) {
   computeFinalVectors();
 }
 
-void MC::MC_Driver::computeAbsPattern() {
+void SP::SP_Driver::computeAbsPattern() {
   float remainingLength = totalLength;
   float repeatedLength = 0.f;
   bool once = false;
@@ -144,7 +144,7 @@ void MC::MC_Driver::computeAbsPattern() {
 }
 
 // We only find a local minimum
-void MC::MC_Driver::optimizeCoordinate(int n) { // n = coord
+void SP::SP_Driver::optimizeCoordinate(int n) { // n = coord
   if (repetitions[n] != -1) {
     repetitions[n] = 0;
     if (n != 0)
@@ -166,7 +166,7 @@ void MC::MC_Driver::optimizeCoordinate(int n) { // n = coord
       prevScore = newScore;
       newScore = fabs((totalLength - totalAbsLength) / totalRelWeight - 1.f);
     }
-    
+
     repetitions = prevRepetitions; // To match with prevScore
   }
 
@@ -177,7 +177,7 @@ void MC::MC_Driver::optimizeCoordinate(int n) { // n = coord
     instantiate();
 }
 
-void MC::MC_Driver::computeFinalVectors() {
+void SP::SP_Driver::computeFinalVectors() {
   finalWeights.clear();
   finalActions.clear();
 
@@ -194,14 +194,14 @@ void MC::MC_Driver::computeFinalVectors() {
   }
 }
 
-void MC::MC_Driver::instantiate() {
+void SP::SP_Driver::instantiate() {
   patternInstance.clear();
   totalRelWeight = 0.f;
   totalAbsLength = 0.f;
   instantiateScope(pattern);
 }
 
-void MC::MC_Driver::instantiateScope(std::list<Elmt*> scope) {
+void SP::SP_Driver::instantiateScope(std::list<Elmt*> scope) {
   for (auto it = scope.begin() ; it != scope.end() ; it++) {
     switch((*it)->type) {
       case RELWGHT:

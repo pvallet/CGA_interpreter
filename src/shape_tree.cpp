@@ -25,14 +25,14 @@ void ShapeTree::displayGeometry() {
 }
 
 void ShapeTree::executeActions(Node* affectedNode, const string& actions) {
-	
+
 }
 
 int ShapeTree::executeRule() {
 	if (!rules.empty())	{
 		for (	auto it = rules.front()->getNodes().begin() ;
 					it != rules.front()->getNodes().end() ; it++) {
-			executeActions(*it, rules.front()->getActions());
+			executeActions(*it, rules.front()->getActions(*it));
 		}
 		rules.pop_front();
 		return 0;

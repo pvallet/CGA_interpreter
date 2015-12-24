@@ -400,7 +400,7 @@ int yyFlexLexer::yylex()
 	return 0;
 	}
 
-#define YY_DECL int MC::MC_Scanner::yylex()
+#define YY_DECL int SP::SP_Scanner::yylex()
 
 /* %% [1.5] DFA */
 
@@ -519,9 +519,9 @@ static yyconst flex_int16_t yy_rule_linenum[6] =
 #line 2 "split_pattern.l"
   #include <iostream>
   #include "split_pattern_parser.h"
-  #include "scanner.h"
+  #include "split_pattern_scanner.h"
 
-  typedef MC::MC_Parser::token token;
+  typedef SP::SP_Parser::token token;
 
   #define YY_NO_UNISTD_H
 #line 528 "split_pattern_lexer.cpp"

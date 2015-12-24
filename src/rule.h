@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -11,16 +12,18 @@ using namespace std;
 class ShapeTree;
 
 class Rule {
-private:
-  string name;
-  list<Node*> affectedNodes;
-  string actions;
 public:
   Rule (string _name, string _actions);
   virtual ~Rule ();
 
-  void addNode(Node* node) {affectedNodes.push_back(node);}
+  void addNode(Node* node, const string& actions = string());
   const string& getName() {return name;}
-  const list<Node*>& getNodes() {return affectedNodes;}
-  const string& getActions() {return actions;}
+  const list<Node*>& getNodes() const {return affectedNodes;}
+  const string& getActions(Node* node) const {return actions + additionalActions.at(node);}
+
+private:
+  string name;
+  list<Node*> affectedNodes;
+  map<Node*,string> additionalActions;
+  string actions;
 };

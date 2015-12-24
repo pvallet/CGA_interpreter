@@ -55,7 +55,7 @@
    #include <cstdlib>
    #include <fstream>
 
-	 #include "driver.h"
+	 #include "split_pattern_driver.h"
 
 #undef yylex
 #define yylex scanner.yylex
@@ -126,11 +126,11 @@
 #define YYRECOVERING()  (!!yyerrstatus_)
 
 #line 5 "split_pattern.y" // lalr1.cc:474
-namespace MC {
+namespace SP {
 #line 131 "split_pattern_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
-  MC_Parser::MC_Parser (MC_Scanner  &scanner_yyarg, MC_Driver  &driver_yyarg)
+  SP_Parser::SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver  &driver_yyarg)
     :
 #if YYDEBUG
       yydebug_ (false),
@@ -140,7 +140,7 @@ namespace MC {
       driver (driver_yyarg)
   {}
 
-  MC_Parser::~MC_Parser ()
+  SP_Parser::~SP_Parser ()
   {}
 
 
@@ -149,20 +149,20 @@ namespace MC {
   `---------------*/
 
   inline
-  MC_Parser::syntax_error::syntax_error (const std::string& m)
+  SP_Parser::syntax_error::syntax_error (const std::string& m)
     : std::runtime_error (m)
   {}
 
   // basic_symbol.
   template <typename Base>
   inline
-  MC_Parser::basic_symbol<Base>::basic_symbol ()
+  SP_Parser::basic_symbol<Base>::basic_symbol ()
     : value ()
   {}
 
   template <typename Base>
   inline
-  MC_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+  SP_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
     : Base (other)
     , value ()
   {
@@ -172,7 +172,7 @@ namespace MC {
 
   template <typename Base>
   inline
-  MC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
+  SP_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
     : Base (t)
     , value (v)
   {}
@@ -181,21 +181,21 @@ namespace MC {
   /// Constructor for valueless symbols.
   template <typename Base>
   inline
-  MC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
+  SP_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
     : Base (t)
     , value ()
   {}
 
   template <typename Base>
   inline
-  MC_Parser::basic_symbol<Base>::~basic_symbol ()
+  SP_Parser::basic_symbol<Base>::~basic_symbol ()
   {
   }
 
   template <typename Base>
   inline
   void
-  MC_Parser::basic_symbol<Base>::move (basic_symbol& s)
+  SP_Parser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move(s);
     value = s.value;
@@ -203,23 +203,23 @@ namespace MC {
 
   // by_type.
   inline
-  MC_Parser::by_type::by_type ()
+  SP_Parser::by_type::by_type ()
      : type (empty)
   {}
 
   inline
-  MC_Parser::by_type::by_type (const by_type& other)
+  SP_Parser::by_type::by_type (const by_type& other)
     : type (other.type)
   {}
 
   inline
-  MC_Parser::by_type::by_type (token_type t)
+  SP_Parser::by_type::by_type (token_type t)
     : type (yytranslate_ (t))
   {}
 
   inline
   void
-  MC_Parser::by_type::move (by_type& that)
+  SP_Parser::by_type::move (by_type& that)
   {
     type = that.type;
     that.type = empty;
@@ -227,7 +227,7 @@ namespace MC {
 
   inline
   int
-  MC_Parser::by_type::type_get () const
+  SP_Parser::by_type::type_get () const
   {
     return type;
   }
@@ -235,42 +235,42 @@ namespace MC {
 
   // by_state.
   inline
-  MC_Parser::by_state::by_state ()
+  SP_Parser::by_state::by_state ()
     : state (empty)
   {}
 
   inline
-  MC_Parser::by_state::by_state (const by_state& other)
+  SP_Parser::by_state::by_state (const by_state& other)
     : state (other.state)
   {}
 
   inline
   void
-  MC_Parser::by_state::move (by_state& that)
+  SP_Parser::by_state::move (by_state& that)
   {
     state = that.state;
     that.state = empty;
   }
 
   inline
-  MC_Parser::by_state::by_state (state_type s)
+  SP_Parser::by_state::by_state (state_type s)
     : state (s)
   {}
 
   inline
-  MC_Parser::symbol_number_type
-  MC_Parser::by_state::type_get () const
+  SP_Parser::symbol_number_type
+  SP_Parser::by_state::type_get () const
   {
     return state == empty ? 0 : yystos_[state];
   }
 
   inline
-  MC_Parser::stack_symbol_type::stack_symbol_type ()
+  SP_Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
 
   inline
-  MC_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
+  SP_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
     : super_type (s)
   {
     value = that.value;
@@ -279,8 +279,8 @@ namespace MC {
   }
 
   inline
-  MC_Parser::stack_symbol_type&
-  MC_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
+  SP_Parser::stack_symbol_type&
+  SP_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
     value = that.value;
@@ -291,7 +291,7 @@ namespace MC {
   template <typename Base>
   inline
   void
-  MC_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  SP_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
@@ -303,7 +303,7 @@ namespace MC {
 #if YYDEBUG
   template <typename Base>
   void
-  MC_Parser::yy_print_ (std::ostream& yyo,
+  SP_Parser::yy_print_ (std::ostream& yyo,
                                      const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
@@ -318,7 +318,7 @@ namespace MC {
 
   inline
   void
-  MC_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
+  SP_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
   {
     stack_symbol_type t (s, sym);
     yypush_ (m, t);
@@ -326,7 +326,7 @@ namespace MC {
 
   inline
   void
-  MC_Parser::yypush_ (const char* m, stack_symbol_type& s)
+  SP_Parser::yypush_ (const char* m, stack_symbol_type& s)
   {
     if (m)
       YY_SYMBOL_PRINT (m, s);
@@ -335,40 +335,40 @@ namespace MC {
 
   inline
   void
-  MC_Parser::yypop_ (unsigned int n)
+  SP_Parser::yypop_ (unsigned int n)
   {
     yystack_.pop (n);
   }
 
 #if YYDEBUG
   std::ostream&
-  MC_Parser::debug_stream () const
+  SP_Parser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-  MC_Parser::set_debug_stream (std::ostream& o)
+  SP_Parser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-  MC_Parser::debug_level_type
-  MC_Parser::debug_level () const
+  SP_Parser::debug_level_type
+  SP_Parser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-  MC_Parser::set_debug_level (debug_level_type l)
+  SP_Parser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
 #endif // YYDEBUG
 
-  inline MC_Parser::state_type
-  MC_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
+  inline SP_Parser::state_type
+  SP_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - yyntokens_] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
@@ -378,19 +378,19 @@ namespace MC {
   }
 
   inline bool
-  MC_Parser::yy_pact_value_is_default_ (int yyvalue)
+  SP_Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
   inline bool
-  MC_Parser::yy_table_value_is_error_ (int yyvalue)
+  SP_Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-  MC_Parser::parse ()
+  SP_Parser::parse ()
   {
     /// Whether yyla contains a lookahead.
     bool yyempty = true;
@@ -718,79 +718,79 @@ namespace MC {
   }
 
   void
-  MC_Parser::error (const syntax_error& yyexc)
+  SP_Parser::error (const syntax_error& yyexc)
   {
     error (yyexc.what());
   }
 
   // Generate an error message.
   std::string
-  MC_Parser::yysyntax_error_ (state_type, symbol_number_type) const
+  SP_Parser::yysyntax_error_ (state_type, symbol_number_type) const
   {
     return YY_("syntax error");
   }
 
 
-  const signed char MC_Parser::yypact_ninf_ = -10;
+  const signed char SP_Parser::yypact_ninf_ = -10;
 
-  const signed char MC_Parser::yytable_ninf_ = -1;
+  const signed char SP_Parser::yytable_ninf_ = -1;
 
   const signed char
-  MC_Parser::yypact_[] =
+  SP_Parser::yypact_[] =
   {
       -4,   -10,     4,    -1,   -10,    -3,   -10,   -10,     1,     2,
      -10,    -2,   -10,     3,     7,   -10,    -3,   -10,   -10,   -10
   };
 
   const unsigned char
-  MC_Parser::yydefact_[] =
+  SP_Parser::yydefact_[] =
   {
        0,     4,     0,     2,     3,     0,     1,    11,     0,     0,
        8,     0,     6,     0,     0,     5,     0,     9,    10,     7
   };
 
   const signed char
-  MC_Parser::yypgoto_[] =
+  SP_Parser::yypgoto_[] =
   {
      -10,    13,   -10,   -10,   -10,    -9,   -10
   };
 
   const signed char
-  MC_Parser::yydefgoto_[] =
+  SP_Parser::yydefgoto_[] =
   {
       -1,    10,     3,     5,    11,    12,     4
   };
 
   const unsigned char
-  MC_Parser::yytable_[] =
+  SP_Parser::yytable_[] =
   {
        8,     9,     1,     1,     6,    15,    16,    19,    17,     7,
       13,    14,    18,     2
   };
 
   const unsigned char
-  MC_Parser::yycheck_[] =
+  SP_Parser::yycheck_[] =
   {
        3,     4,     6,     6,     0,     7,     8,    16,     5,    10,
        9,     9,     5,     0
   };
 
   const unsigned char
-  MC_Parser::yystos_[] =
+  SP_Parser::yystos_[] =
   {
        0,     6,    12,    13,    17,    14,     0,    10,     3,     4,
       12,    15,    16,     9,     9,     7,     8,     5,     5,    16
   };
 
   const unsigned char
-  MC_Parser::yyr1_[] =
+  SP_Parser::yyr1_[] =
   {
        0,    11,    12,    12,    14,    13,    15,    15,    16,    16,
       16,    17
   };
 
   const unsigned char
-  MC_Parser::yyr2_[] =
+  SP_Parser::yyr2_[] =
   {
        0,     2,     1,     1,     0,     4,     1,     3,     1,     3,
        3,     2
@@ -801,7 +801,7 @@ namespace MC {
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
-  const MC_Parser::yytname_[] =
+  const SP_Parser::yytname_[] =
   {
   "$end", "error", "$undefined", "RELWGHT", "ABSWGHT", "ACTIONS", "'{'",
   "'}'", "'|'", "':'", "'*'", "$accept", "block", "cst_block", "$@1",
@@ -810,7 +810,7 @@ namespace MC {
 
 
   const unsigned char
-  MC_Parser::yyrline_[] =
+  SP_Parser::yyrline_[] =
   {
        0,    43,    43,    44,    48,    48,    58,    59,    63,    64,
       72,    82
@@ -818,7 +818,7 @@ namespace MC {
 
   // Print the state stack on the debug stream.
   void
-  MC_Parser::yystack_print_ ()
+  SP_Parser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
@@ -831,7 +831,7 @@ namespace MC {
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  MC_Parser::yy_reduce_print_ (int yyrule)
+  SP_Parser::yy_reduce_print_ (int yyrule)
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -847,8 +847,8 @@ namespace MC {
 
   // Symbol number corresponding to token number t.
   inline
-  MC_Parser::token_number_type
-  MC_Parser::yytranslate_ (int t)
+  SP_Parser::token_number_type
+  SP_Parser::yytranslate_ (int t)
   {
     static
     const token_number_type
@@ -894,11 +894,11 @@ namespace MC {
   }
 
 #line 5 "split_pattern.y" // lalr1.cc:1155
-} // MC
+} // SP
 #line 899 "split_pattern_parser.cpp" // lalr1.cc:1155
 #line 85 "split_pattern.y" // lalr1.cc:1156
 
 
-void MC::MC_Parser::error( const std::string &err_message ) {
+void SP::SP_Parser::error( const std::string &err_message ) {
    std::cerr << "Error: " << err_message << "\n";
 }

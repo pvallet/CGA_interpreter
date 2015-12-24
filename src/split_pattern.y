@@ -2,25 +2,25 @@
 %require  "3.0"
 %debug
 %defines "split_pattern_parser.h"
-%define api.namespace{MC}
-%define parser_class_name {MC_Parser}
+%define api.namespace{SP}
+%define parser_class_name {SP_Parser}
 
 %code requires{
-	namespace MC {
-		class MC_Scanner;
-		class MC_Driver;
+	namespace SP {
+		class SP_Scanner;
+		class SP_Driver;
 	}
 }
 
-%parse-param { MC_Scanner  &scanner  }
-%parse-param { MC_Driver  &driver  }
+%parse-param { SP_Scanner  &scanner  }
+%parse-param { SP_Driver  &driver  }
 
 %code{
    #include <iostream>
    #include <cstdlib>
    #include <fstream>
 
-	 #include "driver.h"
+	 #include "split_pattern_driver.h"
 
 #undef yylex
 #define yylex scanner.yylex
@@ -84,6 +84,6 @@ var_block:
 
 %%
 
-void MC::MC_Parser::error( const std::string &err_message ) {
+void SP::SP_Parser::error( const std::string &err_message ) {
    std::cerr << "Error: " << err_message << "\n";
 }

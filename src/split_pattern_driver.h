@@ -1,27 +1,26 @@
-#ifndef __MCDRIVER_HPP__
-#define __MCDRIVER_HPP__ 1
+#pragma once
 
 #include <string>
 #include <stack>
 #include <list>
-#include "scanner.h"
+#include "split_pattern_scanner.h"
 #include "split_pattern_parser.h"
 
-namespace MC{
+namespace SP{
 
 enum DataType {RELWGHT, ABSWGHT, SCOPE};
 
 typedef struct Elmt{
-  MC::DataType      type;
+  SP::DataType      type;
   float             value; // Weight or # of scope if it is repeated
   std::string       actions;
   std::list<Elmt*>  subElmts;
 } Elmt;
 
-class MC_Driver{
+class SP_Driver{
 public:
-  MC_Driver();
-  virtual ~MC_Driver();
+  SP_Driver();
+  virtual ~SP_Driver();
 
   void parse( const char *string );
 
@@ -44,8 +43,8 @@ private:
   void instantiateScope(std::list<Elmt*> scope);
   void deleteScope(std::list<Elmt*> scope);
 
-  MC::MC_Parser  *parser  = nullptr;
-  MC::MC_Scanner *scanner = nullptr;
+  SP::SP_Parser  *parser  = nullptr;
+  SP::SP_Scanner *scanner = nullptr;
 
   bool hasRelWeight;
   float totalLength;
@@ -63,5 +62,4 @@ private:
   std::vector<std::string> finalActions;
 };
 
-} /* end namespace MC */
-#endif /* END __MCDRIVER_HPP__ */
+} /* end namespace SP */

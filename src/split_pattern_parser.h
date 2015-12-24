@@ -32,7 +32,7 @@
 
 /**
  ** \file split_pattern_parser.h
- ** Define the MC::parser class.
+ ** Define the SP::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
@@ -42,9 +42,9 @@
 // //                    "%code requires" blocks.
 #line 8 "split_pattern.y" // lalr1.cc:372
 
-	namespace MC {
-		class MC_Scanner;
-		class MC_Driver;
+	namespace SP {
+		class SP_Scanner;
+		class SP_Driver;
 	}
 
 #line 51 "split_pattern_parser.h" // lalr1.cc:372
@@ -117,7 +117,7 @@
 #endif
 
 #line 5 "split_pattern.y" // lalr1.cc:372
-namespace MC {
+namespace SP {
 #line 122 "split_pattern_parser.h" // lalr1.cc:372
 
 
@@ -125,7 +125,7 @@ namespace MC {
 
 
   /// A Bison parser.
-  class MC_Parser
+  class SP_Parser
   {
   public:
 #ifndef YYSTYPE
@@ -245,8 +245,8 @@ namespace MC {
 
 
     /// Build a parser object.
-    MC_Parser (MC_Scanner  &scanner_yyarg, MC_Driver  &driver_yyarg);
-    virtual ~MC_Parser ();
+    SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver  &driver_yyarg);
+    virtual ~SP_Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -275,8 +275,8 @@ namespace MC {
 
   private:
     /// This class is not copyable.
-    MC_Parser (const MC_Parser&);
-    MC_Parser& operator= (const MC_Parser&);
+    SP_Parser (const SP_Parser&);
+    SP_Parser& operator= (const SP_Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -450,13 +450,13 @@ namespace MC {
 
 
     // User arguments.
-    MC_Scanner  &scanner;
-    MC_Driver  &driver;
+    SP_Scanner  &scanner;
+    SP_Driver  &driver;
   };
 
 
 #line 5 "split_pattern.y" // lalr1.cc:372
-} // MC
+} // SP
 #line 461 "split_pattern_parser.h" // lalr1.cc:372
 
 
