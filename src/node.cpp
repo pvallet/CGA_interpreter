@@ -1,12 +1,13 @@
 #include "node.h"
 
-#include <cfloat>
 #include <cstddef>
 #include <cstring>
 
 #include <algorithm>
 #include <fstream>
 #include <map>
+
+#include "split_pattern_driver.h"
 
 using namespace std;
 
@@ -123,23 +124,15 @@ void Node::distributeX(
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
 
-	double minCoord, maxCoord;
-	minCoord = shape.point(sortedVertices.front()).x();
-	maxCoord = shape.point(sortedVertices.back()).x();
-
-	double totalWeight = 0.;
+	double minCoord = shape.point(sortedVertices.front()).x();
 	double cumWeight = 0;
-
-	for (auto it = weights.begin() ; it != weights.end() ; it++)
-		totalWeight += *it;
-
 	double prvSeparator, nxtSeparator;
 	unsigned int j = 0;
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
-		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		prvSeparator = minCoord + cumWeight;
 		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		nxtSeparator = minCoord + cumWeight;
 
 		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).x() <= nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
@@ -191,23 +184,15 @@ void Node::distributeY(
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
 
-	double minCoord, maxCoord;
-	minCoord = shape.point(sortedVertices.front()).y();
-	maxCoord = shape.point(sortedVertices.back()).y();
-
-	double totalWeight = 0.;
+	double minCoord = shape.point(sortedVertices.front()).y();
 	double cumWeight = 0;
-
-	for (auto it = weights.begin() ; it != weights.end() ; it++)
-		totalWeight += *it;
-
 	double prvSeparator, nxtSeparator;
 	unsigned int j = 0;
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
-		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		prvSeparator = minCoord + cumWeight;
 		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		nxtSeparator = minCoord + cumWeight;
 
 		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).y() <= nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
@@ -259,23 +244,15 @@ void Node::distributeZ(
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
 
-	double minCoord, maxCoord;
-	minCoord = shape.point(sortedVertices.front()).z();
-	maxCoord = shape.point(sortedVertices.back()).z();
-
-	double totalWeight = 0.;
+	double minCoord = shape.point(sortedVertices.front()).z();
 	double cumWeight = 0;
-
-	for (auto it = weights.begin() ; it != weights.end() ; it++)
-		totalWeight += *it;
-
 	double prvSeparator, nxtSeparator;
 	unsigned int j = 0;
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
-		prvSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		prvSeparator = minCoord + cumWeight;
 		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight * (maxCoord - minCoord) / totalWeight;
+		nxtSeparator = minCoord + cumWeight;
 
 		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).z() <= nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
@@ -389,7 +366,9 @@ struct CompZ {
   	bool operator() (vertex_descriptor i,vertex_descriptor j) { return CGAL::compare_z(shape->point(i),shape->point(j)) == -1; }
 };
 
-void Node::split(Axis axis, vector<Node*>& actions, vector<double> weights) {
+void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern) {
+	SP::SP_Driver driver;
+	driver.parse(pattern.c_str());
 
 	// Sort vertices according to the axis
 
@@ -404,16 +383,25 @@ void Node::split(Axis axis, vector<Node*>& actions, vector<double> weights) {
 		case X:
 			struct CompX compX; compX.shape = &shape;
 			sort(vertices.begin(), vertices.end(), compX);
+			driver.computePattern(shape.point(vertices.back()).x()
+													- shape.point(vertices.front()).x());
 			break;
 		case Y:
 			struct CompY compY; compY.shape = &shape;
 			sort(vertices.begin(), vertices.end(), compY);
+			driver.computePattern(shape.point(vertices.back()).y()
+													- shape.point(vertices.front()).y());
 			break;
 		case Z:
 			struct CompZ compZ; compZ.shape = &shape;
 			sort(vertices.begin(), vertices.end(), compZ);
+			driver.computePattern(shape.point(vertices.back()).z()
+													- shape.point(vertices.front()).z());
 			break;
 	}
+
+	vector<double> weights = driver.getWeights();
+	actions = driver.getActions();
 
 	// Useful variables
 
@@ -450,12 +438,12 @@ void Node::split(Axis axis, vector<Node*>& actions, vector<double> weights) {
 	Node* subd = new Node(this, true);
 	subd->setShape(shape);
 
-	actions.resize(weights.size());
+	nodes.resize(weights.size());
 
 	for (unsigned int i = 0 ; i < nShapes.size() ; i++) {
-		actions[i] = new Node(subd, true);
-		actions[i]->setShape(nShapes[i]);
-		subd->addChild(actions[i]);
+		nodes[i] = new Node(subd, true);
+		nodes[i]->setShape(nShapes[i]);
+		subd->addChild(nodes[i]);
 	}
 
 	addChild(subd);

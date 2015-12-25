@@ -96,7 +96,7 @@ void SP::SP_Driver::wasConstScope() { // Append the subscope to the list
   currentScope.top()->splice(currentScope.top()->end(), *subscope);
 }
 
-void SP::SP_Driver::computePattern(float _totalLength) {
+void SP::SP_Driver::computePattern(double _totalLength) {
   totalLength = _totalLength;
 
   if (!hasRelWeight) {
@@ -115,8 +115,8 @@ void SP::SP_Driver::computePattern(float _totalLength) {
 }
 
 void SP::SP_Driver::computeAbsPattern() {
-  float remainingLength = totalLength;
-  float repeatedLength = 0.f;
+  double remainingLength = totalLength;
+  double repeatedLength = 0.f;
   bool once = false;
 
 
@@ -151,8 +151,8 @@ void SP::SP_Driver::optimizeCoordinate(int n) { // n = coord
       optimizeCoordinate(n-1);
     else
       instantiate();
-    float prevScore = FLT_MAX;
-    float newScore = fabs((totalLength - totalAbsLength) / totalRelWeight - 1.f);
+    double prevScore = DBL_MAX;
+    double newScore = fabs((totalLength - totalAbsLength) / totalRelWeight - 1.f);
 
     std::vector<int> prevRepetitions;
 
@@ -181,7 +181,7 @@ void SP::SP_Driver::computeFinalVectors() {
   finalWeights.clear();
   finalActions.clear();
 
-  float remainingRelLength = totalLength - totalAbsLength;
+  double remainingRelLength = totalLength - totalAbsLength;
 
   for (auto it = patternInstance.begin() ; it != patternInstance.end() ; it++) {
     finalActions.push_back((*it)->actions);

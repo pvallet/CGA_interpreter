@@ -10,18 +10,19 @@ int main() {
   ShapeTree shapeTree;
 
   shapeTree.initFromFile(std::string("plane.off"));
-  /*Node* root = shapeTree.getRoot();
+  Node* root = shapeTree.getRoot();
 
   std::vector<Node*> split1, split2;
+  std::vector<std::string> actions1;
   std::vector<double> weights(3,1.);
 
-  root->split(X, split1, weights);
+  root->split(X, split1, actions1, "{~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
 
   split1[0]->extrude(5);
   split1[1]->extrude(3);
   split1[2]->extrude(2);
 
-  split1[1]->split(Y, split2, weights);*/
+  shapeTree.displayGeometry();
 
   /*Rule* split = new Rule("Parcel",
   "split(\"x\") {~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
@@ -36,17 +37,18 @@ int main() {
 
   shapeTree.displayGeometry();*/
 
-  SP::SP_Driver driver;
+  /*SP::SP_Driver driver;
 
-  driver.parse("{~1 : A | {0.3 : B | ~2 : C }* | 0.3 : B | {~1.5 : EDE | 0.5 : pok}* | ~1 : A}");
+  //driver.parse("{~1 : A | {0.3 : B | ~2 : C }* | 0.3 : B | {~1.5 : EDE | 0.5 : pok}* | ~1 : A}");
   //driver.parse("{15:A}*");
+  driver.parse("{~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
   driver.computePattern(20);
-  std::vector<float> weights = driver.getWeights();
+  std::vector<double> weights = driver.getWeights();
   std::vector<std::string> actions = driver.getActions();
 
   for (unsigned int i = 0 ; i < weights.size() ; i++) {
     std::cout << weights[i] << " " << actions[i] << std::endl;
-  }
+  }*/
 
   return 0;
 }

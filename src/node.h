@@ -34,7 +34,7 @@ public:
 
 	Mesh getSubGeometry();
 	void extrude(Kernel::RT height);
-	void split(Axis axis, vector<Node*>& actions, vector<double> weights);
+	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
 
 private:
 
