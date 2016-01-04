@@ -62,4 +62,4 @@ private:
   std::vector<std::string> finalActions;
 };
 
-} /* end namespace SP */
+} /* End namespace SP */

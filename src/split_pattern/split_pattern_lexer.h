@@ -1,6 +1,6 @@
-#ifndef yyHEADER_H
-#define yyHEADER_H 1
-#define yyIN_HEADER 1
+#ifndef spHEADER_H
+#define spHEADER_H 1
+#define spIN_HEADER 1
 
 #line 6 "split_pattern_lexer.h"
 
@@ -27,7 +27,7 @@
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-    #define yyFlexLexer yyFlexLexer
+    #define yyFlexLexer spFlexLexer
 /* %endif */
 
 /* %if-c-only */
@@ -255,9 +255,9 @@ struct yy_buffer_state
 /* %endif */
 /* %endif */
 
-void *yyalloc (yy_size_t  );
-void *yyrealloc (void *,yy_size_t  );
-void yyfree (void *  );
+void *spalloc (yy_size_t  );
+void *sprealloc (void *,yy_size_t  );
+void spfree (void *  );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
@@ -390,9 +390,9 @@ static int yy_flex_strlen (yyconst char * );
 #undef YY_DECL
 #endif
 
-#line 27 "split_pattern.l"
+#line 31 "split_pattern.l"
 
 
 #line 397 "split_pattern_lexer.h"
-#undef yyIN_HEADER
-#endif /* yyHEADER_H */
+#undef spIN_HEADER
+#endif /* spHEADER_H */

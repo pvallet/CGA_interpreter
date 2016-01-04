@@ -35,8 +35,8 @@
  ** Define the SP::stack class.
  */
 
-#ifndef YY_YY_STACK_HH_INCLUDED
-# define YY_YY_STACK_HH_INCLUDED
+#ifndef YY_SP_STACK_HH_INCLUDED
+# define YY_SP_STACK_HH_INCLUDED
 
 # include <vector>
 
@@ -155,4 +155,4 @@ namespace SP {
 } // SP
 #line 157 "stack.hh" // stack.hh:133
 
-#endif // !YY_YY_STACK_HH_INCLUDED
+#endif // !YY_SP_STACK_HH_INCLUDED

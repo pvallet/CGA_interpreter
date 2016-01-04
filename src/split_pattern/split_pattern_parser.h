@@ -37,8 +37,8 @@
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_SPLIT_PATTERN_PARSER_H_INCLUDED
-# define YY_YY_SPLIT_PATTERN_PARSER_H_INCLUDED
+#ifndef YY_SP_SPLIT_PATTERN_PARSER_H_INCLUDED
+# define YY_SP_SPLIT_PATTERN_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
 #line 8 "split_pattern.y" // lalr1.cc:372
 
@@ -112,13 +112,21 @@
 #endif
 
 /* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 1
-#endif
+#ifndef SPDEBUG
+# if defined YYDEBUG
+#if YYDEBUG
+#   define SPDEBUG 1
+#  else
+#   define SPDEBUG 0
+#  endif
+# else /* ! defined YYDEBUG */
+#  define SPDEBUG 1
+# endif /* ! defined YYDEBUG */
+#endif  /* ! defined SPDEBUG */
 
 #line 5 "split_pattern.y" // lalr1.cc:372
 namespace SP {
-#line 122 "split_pattern_parser.h" // lalr1.cc:372
+#line 130 "split_pattern_parser.h" // lalr1.cc:372
 
 
 
@@ -128,20 +136,20 @@ namespace SP {
   class SP_Parser
   {
   public:
-#ifndef YYSTYPE
+#ifndef SPSTYPE
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 31 "split_pattern.y" // lalr1.cc:372
+    #line 35 "split_pattern.y" // lalr1.cc:372
 
 	float fval;
 	int ival;
 	char* sval;
 
-#line 142 "split_pattern_parser.h" // lalr1.cc:372
+#line 150 "split_pattern_parser.h" // lalr1.cc:372
     };
 #else
-    typedef YYSTYPE semantic_type;
+    typedef SPSTYPE semantic_type;
 #endif
 
     /// Syntax errors thrown from user actions.
@@ -245,14 +253,14 @@ namespace SP {
 
 
     /// Build a parser object.
-    SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver  &driver_yyarg);
+    SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver   &driver_yyarg);
     virtual ~SP_Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
     virtual int parse ();
 
-#if YYDEBUG
+#if SPDEBUG
     /// The current debugging stream.
     std::ostream& debug_stream () const YY_ATTRIBUTE_PURE;
     /// Set the current debugging stream.
@@ -340,7 +348,7 @@ namespace SP {
   static const unsigned char yyr2_[];
 
 
-#if YYDEBUG
+#if SPDEBUG
     /// For a symbol, its name in clear.
     static const char* const yytname_[];
 
@@ -451,15 +459,15 @@ namespace SP {
 
     // User arguments.
     SP_Scanner  &scanner;
-    SP_Driver  &driver;
+    SP_Driver   &driver;
   };
 
 
 #line 5 "split_pattern.y" // lalr1.cc:372
 } // SP
-#line 461 "split_pattern_parser.h" // lalr1.cc:372
+#line 469 "split_pattern_parser.h" // lalr1.cc:372
 
 
 
 
-#endif // !YY_YY_SPLIT_PATTERN_PARSER_H_INCLUDED
+#endif // !YY_SP_SPLIT_PATTERN_PARSER_H_INCLUDED

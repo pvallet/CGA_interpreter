@@ -30,10 +30,12 @@
 // This special exception was added by the Free Software Foundation in
 // version 2.2 of Bison.
 
+// Take the name prefix into account.
+#define yylex   splex
 
 // First part of user declarations.
 
-#line 37 "split_pattern_parser.cpp" // lalr1.cc:399
+#line 39 "split_pattern_parser.cpp" // lalr1.cc:399
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -47,7 +49,7 @@
 
 // User implementation prologue.
 
-#line 51 "split_pattern_parser.cpp" // lalr1.cc:407
+#line 53 "split_pattern_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
 #line 18 "split_pattern.y" // lalr1.cc:408
 
@@ -58,9 +60,11 @@
 	 #include "split_pattern_driver.h"
 
 #undef yylex
-#define yylex scanner.yylex
+#define yylex scanner.splex
 
-#line 64 "split_pattern_parser.cpp" // lalr1.cc:408
+extern int line_num;
+
+#line 68 "split_pattern_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -81,7 +85,7 @@
 #define YYUSE(E) ((void) (E))
 
 // Enable debugging if requested.
-#if YYDEBUG
+#if SPDEBUG
 
 // A pseudo ostream that takes yydebug_ into account.
 # define YYCDEBUG if (yydebug_) (*yycdebug_)
@@ -108,14 +112,14 @@
       yystack_print_ ();                \
   } while (false)
 
-#else // !YYDEBUG
+#else // !SPDEBUG
 
 # define YYCDEBUG if (false) std::cerr
 # define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE(Symbol)
 # define YY_REDUCE_PRINT(Rule)           static_cast<void>(0)
 # define YY_STACK_PRINT()                static_cast<void>(0)
 
-#endif // !YYDEBUG
+#endif // !SPDEBUG
 
 #define yyerrok         (yyerrstatus_ = 0)
 #define yyclearin       (yyempty = true)
@@ -127,12 +131,12 @@
 
 #line 5 "split_pattern.y" // lalr1.cc:474
 namespace SP {
-#line 131 "split_pattern_parser.cpp" // lalr1.cc:474
+#line 135 "split_pattern_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
-  SP_Parser::SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver  &driver_yyarg)
+  SP_Parser::SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver   &driver_yyarg)
     :
-#if YYDEBUG
+#if SPDEBUG
       yydebug_ (false),
       yycdebug_ (&std::cerr),
 #endif
@@ -300,7 +304,7 @@ namespace SP {
     YYUSE (yysym.type_get ());
   }
 
-#if YYDEBUG
+#if SPDEBUG
   template <typename Base>
   void
   SP_Parser::yy_print_ (std::ostream& yyo,
@@ -340,7 +344,7 @@ namespace SP {
     yystack_.pop (n);
   }
 
-#if YYDEBUG
+#if SPDEBUG
   std::ostream&
   SP_Parser::debug_stream () const
   {
@@ -365,7 +369,7 @@ namespace SP {
   {
     yydebug_ = l;
   }
-#endif // YYDEBUG
+#endif // SPDEBUG
 
   inline SP_Parser::state_type
   SP_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
@@ -522,30 +526,30 @@ namespace SP {
           switch (yyn)
             {
   case 2:
-#line 43 "split_pattern.y" // lalr1.cc:847
+#line 48 "split_pattern.y" // lalr1.cc:847
     {driver.wasConstScope();}
-#line 528 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 532 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 3:
-#line 44 "split_pattern.y" // lalr1.cc:847
+#line 49 "split_pattern.y" // lalr1.cc:847
     {driver.exitSubScope();}
-#line 534 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 538 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 4:
-#line 48 "split_pattern.y" // lalr1.cc:847
+#line 53 "split_pattern.y" // lalr1.cc:847
     {
 			Elmt* elmt = new Elmt();
 			elmt->type = SCOPE;
 			driver.addElement(elmt);
 			driver.enterSubScope();
 		}
-#line 545 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 549 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 9:
-#line 64 "split_pattern.y" // lalr1.cc:847
+#line 69 "split_pattern.y" // lalr1.cc:847
     {
 		Elmt* elmt = new Elmt();
 		elmt->type = RELWGHT;
@@ -553,11 +557,11 @@ namespace SP {
 		elmt->actions = std::string((yystack_[0].value.sval));
 		driver.addElement(elmt);
 	}
-#line 557 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 561 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
-#line 72 "split_pattern.y" // lalr1.cc:847
+#line 77 "split_pattern.y" // lalr1.cc:847
     {
 		Elmt* elmt = new Elmt();
 		elmt->type = ABSWGHT;
@@ -565,11 +569,11 @@ namespace SP {
 		elmt->actions = std::string((yystack_[0].value.sval));
 		driver.addElement(elmt);
 	}
-#line 569 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 573 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 573 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 577 "split_pattern_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -797,7 +801,7 @@ namespace SP {
   };
 
 
-#if YYDEBUG
+#if SPDEBUG
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
@@ -812,8 +816,8 @@ namespace SP {
   const unsigned char
   SP_Parser::yyrline_[] =
   {
-       0,    43,    43,    44,    48,    48,    58,    59,    63,    64,
-      72,    82
+       0,    48,    48,    49,    53,    53,    63,    64,    68,    69,
+      77,    87
   };
 
   // Print the state stack on the debug stream.
@@ -843,7 +847,7 @@ namespace SP {
       YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
                        yystack_[(yynrhs) - (yyi + 1)]);
   }
-#endif // YYDEBUG
+#endif // SPDEBUG
 
   // Symbol number corresponding to token number t.
   inline
@@ -895,10 +899,10 @@ namespace SP {
 
 #line 5 "split_pattern.y" // lalr1.cc:1155
 } // SP
-#line 899 "split_pattern_parser.cpp" // lalr1.cc:1155
-#line 85 "split_pattern.y" // lalr1.cc:1156
+#line 903 "split_pattern_parser.cpp" // lalr1.cc:1155
+#line 90 "split_pattern.y" // lalr1.cc:1156
 
 
 void SP::SP_Parser::error( const std::string &err_message ) {
-   std::cerr << "Error: " << err_message << "\n";
+   std::cerr << "Split pattern : error: " << err_message << " Line: " << line_num << "\n";
 }

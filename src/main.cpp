@@ -3,14 +3,15 @@
 #include "rule.h"
 #include "shape_tree.h"
 
-#include "split_pattern_driver.h"
+//#include "split_pattern_driver/split_pattern_driver.h"
 
 int main() {
 
-  ShapeTree shapeTree;
+  ACT::ShapeTree shapeTree;
 
   shapeTree.initFromFile(std::string("plane.off"));
-  Node* root = shapeTree.getRoot();
+
+  /*Node* root = shapeTree.getRoot();
 
   std::vector<Node*> split1, split2;
   std::vector<std::string> actions1;
@@ -22,20 +23,22 @@ int main() {
   split1[1]->extrude(3);
   split1[2]->extrude(2);
 
-  shapeTree.displayGeometry();
+  shapeTree.displayGeometry();*/
 
-  /*Rule* split = new Rule("Parcel",
-  "split(\"x\") {~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
-  // split("y") { floorH: set("floorIdx", get("split;index")) t(randShift(), 9, randShift()) Floor}*
+  Rule* Parcel = new Rule("Parcel", "split(\"x\") {~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
+  Rule* BldArea = new Rule("BldArea", "extrude(5)");
 
-  shapeTree.addRule(split);
-  shapeTree.addRule(new Rule("BldArea", "extrude(5)"));
+  shapeTree.addRule(Parcel);
+  shapeTree.addRule(BldArea);
 
-  shapeTree.setInitRule(split);
+  RuleNames::getInstance().addRule("Parcel");
+  RuleNames::getInstance().addRule("BldArea");
+
+  shapeTree.setInitRule(Parcel);
 
   while (shapeTree.executeRule() != -1);
 
-  shapeTree.displayGeometry();*/
+  shapeTree.displayGeometry();
 
   /*SP::SP_Driver driver;
 

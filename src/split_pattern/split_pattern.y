@@ -13,7 +13,7 @@
 }
 
 %parse-param { SP_Scanner  &scanner  }
-%parse-param { SP_Driver  &driver  }
+%parse-param { SP_Driver   &driver  }
 
 %code{
    #include <iostream>
@@ -23,8 +23,12 @@
 	 #include "split_pattern_driver.h"
 
 #undef yylex
-#define yylex scanner.yylex
+#define yylex scanner.splex
+
+extern int line_num;
 }
+
+%define api.prefix {sp}
 
 %output  "split_pattern_parser.cpp"
 
@@ -39,6 +43,7 @@
 %token <sval> ACTIONS
 
 %%
+%start block;
 block:
 	cst_block		{driver.wasConstScope();}
 	| var_block	{driver.exitSubScope();}
@@ -85,5 +90,5 @@ var_block:
 %%
 
 void SP::SP_Parser::error( const std::string &err_message ) {
-   std::cerr << "Error: " << err_message << "\n";
+   std::cerr << "Split pattern : error: " << err_message << " Line: " << line_num << "\n";
 }

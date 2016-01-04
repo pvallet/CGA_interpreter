@@ -13,7 +13,7 @@ typedef CGAL::Simple_cartesian<double>     	Kernel;
 typedef Kernel::Point_3						Point_3;
 typedef Kernel::Vector_3					Vector_3;
 typedef CGAL::Surface_mesh<Point_3>        	Mesh;
-typedef Mesh::Vertex_index 					vertex_descriptor;
+typedef Mesh::Vertex_index 				vertex_descriptor;
 typedef Mesh::Face_index 					face_descriptor;
 
 enum Axis {X,Y,Z};
@@ -31,9 +31,9 @@ public:
 	void addChild(Node* _child);
 
 	bool isVisible() {return visible;}
-
 	Mesh getSubGeometry();
-	void extrude(Kernel::RT height);
+
+	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
 
 private:
@@ -73,5 +73,4 @@ private:
 	Mesh shape;
 	map<string, double> attributes;
 	bool visible;
-	bool anonymous;
 };

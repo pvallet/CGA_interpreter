@@ -7,7 +7,7 @@
 #include <fstream>
 #include <map>
 
-#include "split_pattern_driver.h"
+#include "split_pattern/split_pattern_driver.h"
 
 using namespace std;
 
@@ -15,8 +15,7 @@ typedef pair<vertex_descriptor,vertex_descriptor> Match;
 
 Node::Node(Node* _parent, bool _visible) :
 	parent(_parent),
-	visible(_visible),
-	anonymous(false)
+	visible(_visible)
 {}
 
 void Node::load(string path) {
@@ -29,7 +28,7 @@ void Node::load(string path) {
 void Node::setVisible(bool _visible) {
 	if (_visible) {
 		visible = true;
-		if (parent != NULL && !anonymous)
+		if (parent != NULL)
 			parent->setVisible(true);
 	}
 
@@ -67,53 +66,59 @@ Mesh Node::getSubGeometry() {
 	}
 }
 
-void Node::extrude(Kernel::RT height) {
-    Mesh::Face_range::iterator f, f_end;
+Node* Node::extrude(Kernel::RT height) {
+	Mesh nShape = shape;
+  Mesh::Face_range::iterator f, f_end;
 
-    for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+  for (boost::tie(f,f_end) = nShape.faces(); f != f_end ; f++) {
 
-    	vector<vertex_descriptor> indices;
+  	vector<vertex_descriptor> indices;
 
-    	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-	    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
-	        v != v_end; v++){
+  	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+    for(boost::tie(v, v_end) = vertices_around_face(nShape.halfedge(*f), nShape);
+        v != v_end; v++){
 
-	    	indices.push_back(*v);
-	    }
-
-	    CGAL::Vector_3<Kernel> normal = CGAL::unit_normal(shape.point(indices[0]),
-	    											 shape.point(indices[1]),
-	    											 shape.point(indices[2]));
-
-	    normal = normal * height;
-
-	    vector<vertex_descriptor> nIndices;
-
-	    for (unsigned int i = 0 ; i < indices.size() ; i++) {
-	    	nIndices.push_back(shape.add_vertex(shape.point(indices[i]) + normal));
-	    }
-
-	    face_descriptor f;
-
-	    for (unsigned int i = 0 ; i < indices.size() ; i++) {
-	    	f = shape.add_face(	nIndices[i],
-		    					nIndices[(i+1) % nIndices.size()],
-		    					indices[(i+1) % indices.size()],
-		    					indices[i]);
-
-	    	if (f == Mesh::null_face())
-				cout << "Extrude: Unable to add face" << endl;
-	    }
-
-	    if (nIndices.size() == 3)
-	    	f = shape.add_face(nIndices[0], nIndices[1], nIndices[2]);
-
-	    else if (nIndices.size() == 4)
-	    	f = shape.add_face(nIndices[0], nIndices[3], nIndices[2], nIndices[1]);
-
-	    else
-	    	cout << "Extrude: This face has more than 4 vertices" << endl;
+    	indices.push_back(*v);
     }
+
+    CGAL::Vector_3<Kernel> normal = CGAL::unit_normal(nShape.point(indices[0]),
+    											 nShape.point(indices[1]),
+    											 nShape.point(indices[2]));
+
+    normal = normal * height;
+
+    vector<vertex_descriptor> nIndices;
+
+    for (unsigned int i = 0 ; i < indices.size() ; i++) {
+    	nIndices.push_back(nShape.add_vertex(nShape.point(indices[i]) + normal));
+    }
+
+    face_descriptor f;
+
+    for (unsigned int i = 0 ; i < indices.size() ; i++) {
+    	f = nShape.add_face(	nIndices[i],
+	    					nIndices[(i+1) % nIndices.size()],
+	    					indices[(i+1) % indices.size()],
+	    					indices[i]);
+
+    	if (f == Mesh::null_face())
+			cout << "Extrude: Unable to add face" << endl;
+    }
+
+    if (nIndices.size() == 3)
+    	f = nShape.add_face(nIndices[0], nIndices[1], nIndices[2]);
+
+    else if (nIndices.size() == 4)
+    	f = nShape.add_face(nIndices[0], nIndices[3], nIndices[2], nIndices[1]);
+
+    else
+    	cout << "Extrude: This face has more than 4 vertices" << endl;
+  }
+
+	Node* extr = new Node(this, true);
+	extr->setShape(nShape);
+	addChild(extr);
+	return extr;
 }
 
 void Node::distributeX(
