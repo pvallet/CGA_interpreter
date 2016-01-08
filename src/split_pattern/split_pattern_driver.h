@@ -32,7 +32,7 @@ public:
   void computePattern(double _totalLength); /* Find the optimal repetitions,
                                             * then compute final vectors. */
 
-  const std::vector<double>&        getWeights() const {return finalWeights;}
+  const std::vector<double>&       getWeights() const {return finalWeights;}
   const std::vector<std::string>&  getActions() const {return finalActions;}
 
 private:

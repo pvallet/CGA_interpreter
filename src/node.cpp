@@ -333,7 +333,7 @@ void Node::reconstruct(
 			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2]);
 
 			    else if (aroundNewFace.size() == 4)
-			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[3], aroundNewFace[2], aroundNewFace[1]);
+			    	(*nShapes)[i].add_face(aroundNewFace[1], aroundNewFace[2], aroundNewFace[3], aroundNewFace[0]);
 
 			    else
 	    			cout << "Extrude: This face has more than 4 vertices" << endl;
