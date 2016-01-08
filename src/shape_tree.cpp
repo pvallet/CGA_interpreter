@@ -19,6 +19,7 @@ void ACT::ShapeTree::outputGeometry() {
 
 void ACT::ShapeTree::displayGeometry() {
 	outputGeometry();
+	cout << endl;
 	if (execl("./viewer", "./viewer") == -1)
 		cout << strerror(errno) << endl;
 }
