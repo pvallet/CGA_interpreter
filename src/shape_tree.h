@@ -15,7 +15,7 @@ class ShapeTree {
 
 public:
 	ShapeTree();
-	~ShapeTree();
+	~ShapeTree() {}
 
 	void initFromFile(string path) {root.load(path);}
 	Node* getRoot() {return &root;}
@@ -35,9 +35,6 @@ public:
 private:
 	// Parse function
 	void executeActions(const string& actions);
-
-	ACT::ACT_Parser  *parser  = nullptr;
-  ACT::ACT_Scanner *scanner = nullptr;
 
 	Node root;
 	Node* affectedNode; // To execute actions upon

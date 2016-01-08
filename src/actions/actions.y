@@ -27,6 +27,7 @@
 #define yylex scanner.actlex
 
 extern int line_num;
+std::string toStr(char* ptr);
 }
 
 %define api.prefix {act}
@@ -35,7 +36,7 @@ extern int line_num;
 
 %union {
 	double dval;
-	std::string* sval;
+	char*	 sval;
 }
 
 %token <sval> STRING
@@ -51,8 +52,6 @@ extern int line_num;
 %type <sval> string
 %type <dval> double
 
-%destructor { if ($$) { delete ($$); ($$) = nullptr; } } <sval>
-
 %%
 %start actions;
 actions:
@@ -63,29 +62,31 @@ actions:
 action:
 	extrude
 	| split
-	| RULE						{std::cout<<"rule"<<std::endl;st.addToRule(*$1);}
-	| RULE ACTIONS		{std::cout<<"deadrule"<<std::endl;st.addToRule(*$1,*$2);}
+	| RULE						{st.addToRule(toStr($1));}
+	| RULE ACTIONS		{st.addToRule(toStr($1),toStr($2));}
 	| DEADRULE
 	;
 
 string:
-	string STRING			{std::cout<<"concat"<<std::endl;$$ = new std::string(*$1 + *$2);}
-	| STRING					{std::cout<<"returnstring"<<std::endl;$$ = new std::string(*$1);}
+	string STRING			{char *ss = (char *) malloc (strlen($1) + strlen($2) + 1);
+											strcpy(ss,$1); free($1);
+											strcat(ss,$2); free($2);
+											$$ = ss; }
+	| STRING					{$$ = strdup($1); free($1);}
 	;
 
 double:
-	DOUBLE						{std::cout<<"returndouble"<<std::endl;$$ = $1;}
+	DOUBLE						{$$ = $1;}
 	;
 
 extrude:
-	EXTRUDE '(' double ')' {std::cout<<"extrude"<<std::endl;st.extrude($3);}
+	EXTRUDE '(' double ')' {st.extrude($3);}
 	;
 
 split:
 	SPLIT '(' string ')' BEG_PTRN string END_PTRN
-		{	std::cout<<"split"<<std::endl;char axis = $3->c_str()[1];
-		 	st.split(axis, *$5 + *$6 + *$7);
-			std::cout<<"endsplit"<<std::endl;
+		{	char axis = $3[1];
+		 	st.split(axis, toStr($5) + toStr($6) + toStr($7));
 	 	}
 	;
 
@@ -93,4 +94,10 @@ split:
 
 void ACT::ACT_Parser::error( const std::string &err_message ) {
    std::cerr << "Actions: Error: " << err_message << " Line: " << line_num << "\n";
+}
+
+std::string toStr(char* ptr) {
+  std::string ret = (ptr != NULL) ? std::string(ptr, (strlen(ptr))) : std::string("");
+  delete[] ptr; // Delete memory allocated by lexer.
+  return ret;
 }

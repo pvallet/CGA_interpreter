@@ -10,13 +10,6 @@ ACT::ShapeTree::ShapeTree() :
 	root(NULL, true)
 {}
 
-ACT::ShapeTree::~ShapeTree() {
-   delete(scanner);
-   scanner = nullptr;
-   delete(parser);
-   parser = nullptr;
-}
-
 void ACT::ShapeTree::outputGeometry() {
     ofstream output;
 	output.open("out.off", ios::trunc);
@@ -26,7 +19,6 @@ void ACT::ShapeTree::outputGeometry() {
 
 void ACT::ShapeTree::displayGeometry() {
 	outputGeometry();
-	cout << endl;
 	if (execl("./viewer", "./viewer") == -1)
 		cout << strerror(errno) << endl;
 }
@@ -37,6 +29,8 @@ void ACT::ShapeTree::setInitRule(Rule* rule) {
 }
 
 void ACT::ShapeTree::executeActions(const string& actions) {
+	ACT::ACT_Parser  *parser  = nullptr;
+  ACT::ACT_Scanner *scanner = nullptr;
 	std::stringstream ss( actions );
 
 	delete(scanner);
@@ -63,12 +57,11 @@ void ACT::ShapeTree::executeActions(const string& actions) {
 		 exit( EXIT_FAILURE );
 	}
 	const int accept( 0 );
-	cout << "enter parse" << endl;
+
 	if( parser->parse() != accept )
 	{
 		 std::cerr << "Parse failed !\n";
 	}
-	cout << "exit parse" << endl;
 }
 
 void ACT::ShapeTree::addToRule(string rule, string actions) {
@@ -79,7 +72,6 @@ void ACT::ShapeTree::addToRule(string rule, string actions) {
 }
 
 int ACT::ShapeTree::executeRule() {
-	cout << "execute rule: " << rules.front()->getName() << endl;
 	if (!rules.empty())	{
 		for (	auto it = rules.front()->getNodes().begin() ;
 					it != rules.front()->getNodes().end() ; it++) {

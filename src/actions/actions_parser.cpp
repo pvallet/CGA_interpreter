@@ -64,8 +64,9 @@
 #define yylex scanner.actlex
 
 extern int line_num;
+std::string toStr(char* ptr);
 
-#line 69 "actions_parser.cpp" // lalr1.cc:408
+#line 70 "actions_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -132,7 +133,7 @@ extern int line_num;
 
 #line 5 "actions.y" // lalr1.cc:474
 namespace ACT {
-#line 136 "actions_parser.cpp" // lalr1.cc:474
+#line 137 "actions_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
   ACT_Parser::ACT_Parser (ACT_Scanner  &scanner_yyarg, ShapeTree &st_yyarg)
@@ -527,52 +528,54 @@ namespace ACT {
           switch (yyn)
             {
   case 6:
-#line 66 "actions.y" // lalr1.cc:847
-    {std::cout<<"rule"<<std::endl;st.addToRule(*(yystack_[0].value.sval));}
-#line 533 "actions_parser.cpp" // lalr1.cc:847
+#line 65 "actions.y" // lalr1.cc:847
+    {st.addToRule(toStr((yystack_[0].value.sval)));}
+#line 534 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 7:
-#line 67 "actions.y" // lalr1.cc:847
-    {std::cout<<"deadrule"<<std::endl;st.addToRule(*(yystack_[1].value.sval),*(yystack_[0].value.sval));}
-#line 539 "actions_parser.cpp" // lalr1.cc:847
+#line 66 "actions.y" // lalr1.cc:847
+    {st.addToRule(toStr((yystack_[1].value.sval)),toStr((yystack_[0].value.sval)));}
+#line 540 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 9:
-#line 72 "actions.y" // lalr1.cc:847
-    {std::cout<<"concat"<<std::endl;(yylhs.value.sval) = new std::string(*(yystack_[1].value.sval) + *(yystack_[0].value.sval));}
-#line 545 "actions_parser.cpp" // lalr1.cc:847
+#line 71 "actions.y" // lalr1.cc:847
+    {char *ss = (char *) malloc (strlen((yystack_[1].value.sval)) + strlen((yystack_[0].value.sval)) + 1);
+											strcpy(ss,(yystack_[1].value.sval)); free((yystack_[1].value.sval));
+											strcat(ss,(yystack_[0].value.sval)); free((yystack_[0].value.sval));
+											(yylhs.value.sval) = ss; }
+#line 549 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
-#line 73 "actions.y" // lalr1.cc:847
-    {std::cout<<"returnstring"<<std::endl;(yylhs.value.sval) = new std::string(*(yystack_[0].value.sval));}
-#line 551 "actions_parser.cpp" // lalr1.cc:847
+#line 75 "actions.y" // lalr1.cc:847
+    {(yylhs.value.sval) = strdup((yystack_[0].value.sval)); free((yystack_[0].value.sval));}
+#line 555 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 11:
-#line 77 "actions.y" // lalr1.cc:847
-    {std::cout<<"returndouble"<<std::endl;(yylhs.value.dval) = (yystack_[0].value.dval);}
-#line 557 "actions_parser.cpp" // lalr1.cc:847
+#line 79 "actions.y" // lalr1.cc:847
+    {(yylhs.value.dval) = (yystack_[0].value.dval);}
+#line 561 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 12:
-#line 81 "actions.y" // lalr1.cc:847
-    {std::cout<<"extrude"<<std::endl;st.extrude((yystack_[1].value.dval));}
-#line 563 "actions_parser.cpp" // lalr1.cc:847
+#line 83 "actions.y" // lalr1.cc:847
+    {st.extrude((yystack_[1].value.dval));}
+#line 567 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 13:
-#line 86 "actions.y" // lalr1.cc:847
-    {	std::cout<<"split"<<std::endl;char axis = (yystack_[4].value.sval)->c_str()[1];
-		 	st.split(axis, *(yystack_[2].value.sval) + *(yystack_[1].value.sval) + *(yystack_[0].value.sval));
-			std::cout<<"endsplit"<<std::endl;
+#line 88 "actions.y" // lalr1.cc:847
+    {	char axis = (yystack_[4].value.sval)[1];
+		 	st.split(axis, toStr((yystack_[2].value.sval)) + toStr((yystack_[1].value.sval)) + toStr((yystack_[0].value.sval)));
 	 	}
-#line 572 "actions_parser.cpp" // lalr1.cc:847
+#line 575 "actions_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 576 "actions_parser.cpp" // lalr1.cc:847
+#line 579 "actions_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -820,8 +823,8 @@ namespace ACT {
   const unsigned char
   ACT_Parser::yyrline_[] =
   {
-       0,    59,    59,    60,    64,    65,    66,    67,    68,    72,
-      73,    77,    81,    85
+       0,    58,    58,    59,    63,    64,    65,    66,    67,    71,
+      75,    79,    83,    87
   };
 
   // Print the state stack on the debug stream.
@@ -903,10 +906,16 @@ namespace ACT {
 
 #line 5 "actions.y" // lalr1.cc:1155
 } // ACT
-#line 907 "actions_parser.cpp" // lalr1.cc:1155
-#line 92 "actions.y" // lalr1.cc:1156
+#line 910 "actions_parser.cpp" // lalr1.cc:1155
+#line 93 "actions.y" // lalr1.cc:1156
 
 
 void ACT::ACT_Parser::error( const std::string &err_message ) {
    std::cerr << "Actions: Error: " << err_message << " Line: " << line_num << "\n";
+}
+
+std::string toStr(char* ptr) {
+  std::string ret = (ptr != NULL) ? std::string(ptr, (strlen(ptr))) : std::string("");
+  delete[] ptr; // Delete memory allocated by lexer.
+  return ret;
 }

@@ -531,8 +531,8 @@ static yyconst flex_int16_t yy_chk[106] =
 
 static yyconst flex_int16_t yy_rule_linenum[17] =
     {   0,
-       31,   32,   33,   34,   42,   43,   44,   45,   46,   47,
-       48,   52,   56,   57,   64,   65
+       30,   31,   32,   33,   41,   42,   43,   44,   45,   46,
+       47,   51,   55,   56,   63,   64
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -552,7 +552,6 @@ static yyconst flex_int16_t yy_rule_linenum[17] =
 
   typedef ACT::ACT_Parser::token token;
 
-  #define STOKEN( x ) ( new std::string( x ) )
   #define YY_NO_UNISTD_H
   int param_count = 0;
   int pattern_count = 0;
@@ -560,7 +559,7 @@ static yyconst flex_int16_t yy_rule_linenum[17] =
 
 
 
-#line 564 "actions_lexer.cpp"
+#line 563 "actions_lexer.cpp"
 
 #define INITIAL 0
 #define PARAM 1
@@ -760,10 +759,10 @@ YY_DECL
 
 	{
 /* %% [7.0] user's declarations go here */
-#line 29 "actions.l"
+#line 28 "actions.l"
 
 
-#line 767 "actions_lexer.cpp"
+#line 766 "actions_lexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -844,27 +843,27 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 31 "actions.l"
+#line 30 "actions.l"
 ;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 32 "actions.l"
+#line 31 "actions.l"
 { param_count = 1; BEGIN(PARAM); return '(';}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 33 "actions.l"
-{ param_count++; yylval->sval = STOKEN(yytext); return token::STRING; }
+#line 32 "actions.l"
+{ param_count++; yylval->sval = strdup(yytext); return token::STRING; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 34 "actions.l"
+#line 33 "actions.l"
 { param_count--;
                   if (param_count == 0) {
                     BEGIN(INITIAL); return ')';
                   } else {
-                    yylval->sval = STOKEN(yytext);
+                    yylval->sval = strdup(yytext);
                     return token::STRING;
                   }
                 }
@@ -872,46 +871,46 @@ YY_RULE_SETUP
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 42 "actions.l"
-{ yylval->sval = STOKEN(yytext); return token::STRING;}
+#line 41 "actions.l"
+{ yylval->sval = strdup(yytext); return token::STRING;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 43 "actions.l"
+#line 42 "actions.l"
 { yylval->dval = atof(yytext);   return token::DOUBLE;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 44 "actions.l"
+#line 43 "actions.l"
 { return token::EXTRUDE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 45 "actions.l"
+#line 44 "actions.l"
 { return token::SPLIT; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 46 "actions.l"
-{ pattern_count = 1; BEGIN(PATTERN); yylval->sval = STOKEN(yytext); return token::BEG_PTRN;}
+#line 45 "actions.l"
+{ pattern_count = 1; BEGIN(PATTERN); yylval->sval = strdup(yytext); return token::BEG_PTRN;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 47 "actions.l"
-{ pattern_count++; yylval->sval = STOKEN(yytext); return token::STRING; }
+#line 46 "actions.l"
+{ pattern_count++; yylval->sval = strdup(yytext); return token::STRING; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 48 "actions.l"
-{ pattern_count--; yylval->sval = STOKEN(yytext);
+#line 47 "actions.l"
+{ pattern_count--; yylval->sval = strdup(yytext);
                   if (param_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
                   else return token::STRING;
                 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 52 "actions.l"
-{ pattern_count--; yylval->sval = STOKEN(yytext);
+#line 51 "actions.l"
+{ pattern_count--; yylval->sval = strdup(yytext);
                   if (param_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
                   else return token::STRING;
                 }
@@ -919,13 +918,13 @@ YY_RULE_SETUP
 case 13:
 /* rule 13 can match eol */
 YY_RULE_SETUP
-#line 56 "actions.l"
-{ yylval->sval = STOKEN(yytext); return token::STRING;}
+#line 55 "actions.l"
+{ yylval->sval = strdup(yytext); return token::STRING;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 57 "actions.l"
-{ yylval->sval = STOKEN(yytext);
+#line 56 "actions.l"
+{ yylval->sval = strdup(yytext);
                   if (RuleNames::getInstance().isRule(yytext)) {
                     BEGIN(REMAINING);
                     return token::RULE;
@@ -935,21 +934,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 64 "actions.l"
-{ yylval->sval = STOKEN(yytext); return token::ACTIONS;}
+#line 63 "actions.l"
+{ yylval->sval = strdup(yytext); return token::ACTIONS;}
 	YY_BREAK
 case 16:
 /* rule 16 can match eol */
 YY_RULE_SETUP
-#line 65 "actions.l"
+#line 64 "actions.l"
 { lineNum++; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 67 "actions.l"
+#line 66 "actions.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 953 "actions_lexer.cpp"
+#line 952 "actions_lexer.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(PARAM):
 case YY_STATE_EOF(PATTERN):
@@ -2064,7 +2063,7 @@ void actfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 67 "actions.l"
+#line 66 "actions.l"
 
 
 

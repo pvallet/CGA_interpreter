@@ -140,10 +140,10 @@ namespace ACT {
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 36 "actions.y" // lalr1.cc:372
+    #line 37 "actions.y" // lalr1.cc:372
 
 	double dval;
-	std::string* sval;
+	char*	 sval;
 
 #line 149 "actions_parser.h" // lalr1.cc:372
     };
