@@ -1,8 +1,10 @@
 #pragma once
 
+#if ! defined(yyFlexLexerOnce)
 #undef yyFlexLexer
 #define yyFlexLexer actFlexLexer
 #include <FlexLexer.h>
+#endif
 
 #include "actions_parser.h"
 

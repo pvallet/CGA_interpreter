@@ -129,15 +129,11 @@ void Node::distributeX(
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
 
-	double minCoord = shape.point(sortedVertices.front()).x();
-	double cumWeight = 0;
-	double prvSeparator, nxtSeparator;
+	double nxtSeparator = shape.point(sortedVertices.front()).x(); // minCoord
 	unsigned int j = 0;
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
-		prvSeparator = minCoord + cumWeight;
-		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight;
+		nxtSeparator += weights[i];
 
 		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).x() <= nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
@@ -147,35 +143,34 @@ void Node::distributeX(
 			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
 					h != h_end; h++){
 
-				if (shape.point(shape.source(*h)).x() > nxtSeparator) {
+				double sep = nxtSeparator - weights[i];
+				int k = i;
+				Point_3 currentPoint = shape.point(sortedVertices[j]);
 
-					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+				// Put new vertices at each border cutting the edge
+				// We need the condition over k when the weights do not some up to maxCoord
+				while (shape.point(shape.source(*h)).x() > sep && k < weights.size() - 1) {
+					sep += weights[k];
 
-					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(nxtSeparator - shape.point(sortedVertices[j]).x()) /
-						(shape.point(shape.source(*h)).x() - shape.point(sortedVertices[j]).x()) );
-
-					(*onBorderForthw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderForthw)[i].back()) );
-
-					(*onBorderBackw)[i+1].push_back((*nShapes)[i+1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i+1].insert( Match(shape.source(*h), (*onBorderBackw)[i+1].back()) );
-				}
-
-				else if (shape.point(shape.source(*h)).x() < prvSeparator) {
-
-					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+					Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
 
 					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(prvSeparator - shape.point(sortedVertices[j]).x()) /
-						(shape.point(shape.source(*h)).x() - shape.point(sortedVertices[j]).x()) );
+						(sep - currentPoint.x()) /
+						(shape.point(shape.source(*h)).x() - currentPoint.x()) );
 
-					(*onBorderBackw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderBackw)[i].back()) );
+					currentPoint = currentPoint + crossingEdge;
 
-					(*onBorderForthw)[i-1].push_back((*nShapes)[i-1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i-1].insert( Match(shape.source(*h), (*onBorderForthw)[i-1].back()) );
+					(*onBorderForthw)[k].push_back((*nShapes)[k].add_vertex(currentPoint));
+					(*matchVertexIn)[k].insert( Match(shape.source(*h), (*onBorderForthw)[k].back()) );
+
+					(*onBorderBackw)[k+1].push_back((*nShapes)[k+1].add_vertex(currentPoint));
+					(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*onBorderBackw)[k+1].back()) );
+
+					k++;
 				}
+
+				vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
+				(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
 			}
 		}
 	}
@@ -189,15 +184,11 @@ void Node::distributeY(
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
 
-	double minCoord = shape.point(sortedVertices.front()).y();
-	double cumWeight = 0;
-	double prvSeparator, nxtSeparator;
+	double nxtSeparator = shape.point(sortedVertices.front()).y(); // minCoord
 	unsigned int j = 0;
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
-		prvSeparator = minCoord + cumWeight;
-		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight;
+		nxtSeparator += weights[i];
 
 		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).y() <= nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
@@ -207,35 +198,34 @@ void Node::distributeY(
 			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
 					h != h_end; h++){
 
-				if (shape.point(shape.source(*h)).y() > nxtSeparator) {
+				double sep = nxtSeparator - weights[i];
+				int k = i;
+				Point_3 currentPoint = shape.point(sortedVertices[j]);
 
-					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+				// Put new vertices at each border cutting the edge
+				// We need the condition over k when the weights do not some up to maxCoord
+				while (shape.point(shape.source(*h)).y() > sep && k < weights.size() - 1) {
+					sep += weights[k];
 
-					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(nxtSeparator - shape.point(sortedVertices[j]).y()) /
-						(shape.point(shape.source(*h)).y() - shape.point(sortedVertices[j]).y()) );
-
-					(*onBorderForthw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderForthw)[i].back()) );
-
-					(*onBorderBackw)[i+1].push_back((*nShapes)[i+1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i+1].insert( Match(shape.source(*h), (*onBorderBackw)[i+1].back()) );
-				}
-
-				else if (shape.point(shape.source(*h)).y() < prvSeparator) {
-
-					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+					Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
 
 					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(prvSeparator - shape.point(sortedVertices[j]).y()) /
-						(shape.point(shape.source(*h)).y() - shape.point(sortedVertices[j]).y()) );
+						(sep - currentPoint.y()) /
+						(shape.point(shape.source(*h)).y() - currentPoint.y()) );
 
-					(*onBorderBackw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderBackw)[i].back()) );
+					currentPoint = currentPoint + crossingEdge;
 
-					(*onBorderForthw)[i-1].push_back((*nShapes)[i-1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i-1].insert( Match(shape.source(*h), (*onBorderForthw)[i-1].back()) );
+					(*onBorderForthw)[k].push_back((*nShapes)[k].add_vertex(currentPoint));
+					(*matchVertexIn)[k].insert( Match(shape.source(*h), (*onBorderForthw)[k].back()) );
+
+					(*onBorderBackw)[k+1].push_back((*nShapes)[k+1].add_vertex(currentPoint));
+					(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*onBorderBackw)[k+1].back()) );
+
+					k++;
 				}
+
+				vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
+				(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
 			}
 		}
 	}
@@ -249,15 +239,11 @@ void Node::distributeZ(
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
 
-	double minCoord = shape.point(sortedVertices.front()).z();
-	double cumWeight = 0;
-	double prvSeparator, nxtSeparator;
+	double nxtSeparator = shape.point(sortedVertices.front()).z(); // minCoord
 	unsigned int j = 0;
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
-		prvSeparator = minCoord + cumWeight;
-		cumWeight += weights[i];
-		nxtSeparator = minCoord + cumWeight;
+		nxtSeparator += weights[i];
 
 		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).z() <= nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
@@ -267,35 +253,34 @@ void Node::distributeZ(
 			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
 					h != h_end; h++){
 
-				if (shape.point(shape.source(*h)).z() > nxtSeparator) {
+				double sep = nxtSeparator - weights[i];
+				int k = i;
+				Point_3 currentPoint = shape.point(sortedVertices[j]);
 
-					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+				// Put new vertices at each border cutting the edge
+				// We need the condition over k when the weights do not some up to maxCoord
+				while (shape.point(shape.source(*h)).z() > sep && k < weights.size() - 1) {
+					sep += weights[k];
 
-					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(nxtSeparator - shape.point(sortedVertices[j]).z()) /
-						(shape.point(shape.source(*h)).z() - shape.point(sortedVertices[j]).z()) );
-
-					(*onBorderForthw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderForthw)[i].back()) );
-
-					(*onBorderBackw)[i+1].push_back((*nShapes)[i+1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i+1].insert( Match(shape.source(*h), (*onBorderBackw)[i+1].back()) );
-				}
-
-				else if (shape.point(shape.source(*h)).z() < prvSeparator) {
-
-					Vector_3 crossingEdge(shape.point(sortedVertices[j]), shape.point(shape.source(*h)));
+					Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
 
 					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(prvSeparator - shape.point(sortedVertices[j]).z()) /
-						(shape.point(shape.source(*h)).z() - shape.point(sortedVertices[j]).z()) );
+						(sep - currentPoint.z()) /
+						(shape.point(shape.source(*h)).z() - currentPoint.z()) );
 
-					(*onBorderBackw)[i].push_back((*nShapes)[i].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i].insert( Match(shape.source(*h), (*onBorderBackw)[i].back()) );
+					currentPoint = currentPoint + crossingEdge;
 
-					(*onBorderForthw)[i-1].push_back((*nShapes)[i-1].add_vertex(shape.point(sortedVertices[j]) + crossingEdge));
-					(*matchVertexIn)[i-1].insert( Match(shape.source(*h), (*onBorderForthw)[i-1].back()) );
+					(*onBorderForthw)[k].push_back((*nShapes)[k].add_vertex(currentPoint));
+					(*matchVertexIn)[k].insert( Match(shape.source(*h), (*onBorderForthw)[k].back()) );
+
+					(*onBorderBackw)[k+1].push_back((*nShapes)[k+1].add_vertex(currentPoint));
+					(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*onBorderBackw)[k+1].back()) );
+
+					k++;
 				}
+
+				vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
+				(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
 			}
 		}
 	}
@@ -333,7 +318,7 @@ void Node::reconstruct(
 			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2]);
 
 			    else if (aroundNewFace.size() == 4)
-			    	(*nShapes)[i].add_face(aroundNewFace[1], aroundNewFace[2], aroundNewFace[3], aroundNewFace[0]);
+			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2], aroundNewFace[3]);
 
 			    else
 	    			cout << "Extrude: This face has more than 4 vertices" << endl;
@@ -349,7 +334,7 @@ void Node::reconstruct(
 		}
 
 		if (onBorderBackw.size() == 4) {
-			(*nShapes)[i].add_face(onBorderBackw[i][0], onBorderBackw[i][3], onBorderBackw[i][2], onBorderBackw[i][1]);
+			(*nShapes)[i].add_face(onBorderBackw[i][1], onBorderBackw[i][2], onBorderBackw[i][3], onBorderBackw[i][0]);
 		}
 
 		// TODO : Else, do a delaunay triangulation to create the faces on a separator
