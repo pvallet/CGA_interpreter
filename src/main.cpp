@@ -1,4 +1,4 @@
-#include <string>
+/*#include <string>
 
 #include "rule.h"
 #include "shape_tree.h"
@@ -10,22 +10,6 @@ int main() {
   ACT::ShapeTree shapeTree;
 
   shapeTree.initFromFile(std::string("plane.off"));
-
-  /*Node* root = shapeTree.getRoot();
-
-  std::vector<Node*> split1, split2;
-  std::vector<std::string> actions1;
-  std::vector<double> weights(3,1.);
-
-  root->split(X, split1, actions1, "{~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
-
-  split1[0]->extrude(5);
-  split1[1]->extrude(3);
-  split1[2]->extrude(2);
-
-  //split1[0]->split(Y, split2, actions1, "{~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
-
-  shapeTree.displayGeometry();*/
 
   Rule* Parcel = new Rule("Parcel", "split(\"x\") {~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
   Rule* BldArea = new Rule("BldArea", "extrude(5) split(\"y\") {0.4: Floor}*");
@@ -42,19 +26,81 @@ int main() {
 
   shapeTree.displayGeometry();
 
-  /*SP::SP_Driver driver;
+  return 0;
+}*/
 
-  //driver.parse("{~1 : A | {0.3 : B | ~2 : C }* | 0.3 : B | {~1.5 : EDE | 0.5 : pok}* | ~1 : A}");
-  //driver.parse("{15:A}*");
-  //driver.parse("{~1: BldArea | ~1: GreenSpace | ~1: BldArea}");
-  driver.parse("{0.4: Floor}*");
-  driver.computePattern(20);
-  std::vector<double> weights = driver.getWeights();
-  std::vector<std::string> actions = driver.getActions();
+#include <fstream>
 
-  for (unsigned int i = 0 ; i < weights.size() ; i++) {
-    std::cout << weights[i] << " " << actions[i] << std::endl;
-  }*/
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Surface_mesh.h>
+
+using namespace std;
+
+typedef CGAL::Simple_cartesian<double>     	Kernel;
+typedef Kernel::Point_3						Point_3;
+typedef Kernel::Vector_3					Vector_3;
+typedef CGAL::Surface_mesh<Point_3>        	Mesh;
+typedef Mesh::Vertex_index 				vertex_descriptor;
+typedef Mesh::Face_index 					face_descriptor;
+
+int main() {
+  Mesh mesh;
+  ifstream input;
+	input.open("plane2.off");
+	input >> mesh;
+	input.close();
+
+  string out("out2");
+
+  ofstream objStream, mtlStream;
+  objStream.open(out + ".obj", ios::trunc);
+
+  // OBJ file
+
+  objStream << "# CGA-_interpreter generated building" << endl;
+  objStream << "mtllib " << out << ".mtl" << endl;
+  objStream << "o Building" << endl;
+
+  map<vertex_descriptor, int> vInt;
+  Mesh::Vertex_range::iterator v, v_end;
+
+  int i = 1;
+  for (boost::tie(v,v_end) = mesh.vertices(); v != v_end ; v++) {
+    objStream << 'v' << ' ' << mesh.point(*v).x() << ' ' <<
+                            mesh.point(*v).y() << ' ' <<
+                            mesh.point(*v).z() << std::endl;
+
+    vInt.insert(pair<vertex_descriptor, int>(*v,i));
+    i++;
+  }
+
+  objStream << "vt " << 0 << ' ' << 0 << endl
+            << "vt " << 1 << ' ' << 0 << endl
+            << "vt " << 1 << ' ' << 1 << endl
+            << "vt " << 0 << ' ' << 1 << endl;
+
+  objStream << "usemtl Texture" << endl;
+  objStream << "s off" << endl;
+
+  Mesh::Face_range::iterator f, f_end;
+  for (boost::tie(f,f_end) = mesh.faces(); f != f_end ; f++) {
+    int i = 1;
+    objStream << 'f';
+    CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+    boost::tie(v, v_end) = vertices_around_face(mesh.halfedge(*f), mesh);
+    do
+      {objStream << ' ' << vInt[*v] << '/' << i; i++;}
+    while(++v != v_end);
+    objStream << std::endl;
+  }
+
+  objStream.close();
+  mtlStream.open(out + ".mtl", ios::trunc);
+
+  mtlStream << "newmtl Texture" << endl <<
+    "map_Kd res/window_small.jpg" << endl;
+
+  mtlStream.close();
 
   return 0;
 }

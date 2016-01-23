@@ -326,9 +326,9 @@ void Node::reconstruct(
 	    }
 	}
 
-    // Faces on border
+    // Faces on border : we don't need them
 
-	for (unsigned int i = 0 ; i < onBorderForthw.size() ; i++) {
+	/*for (unsigned int i = 0 ; i < onBorderForthw.size() ; i++) {
 		if (onBorderForthw.size() == 4) {
 			(*nShapes)[i].add_face(onBorderForthw[i][0], onBorderForthw[i][3], onBorderForthw[i][2], onBorderForthw[i][1]);
 		}
@@ -338,7 +338,7 @@ void Node::reconstruct(
 		}
 
 		// TODO : Else, do a delaunay triangulation to create the faces on a separator
-	}
+	}*/
 }
 
 struct CompX {
