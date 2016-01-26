@@ -14,6 +14,7 @@ typedef Kernel::Point_3						Point_3;
 typedef Kernel::Vector_3					Vector_3;
 typedef CGAL::Surface_mesh<Point_3>        	Mesh;
 typedef Mesh::Vertex_index 				vertex_descriptor;
+typedef Mesh::Halfedge_index 			halfedge_descriptor;
 typedef Mesh::Face_index 					face_descriptor;
 
 enum Axis {X,Y,Z};
