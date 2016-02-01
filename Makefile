@@ -12,10 +12,12 @@ OBJS2 = $(addprefix obj/actions/,$(notdir $(SRCS2:.cpp=.o)))
 OBJS3 = $(addprefix obj/split_pattern/,$(notdir $(SRCS3:.cpp=.o)))
 
 $(EXE): $(OBJS) $(OBJS2) $(OBJS3)
-	g++ $(OBJS) $(OBJS2) $(OBJS3) -o $(EXE) $(LIBS)	
+	g++ $(OBJS) $(OBJS2) $(OBJS3) -o $(EXE) $(LIBS)
 
 clean:
 	rm -f *~ $(EXE) $(OBJS) $(OBJS2) $(OBJS3)
+
+rm_parsers:
 	cd src/ ;	for d in $(DIRS); do (cd $$d ; rm -f *_parser* *_lexer*) done
 
 gen_parsers:

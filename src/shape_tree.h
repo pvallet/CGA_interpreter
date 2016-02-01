@@ -17,11 +17,17 @@ public:
 	ShapeTree();
 	~ShapeTree() {}
 
-	void initFromFile(string path) {root.load(path);}
 	Node* getRoot() {return &root;}
 
-	void outputGeometry();
-	void displayGeometry();
+	void initFromFile(string path) {root.load(path);}
+	void setTextureFile(string path) {texturePath = path;}
+	// Name a sub rectangle of the texture file that will constitute a texture to be applied
+	void addTextureRect(string name, double x0, double y0, double x1, double y1);
+
+	void outputGeometryOFF();
+	void displayGeometryOFF();
+	void outputGeometryOBJ();
+	void displayGeometryOBJ();
 	void addRule(Rule* rule) {rules.push_back(rule);}
 	void setInitRule(Rule* rule);
 
@@ -31,15 +37,21 @@ public:
 	void addToRule(string rule, string actions = string());
 	void extrude(double value) {affectedNode = affectedNode->extrude(value);}
 	void split(char axis, string pattern);
+	void selectFaces(string expression); // For the moment only [(x|y|z)(pos|neg)] | all
+	void setTexture(string texture);
 
 private:
 	// Parse function
 	void executeActions(const string& actions);
 
 	Node root;
-	Node* affectedNode; // To execute actions upon
+	Node* affectedNode; // To execute actions on
 	std::list<Rule*> rules;
 	Rule* initRule;
+
+	string texturePath;
+	vector<Point_2> texCoord;
+	map<string, int> textures; // the int specifies the first index of the texture coords
 };
 
 } /* End namespace ACT */

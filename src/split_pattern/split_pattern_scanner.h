@@ -1,10 +1,8 @@
 #pragma once
 
-
 #undef yyFlexLexer
 #define yyFlexLexer spFlexLexer
 #include <FlexLexer.h>
-
 
 #include "split_pattern_parser.h"
 

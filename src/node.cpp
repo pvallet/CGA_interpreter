@@ -18,11 +18,34 @@ Node::Node(Node* _parent, bool _visible) :
 	visible(_visible)
 {}
 
+void Node::selectAllFaces() {
+	selectedFaces.clear();
+
+	Mesh::Face_range::iterator f, f_end;
+	for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+		selectedFaces.push_back(*f);
+	}
+}
+
+void Node::noTexture() {
+	texCoord.clear();
+	texCoord.push_back(Point_2(0,0));
+
+	iTexCoord.clear();
+
+	Mesh::Vertex_range::iterator v, v_end;
+	for (boost::tie(v,v_end) = shape.vertices(); v != v_end ; v++) {
+		iTexCoord.insert(pair<vertex_descriptor,double>(*v,0));
+	}
+}
+
 void Node::load(string path) {
 	ifstream input;
 	input.open(path);
 	input >> shape;
 	input.close();
+	selectAllFaces();
+	noTexture();
 }
 
 void Node::setVisible(bool _visible) {
@@ -44,33 +67,53 @@ void Node::addChild(Node* _child) {
 	children.push_back(_child);
 }
 
-Mesh Node::getSubGeometry() {
-	if (children.empty())
-		return shape;
+MeshResult Node::getSubGeometry() {
+	MeshResult res;
+
+	if (children.empty()) {
+		res.mesh = shape;
+		res.iTexCoord = iTexCoord;
+		return res;
+	}
 
 	else {
-		Mesh result;
-
 		bool hasVisibleChild = false;
-		for (auto it = children.begin() ; it != children.end() ; it++) {
-			if ((*it)->isVisible()) {
+		for (auto chld = children.begin() ; chld != children.end() ; chld++) {
+			if ((*chld)->isVisible()) {
 				hasVisibleChild = true;
-				result += (*it)->getSubGeometry();
+				MeshResult partialRes = (*chld)->getSubGeometry();
+
+				// Maps vertices to the appropriate texture coordinates
+				for (auto vd = partialRes.iTexCoord.begin() ;
+									vd != partialRes.iTexCoord.end() ; vd++) {
+					res.iTexCoord.insert(pair<vertex_descriptor, int>(
+						// This addition is specified in the CGAL doc
+						(vertex_descriptor) (vd->first +
+																 res.mesh.number_of_vertices() +
+																 res.mesh.number_of_removed_vertices()),
+						vd->second));
+				}
+
+				// add vertices
+				res.mesh += partialRes.mesh;
 			}
 		}
 
 		if (hasVisibleChild)
-			return result;
-		else
-			return shape;
-	}
+			return res;
+
+		else {
+			res.mesh = shape;
+			res.iTexCoord = iTexCoord;
+			return res;
+		}
+ 	}
 }
 
 Node* Node::extrude(Kernel::RT height) {
-	Mesh nShape = shape;
-  Mesh::Face_range::iterator f, f_end;
+	Mesh nShape;
 
-  for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+  for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {
 
   	vector<vertex_descriptor> iPrevShape;
 
@@ -144,7 +187,7 @@ void Node::distributeX(
 					h != h_end; h++){
 
 				double sep = nxtSeparator - weights[i];
-				int k = i;
+				unsigned int k = i;
 				Point_3 currentPoint = shape.point(sortedVertices[j]);
 
 				// Put new vertices at each border cutting the edge
@@ -199,7 +242,7 @@ void Node::distributeY(
 					h != h_end; h++){
 
 				double sep = nxtSeparator - weights[i];
-				int k = i;
+				unsigned int k = i;
 				Point_3 currentPoint = shape.point(sortedVertices[j]);
 
 				// Put new vertices at each border cutting the edge
@@ -254,7 +297,7 @@ void Node::distributeZ(
 					h != h_end; h++){
 
 				double sep = nxtSeparator - weights[i];
-				int k = i;
+				unsigned int k = i;
 				Point_3 currentPoint = shape.point(sortedVertices[j]);
 
 				// Put new vertices at each border cutting the edge
@@ -437,6 +480,67 @@ void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, strin
 	}
 
 	addChild(subd);
+}
+
+void Node::selectFace(string face) {
+	bool clear = false;
+	CGAL::Vector_3<Kernel> wantedNormal;
+	if (face == "xpos")
+		wantedNormal = CGAL::Vector_3<Kernel>(1,0,0);
+	else if (face == "xneg")
+		wantedNormal = CGAL::Vector_3<Kernel>(-1,0,0);
+	else if (face == "ypos")
+		wantedNormal = CGAL::Vector_3<Kernel>(0,1,0);
+	else if (face == "yneg")
+		wantedNormal = CGAL::Vector_3<Kernel>(0,-1,0);
+	else if (face == "zpos")
+		wantedNormal = CGAL::Vector_3<Kernel>(0,0,1);
+	else if (face == "zneg")
+		wantedNormal = CGAL::Vector_3<Kernel>(0,0,-1);
+ 	else
+		clear = true;
+
+	if (clear)
+		selectedFaces.clear();
+
+	else {
+		CGAL::Vector_3<Kernel> normal;
+		vector<vertex_descriptor> iPrevShape;
+
+		Mesh::Face_range::iterator f, f_end;
+		CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+
+		for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+			vector<vertex_descriptor> indices;
+	    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+	        v != v_end; v++) {
+	    	indices.push_back(*v);
+	    }
+
+			normal = CGAL::unit_normal(shape.point(indices[0]),
+																 shape.point(indices[1]),
+																 shape.point(indices[2]));
+
+			if (normal * wantedNormal > 0)
+			 selectedFaces.push_back(*f);
+		}
+	}
+}
+
+void Node::setTexture(const vector<Point_2>& points) {
+	for (unsigned int i = 0 ; i < points.size() ; i++) {
+		texCoord.push_back(points[i]);
+	}
+
+	for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {
+		int i = texCoord.size() - points.size();
+		CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+		for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+				v != v_end; v++) {
+			iTexCoord.insert(pair<vertex_descriptor, int>(*v,i));
+			i++;
+		}
+	}
 }
 
 Node::~Node() {
