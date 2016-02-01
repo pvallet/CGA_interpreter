@@ -18,7 +18,6 @@
 %option debug
 %option noyywrap
 %option c++
-%option nodefault
 %option yyclass="ACT::ACT_Scanner"
 
 %x PARAM
@@ -29,30 +28,33 @@
 
 [ \r\t]*				;
 \(              { param_count = 1; BEGIN(PARAM); return '(';}
-<PARAM>\(       { param_count++; yylval->sval = strdup(yytext); return token::STRING; }
+<PARAM>\(       { param_count++; return '('; }
 <PARAM>\)       { param_count--;
                   if (param_count == 0) {
-                    BEGIN(INITIAL); return ')';
-                  } else {
-                    yylval->sval = strdup(yytext);
-                    return token::STRING;
+                    BEGIN(INITIAL);
                   }
+                  return ')';
                 }
-<PARAM>[^\(\)0-9\.]*     { yylval->sval = strdup(yytext); return token::STRING;}
-<PARAM>[0-9]+\.?[0-9]*   { yylval->dval = atof(yytext);   return token::DOUBLE;}
+<PARAM>\"[^\"]*\"         { yylval->sval = strdup(&yytext[1]);
+                            yylval->sval[strlen(yylval->sval) - 1] = '\0';
+                            return token::STRING;}
+<PARAM>[0-9]+\.?[0-9]*    { yylval->dval = atof(yytext);   return token::DOUBLE;}
+<PARAM>\,                 { return ',';}
 extrude         { return token::EXTRUDE; }
 split           { return token::SPLIT; }
+selectFaces     { return token::SELECT_FACES; }
+setTexture      { return token::SET_TEXTURE; }
 \{              { pattern_count = 1; BEGIN(PATTERN); yylval->sval = strdup(yytext); return token::BEG_PTRN;}
-<PATTERN>\{     { pattern_count++; yylval->sval = strdup(yytext); return token::STRING; }
+<PATTERN>\{     { pattern_count++; yylval->sval = strdup(yytext); return token::CODE; }
 <PATTERN>\}\*   { pattern_count--; yylval->sval = strdup(yytext);
                   if (param_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
-                  else return token::STRING;
+                  else return token::CODE;
                 }
 <PATTERN>\}     { pattern_count--; yylval->sval = strdup(yytext);
                   if (param_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
-                  else return token::STRING;
+                  else return token::CODE;
                 }
-<PATTERN>[^\{\}]* { yylval->sval = strdup(yytext); return token::STRING;}
+<PATTERN>[^\{\}]* { yylval->sval = strdup(yytext); return token::CODE;}
 [a-zA-Z]*       { yylval->sval = strdup(yytext);
                   if (RuleNames::getInstance().isRule(yytext)) {
                     BEGIN(REMAINING);

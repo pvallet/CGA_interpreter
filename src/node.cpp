@@ -15,7 +15,8 @@ typedef pair<vertex_descriptor,vertex_descriptor> Match;
 
 Node::Node(Node* _parent, bool _visible) :
 	parent(_parent),
-	visible(_visible)
+	visible(_visible),
+	firstTimeSelect(true)
 {}
 
 void Node::selectAllFaces() {
@@ -28,14 +29,11 @@ void Node::selectAllFaces() {
 }
 
 void Node::noTexture() {
-	texCoord.clear();
-	texCoord.push_back(Point_2(0,0));
-
 	iTexCoord.clear();
 
-	Mesh::Vertex_range::iterator v, v_end;
-	for (boost::tie(v,v_end) = shape.vertices(); v != v_end ; v++) {
-		iTexCoord.insert(pair<vertex_descriptor,double>(*v,0));
+	Mesh::Face_range::iterator f, f_end;
+	for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+		iTexCoord[*f] = 0;
 	}
 }
 
@@ -86,12 +84,12 @@ MeshResult Node::getSubGeometry() {
 				// Maps vertices to the appropriate texture coordinates
 				for (auto vd = partialRes.iTexCoord.begin() ;
 									vd != partialRes.iTexCoord.end() ; vd++) {
-					res.iTexCoord.insert(pair<vertex_descriptor, int>(
+					res.iTexCoord.insert(pair<face_descriptor, int>(
 						// This addition is specified in the CGAL doc
-						(vertex_descriptor) (vd->first +
-																 res.mesh.number_of_vertices() +
-																 res.mesh.number_of_removed_vertices()),
-						vd->second));
+						(face_descriptor) (vd->first +
+															 res.mesh.number_of_faces() +
+															 res.mesh.number_of_removed_faces()),
+															 vd->second));
 				}
 
 				// add vertices
@@ -111,8 +109,7 @@ MeshResult Node::getSubGeometry() {
 }
 
 Node* Node::extrude(Kernel::RT height) {
-	Mesh nShape;
-
+	Mesh nShape = shape;
   for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {
 
   	vector<vertex_descriptor> iPrevShape;
@@ -483,6 +480,7 @@ void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, strin
 }
 
 void Node::selectFace(string face) {
+	firstTimeSelect = false;
 	bool clear = false;
 	CGAL::Vector_3<Kernel> wantedNormal;
 	if (face == "xpos")
@@ -522,24 +520,14 @@ void Node::selectFace(string face) {
 																 shape.point(indices[2]));
 
 			if (normal * wantedNormal > 0)
-			 selectedFaces.push_back(*f);
+			 	selectedFaces.push_back(*f);
 		}
 	}
 }
 
-void Node::setTexture(const vector<Point_2>& points) {
-	for (unsigned int i = 0 ; i < points.size() ; i++) {
-		texCoord.push_back(points[i]);
-	}
-
+void Node::setTexture(int indexFirstCoord) {
 	for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {
-		int i = texCoord.size() - points.size();
-		CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-		for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
-				v != v_end; v++) {
-			iTexCoord.insert(pair<vertex_descriptor, int>(*v,i));
-			i++;
-		}
+		iTexCoord[*f] = indexFirstCoord;
 	}
 }
 

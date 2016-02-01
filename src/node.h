@@ -20,7 +20,7 @@ typedef Mesh::Face_index 					face_descriptor;
 
 typedef struct MeshResult {
 	Mesh mesh;
-	map<vertex_descriptor, int> iTexCoord;
+	map<face_descriptor, int> iTexCoord;
 } MeshResult;
 
 enum Axis {X,Y,Z};
@@ -41,11 +41,12 @@ public:
 
 	bool isVisible() {return visible;}
 	MeshResult getSubGeometry();
+	bool isFirstTimeSelect() {return firstTimeSelect;}
 
 	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
 	void selectFace(string face); // Only (x|y|z)(pos|neg), otherwise unselect everything
-	void setTexture(const vector<Point_2>& points);
+	void setTexture(int indexFirstCoord);
 
 private:
 
@@ -84,7 +85,8 @@ private:
 
 	Mesh shape; // The shape is supposed to be a cube or a square
 	map<string, double> attributes;
-	vector<Point_2> texCoord;
-	map<vertex_descriptor, int> iTexCoord;
+	map<face_descriptor, int> iTexCoord;
+
 	list<face_descriptor> selectedFaces;
+	bool firstTimeSelect;
 };

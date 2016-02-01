@@ -7,16 +7,18 @@
 using namespace std;
 
 ACT::ShapeTree::ShapeTree() :
-	root(NULL, true)
-{}
+	root(NULL, true),
+	texCoord(4, Point_2(0,0)) // This stands for no texture
+{
+}
 
 void ACT::ShapeTree::addTextureRect(string name, double x0, double y0, double x1, double y1) {
 	textures[name] = texCoord.size();
 
 	texCoord.push_back(Point_2(x0, y0));
-	texCoord.push_back(Point_2(x0+(x1-x0), y0));
-	texCoord.push_back(Point_2(x0+(x1-x0), y0+(y1-y0)));
+	texCoord.push_back(Point_2(x1, y0));
 	texCoord.push_back(Point_2(x1, y1));
+	texCoord.push_back(Point_2(x0, y1));
 }
 
 void ACT::ShapeTree::outputGeometryOFF() {
@@ -60,10 +62,12 @@ void ACT::ShapeTree::outputGeometryOBJ() {
     i++;
   }
 
-	for (boost::tie(v,v_end) = res.mesh.vertices(); v != v_end ; v++) {
-    objStream << "vt" << ' ' << texCoord[res.iTexCoord[*v]].x() << ' ' <<
-                            		texCoord[res.iTexCoord[*v]].y() << std::endl;
+	for (unsigned int j = 0 ; j < texCoord.size() ; j++) {
+		objStream << "vt" << ' ' << texCoord[j].x() << ' ' <<
+                            		texCoord[j].y() << std::endl;
+	}
 
+	for (boost::tie(v,v_end) = res.mesh.vertices(); v != v_end ; v++) {
     vInt.insert(pair<vertex_descriptor, int>(*v,i));
     i++;
   }
@@ -76,9 +80,11 @@ void ACT::ShapeTree::outputGeometryOBJ() {
     objStream << 'f';
     CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
     boost::tie(v, v_end) = vertices_around_face(res.mesh.halfedge(*f), res.mesh);
-    do
-      objStream << ' ' << vInt[*v] << '/' << res.iTexCoord[*v]+1;
-    while(++v != v_end);
+		i = res.iTexCoord[*f]+1;
+    do {
+      objStream << ' ' << vInt[*v] << '/' << i;
+			i++;
+    } while(++v != v_end);
     objStream << std::endl;
   }
 
@@ -188,28 +194,19 @@ void ACT::ShapeTree::split(char axis, string pattern) {
 }
 
 void ACT::ShapeTree::selectFaces(string expression) {
-	if (expression == "all") {
-		affectedNode->selectFace("xpos");
-		affectedNode->selectFace("xneg");
-		affectedNode->selectFace("ypos");
-		affectedNode->selectFace("yneg");
-		affectedNode->selectFace("zpos");
-		affectedNode->selectFace("zneg");
-	}
+	if (expression == "all")
+		affectedNode->selectAllFaces();
 
-	else
+	else {
+		if (affectedNode->isFirstTimeSelect())
+			affectedNode->selectFace("");
 		affectedNode->selectFace(expression);
+	}
 }
 
 void ACT::ShapeTree::setTexture(string texture) {
-	vector<Point_2> coord;
-
 	if (textures.find(texture) == textures.end())
 		affectedNode->noTexture();
-	else {
-		for (int i = textures[texture] ; i < 4 ; i++) {
-			coord.push_back(texCoord[i]);
-		}
-		affectedNode->setTexture(coord);
-	}
+	else
+		affectedNode->setTexture(textures[texture]);
 }

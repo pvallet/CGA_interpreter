@@ -40,17 +40,19 @@ std::string toStr(char* ptr);
 }
 
 %token <sval> STRING
+%token <sval> CODE
 %token <dval> DOUBLE
 %token				EXTRUDE
 %token				SPLIT
+%token				SELECT_FACES
+%token				SET_TEXTURE
 %token <sval> BEG_PTRN
 %token <sval> END_PTRN
 %token <sval> RULE
 %token <sval> DEADRULE
 %token <sval> ACTIONS
 
-%type <sval> string
-%type <dval> double
+%type <sval> code
 
 %%
 %start actions;
@@ -62,32 +64,38 @@ actions:
 action:
 	extrude
 	| split
+	| setTexture
+	| selectFaces
 	| RULE						{st.addToRule(toStr($1));}
 	| RULE ACTIONS		{st.addToRule(toStr($1),toStr($2));}
 	| DEADRULE
 	;
 
-string:
-	string STRING			{char *ss = (char *) malloc (strlen($1) + strlen($2) + 1);
+code:
+	code CODE				{char *ss = (char *) malloc (strlen($1) + strlen($2) + 1);
 											strcpy(ss,$1); free($1);
 											strcat(ss,$2); free($2);
 											$$ = ss; }
-	| STRING					{$$ = strdup($1); free($1);}
-	;
-
-double:
-	DOUBLE						{$$ = $1;}
+	| CODE					{$$ = strdup($1); free($1);}
 	;
 
 extrude:
-	EXTRUDE '(' double ')' {st.extrude($3);}
+	EXTRUDE '(' DOUBLE ')' {st.extrude($3);}
 	;
 
 split:
-	SPLIT '(' string ')' BEG_PTRN string END_PTRN
-		{	char axis = $3[1];
+	SPLIT '(' STRING ')' BEG_PTRN code END_PTRN
+		{	char axis = $3[0];
 		 	st.split(axis, toStr($5) + toStr($6) + toStr($7));
 	 	}
+	;
+
+selectFaces:
+	SELECT_FACES '(' STRING ')' { st.selectFaces($3);}
+	;
+
+setTexture:
+	SET_TEXTURE '(' STRING ')' { st.setTexture($3);}
 	;
 
 %%
