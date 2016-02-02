@@ -99,6 +99,7 @@ void SP::SP_Driver::wasConstScope() { // Append the subscope to the list
 void SP::SP_Driver::computePattern(double _totalLength) {
   totalLength = _totalLength;
 
+
   if (!hasRelWeight) {
     /* In this case we only repeat the first star seen, all the other are
      * merely removed. We adapt the repetitions so that it matches the total
@@ -139,14 +140,16 @@ void SP::SP_Driver::computeAbsPattern() {
   if (remainingLength < 0.f)
     std::cerr << "Error: total length is too small for given pattern" << std::endl;
 
-  else
-    repetitions[0] = remainingLength / repeatedLength; // All the others values are 0
+  else {
+    // The little constant is to avoid rounding errors
+    repetitions[0] = remainingLength / repeatedLength + 0.00001; // All the others values are 0
+  }
 }
 
 // We only find a local minimum
 void SP::SP_Driver::optimizeCoordinate(int n) { // n = coord
   if (repetitions[n] != -1) {
-    repetitions[n] = 0;
+    repetitions[n] = 1;
     if (n != 0)
       optimizeCoordinate(n-1);
     else

@@ -49,7 +49,6 @@ void ACT::ShapeTree::outputGeometryOBJ() {
   objStream << "o Building" << endl;
 
   map<vertex_descriptor, int> vInt;
-	map<vertex_descriptor, int> vtInt;
   Mesh::Vertex_range::iterator v, v_end;
 
   int i = 1;
@@ -66,11 +65,6 @@ void ACT::ShapeTree::outputGeometryOBJ() {
 		objStream << "vt" << ' ' << texCoord[j].x() << ' ' <<
                             		texCoord[j].y() << std::endl;
 	}
-
-	for (boost::tie(v,v_end) = res.mesh.vertices(); v != v_end ; v++) {
-    vInt.insert(pair<vertex_descriptor, int>(*v,i));
-    i++;
-  }
 
   objStream << "usemtl Texture" << endl;
   objStream << "s off" << endl;
@@ -91,8 +85,7 @@ void ACT::ShapeTree::outputGeometryOBJ() {
   objStream.close();
   mtlStream.open(out + ".mtl", ios::trunc);
 
-  mtlStream << "newmtl Texture" << endl <<
-    "map_Kd " << texturePath << endl;
+  mtlStream << "newmtl Texture" << endl << "map_Kd " << texturePath << endl;
 
   mtlStream.close();
 }

@@ -175,7 +175,7 @@ void Node::distributeX(
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
 		nxtSeparator += weights[i];
 
-		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).x() <= nxtSeparator; j++) {
+		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).x() < nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
 			(*matchVertexIn)[i].insert( Match(sortedVertices[j], indexAdded) );
 
@@ -209,8 +209,10 @@ void Node::distributeX(
 					k++;
 				}
 
-				vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
-				(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
+				if (shape.point(shape.source(*h)).x() > nxtSeparator) {
+					vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
+					(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
+				}
 			}
 		}
 	}
@@ -230,7 +232,7 @@ void Node::distributeY(
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
 		nxtSeparator += weights[i];
 
-		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).y() <= nxtSeparator; j++) {
+		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).y() < nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
 			(*matchVertexIn)[i].insert( Match(sortedVertices[j], indexAdded) );
 
@@ -264,8 +266,10 @@ void Node::distributeY(
 					k++;
 				}
 
-				vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
-				(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
+				if (shape.point(shape.source(*h)).y() > nxtSeparator) {
+					vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
+					(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
+				}
 			}
 		}
 	}
@@ -285,7 +289,7 @@ void Node::distributeZ(
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
 		nxtSeparator += weights[i];
 
-		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).z() <= nxtSeparator; j++) {
+		for (; j < sortedVertices.size() && shape.point(sortedVertices[j]).z() < nxtSeparator; j++) {
 			vertex_descriptor indexAdded = (*nShapes)[i].add_vertex(shape.point(sortedVertices[j]));
 			(*matchVertexIn)[i].insert( Match(sortedVertices[j], indexAdded) );
 
@@ -319,8 +323,10 @@ void Node::distributeZ(
 					k++;
 				}
 
-				vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
-				(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
+				if (shape.point(shape.source(*h)).z() > nxtSeparator) {
+					vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
+					(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
+				}
 			}
 		}
 	}
