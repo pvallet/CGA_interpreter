@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "node.h"
-
 using namespace std;
+
+class Node;
 
 class Rule {
 public:
@@ -16,9 +16,9 @@ public:
   virtual ~Rule ();
 
   void addNode(Node* node, const string& actions = string());
-  const string& getName() {return name;}
-  const list<Node*>& getNodes() const {return affectedNodes;}
-  string getActions(Node* node) const {return actions + additionalActions.at(node);}
+  inline const string& getName() {return name;}
+  inline const list<Node*>& getNodes() const {return affectedNodes;}
+  inline string getActions(Node* node) const {return actions + additionalActions.at(node);}
 
 private:
   string name;

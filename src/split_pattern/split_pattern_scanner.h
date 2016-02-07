@@ -1,6 +1,5 @@
 #pragma once
 
-
 #undef yyFlexLexer
 #define yyFlexLexer spFlexLexer
 #include <FlexLexer.h>

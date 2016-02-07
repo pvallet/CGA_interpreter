@@ -25,23 +25,27 @@ typedef struct MeshResult {
 
 enum Axis {X,Y,Z};
 
+namespace ACT {
+	class ShapeTree;
+}
+
 class Node {
 
 public:
-	Node(Node* _parent, bool _visible);
+	Node(ACT::ShapeTree* _shapeTree, Node* _parent, bool _visible);
 	~Node();
 
 	void selectAllFaces();
 	void noTexture();
 	void load(string path);
-	void setShape(Mesh _shape) {shape = _shape; selectAllFaces(); noTexture();}
+	inline void setShape(Mesh _shape) {shape = _shape; selectAllFaces(); noTexture();}
 	void setVisible(bool _visible);
-	void setParent(Node* _parent) {parent = _parent;}
+	inline void setParent(Node* _parent) {parent = _parent;}
 	void addChild(Node* _child);
 
-	bool isVisible() {return visible;}
+	inline bool isVisible() {return visible;}
 	MeshResult getSubGeometry();
-	bool isFirstTimeSelect() {return firstTimeSelect;}
+	inline bool isFirstTimeSelect() {return firstTimeSelect;}
 
 	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
@@ -53,32 +57,29 @@ private:
 	// Split
 	void reconstruct(
 		const vector<map<vertex_descriptor, vertex_descriptor> >& matchVertexIn,
-		const vector<vector<vertex_descriptor> >& onBorderBackw,
-		const vector<vector<vertex_descriptor> >& onBorderForthw,
+		const vector<double>& weights,
 		vector<Mesh>* nShapes);
+	void preserveTextures(Axis axis, const vector<Node*>& nodes, const vector<double>& weights);
 
 	void distributeX(
 		vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
-		vector<vector<vertex_descriptor> >* onBorderBackw,
-		vector<vector<vertex_descriptor> >* onBorderForthw,
 		vector<Mesh>* nShapes,
 		const vector<vertex_descriptor>& vertices,
 		const vector<double>& weights);
 	void distributeY(
 		vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
-		vector<vector<vertex_descriptor> >* onBorderBackw,
-		vector<vector<vertex_descriptor> >* onBorderForthw,
 		vector<Mesh>* nShapes,
 		const vector<vertex_descriptor>& vertices,
 		const vector<double>& weights);
 	void distributeZ(
 		vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
-		vector<vector<vertex_descriptor> >* onBorderBackw,
-		vector<vector<vertex_descriptor> >* onBorderForthw,
 		vector<Mesh>* nShapes,
 		const vector<vertex_descriptor>& sortedVertices,
 		const vector<double>& weights);
 
+	string getFaceString(face_descriptor f);
+
+	ACT::ShapeTree* shapeTree;
 	Node* parent;
 	list<Node*> children;
 	bool visible;
@@ -89,4 +90,7 @@ private:
 
 	list<face_descriptor> selectedFaces;
 	bool firstTimeSelect;
+
+protected:
+	void setITexCoord(const map<face_descriptor, int>& _iTexCoord) {iTexCoord = _iTexCoord;}
 };

@@ -7,13 +7,15 @@
 #include <fstream>
 #include <map>
 
+#include "shape_tree.h"
 #include "split_pattern/split_pattern_driver.h"
 
 using namespace std;
 
 typedef pair<vertex_descriptor,vertex_descriptor> Match;
 
-Node::Node(Node* _parent, bool _visible) :
+Node::Node(ACT::ShapeTree* _shapeTree, Node* _parent, bool _visible) :
+	shapeTree(_shapeTree),
 	parent(_parent),
 	visible(_visible),
 	firstTimeSelect(true)
@@ -109,7 +111,7 @@ MeshResult Node::getSubGeometry() {
 }
 
 Node* Node::extrude(Kernel::RT height) {
-	Mesh nShape = shape;
+	Mesh nShape;
   for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {
 
   	vector<vertex_descriptor> iPrevShape;
@@ -136,12 +138,6 @@ Node* Node::extrude(Kernel::RT height) {
 
 		face_descriptor fd;
 
-		// We need to revert the base shape in the HDS to make the faces point outwards
-		fd = nShape.add_face(iNewShape[3], iNewShape[2], iNewShape[1], iNewShape[0]);
-
-		if (fd == Mesh::null_face())
-			cout << "Extrude: Unable to revert base face" << endl;
-
     for (unsigned int i = 0 ; i < iNewShape.size() ; i++) {
     	fd = nShape.add_face(	iNewShape[i],
 							    					iNewShape[(i+1) % iNewShape.size()],
@@ -149,22 +145,24 @@ Node* Node::extrude(Kernel::RT height) {
 							    					iNewShapeExtr[i]);
 
     	if (fd == Mesh::null_face())
-				cout << "Extrude: Unable to add face" << endl;
+				cerr << "Extrude: Unable to add face" << endl;
     }
 
     nShape.add_face(iNewShapeExtr[0], iNewShapeExtr[1], iNewShapeExtr[2], iNewShapeExtr[3]);
   }
 
-	Node* extr = new Node(this, true);
+	Node* save = new Node(shapeTree, this, true);
+	Node* extr = new Node(shapeTree, this, true);
+	save->setShape(shape);
+	save->setITexCoord(iTexCoord);
 	extr->setShape(nShape);
+	addChild(save);
 	addChild(extr);
 	return extr;
 }
 
 void Node::distributeX(
 	vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
-	vector<vector<vertex_descriptor> >* onBorderBackw,
-	vector<vector<vertex_descriptor> >* onBorderForthw,
 	vector<Mesh>* nShapes,
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
@@ -183,33 +181,30 @@ void Node::distributeX(
 			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
 					h != h_end; h++){
 
-				double sep = nxtSeparator - weights[i];
-				unsigned int k = i;
-				Point_3 currentPoint = shape.point(sortedVertices[j]);
-
-				// Put new vertices at each border cutting the edge
-				// We need the condition over k when the weights do not some up to maxCoord
-				while (shape.point(shape.source(*h)).x() > sep && k < weights.size() - 1) {
-					sep += weights[k];
-
-					Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
-
-					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(sep - currentPoint.x()) /
-						(shape.point(shape.source(*h)).x() - currentPoint.x()) );
-
-					currentPoint = currentPoint + crossingEdge;
-
-					(*onBorderForthw)[k].push_back((*nShapes)[k].add_vertex(currentPoint));
-					(*matchVertexIn)[k].insert( Match(shape.source(*h), (*onBorderForthw)[k].back()) );
-
-					(*onBorderBackw)[k+1].push_back((*nShapes)[k+1].add_vertex(currentPoint));
-					(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*onBorderBackw)[k+1].back()) );
-
-					k++;
-				}
-
 				if (shape.point(shape.source(*h)).x() > nxtSeparator) {
+					double sep = nxtSeparator - weights[i];
+					unsigned int k = i;
+					Point_3 currentPoint = shape.point(sortedVertices[j]);
+
+					// Put new vertices at each border cutting the edge
+					// We need the condition over k when the weights do not some up to maxCoord
+					while (shape.point(shape.source(*h)).x() > sep && k < weights.size() - 1) {
+						sep += weights[k];
+
+						Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
+
+						crossingEdge = crossingEdge * Kernel::RT( // Thales
+							(sep - currentPoint.x()) /
+							(shape.point(shape.source(*h)).x() - currentPoint.x()) );
+
+						currentPoint = currentPoint + crossingEdge;
+
+						(*matchVertexIn)[k].insert( Match(shape.source(*h), (*nShapes)[k].add_vertex(currentPoint)) );
+						(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*nShapes)[k+1].add_vertex(currentPoint)) );
+
+						k++;
+					}
+
 					vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
 					(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
 				}
@@ -220,8 +215,6 @@ void Node::distributeX(
 
 void Node::distributeY(
 	vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
-	vector<vector<vertex_descriptor> >* onBorderBackw,
-	vector<vector<vertex_descriptor> >* onBorderForthw,
 	vector<Mesh>* nShapes,
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
@@ -240,33 +233,30 @@ void Node::distributeY(
 			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
 					h != h_end; h++){
 
-				double sep = nxtSeparator - weights[i];
-				unsigned int k = i;
-				Point_3 currentPoint = shape.point(sortedVertices[j]);
-
-				// Put new vertices at each border cutting the edge
-				// We need the condition over k when the weights do not some up to maxCoord
-				while (shape.point(shape.source(*h)).y() > sep && k < weights.size() - 1) {
-					sep += weights[k];
-
-					Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
-
-					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(sep - currentPoint.y()) /
-						(shape.point(shape.source(*h)).y() - currentPoint.y()) );
-
-					currentPoint = currentPoint + crossingEdge;
-
-					(*onBorderForthw)[k].push_back((*nShapes)[k].add_vertex(currentPoint));
-					(*matchVertexIn)[k].insert( Match(shape.source(*h), (*onBorderForthw)[k].back()) );
-
-					(*onBorderBackw)[k+1].push_back((*nShapes)[k+1].add_vertex(currentPoint));
-					(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*onBorderBackw)[k+1].back()) );
-
-					k++;
-				}
-
 				if (shape.point(shape.source(*h)).y() > nxtSeparator) {
+					double sep = nxtSeparator - weights[i];
+					unsigned int k = i;
+					Point_3 currentPoint = shape.point(sortedVertices[j]);
+
+					// Put new vertices at each border cutting the edge
+					// We need the condition over k when the weights do not some up to maxCoord
+					while (shape.point(shape.source(*h)).y() > sep && k < weights.size() - 1) {
+						sep += weights[k];
+
+						Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
+
+						crossingEdge = crossingEdge * Kernel::RT( // Thales
+							(sep - currentPoint.y()) /
+							(shape.point(shape.source(*h)).y() - currentPoint.y()) );
+
+						currentPoint = currentPoint + crossingEdge;
+
+						(*matchVertexIn)[k].insert( Match(shape.source(*h), (*nShapes)[k].add_vertex(currentPoint)) );
+						(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*nShapes)[k+1].add_vertex(currentPoint)) );
+
+						k++;
+					}
+
 					vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
 					(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
 				}
@@ -277,8 +267,6 @@ void Node::distributeY(
 
 void Node::distributeZ(
 	vector<map<vertex_descriptor, vertex_descriptor> >* matchVertexIn,
-	vector<vector<vertex_descriptor> >* onBorderBackw,
-	vector<vector<vertex_descriptor> >* onBorderForthw,
 	vector<Mesh>* nShapes,
 	const vector<vertex_descriptor>& sortedVertices,
 	const vector<double>& weights) {
@@ -297,33 +285,30 @@ void Node::distributeZ(
 			for(boost::tie(h, h_end) = halfedges_around_target(sortedVertices[j], shape);
 					h != h_end; h++){
 
-				double sep = nxtSeparator - weights[i];
-				unsigned int k = i;
-				Point_3 currentPoint = shape.point(sortedVertices[j]);
-
-				// Put new vertices at each border cutting the edge
-				// We need the condition over k when the weights do not some up to maxCoord
-				while (shape.point(shape.source(*h)).z() > sep && k < weights.size() - 1) {
-					sep += weights[k];
-
-					Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
-
-					crossingEdge = crossingEdge * Kernel::RT( // Thales
-						(sep - currentPoint.z()) /
-						(shape.point(shape.source(*h)).z() - currentPoint.z()) );
-
-					currentPoint = currentPoint + crossingEdge;
-
-					(*onBorderForthw)[k].push_back((*nShapes)[k].add_vertex(currentPoint));
-					(*matchVertexIn)[k].insert( Match(shape.source(*h), (*onBorderForthw)[k].back()) );
-
-					(*onBorderBackw)[k+1].push_back((*nShapes)[k+1].add_vertex(currentPoint));
-					(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*onBorderBackw)[k+1].back()) );
-
-					k++;
-				}
-
 				if (shape.point(shape.source(*h)).z() > nxtSeparator) {
+					double sep = nxtSeparator - weights[i];
+					unsigned int k = i;
+					Point_3 currentPoint = shape.point(sortedVertices[j]);
+
+					// Put new vertices at each border cutting the edge
+					// We need the condition over k when the weights do not some up to maxCoord
+					while (shape.point(shape.source(*h)).z() > sep && k < weights.size() - 1) {
+						sep += weights[k];
+
+						Vector_3 crossingEdge(currentPoint, shape.point(shape.source(*h)));
+
+						crossingEdge = crossingEdge * Kernel::RT( // Thales
+							(sep - currentPoint.z()) /
+							(shape.point(shape.source(*h)).z() - currentPoint.z()) );
+
+						currentPoint = currentPoint + crossingEdge;
+
+						(*matchVertexIn)[k].insert( Match(shape.source(*h), (*nShapes)[k].add_vertex(currentPoint)) );
+						(*matchVertexIn)[k+1].insert( Match(sortedVertices[j], (*nShapes)[k+1].add_vertex(currentPoint)) );
+
+						k++;
+					}
+
 					vertex_descriptor sourceAdded = (*nShapes)[k].add_vertex(shape.point(shape.source(*h)));
 					(*matchVertexIn)[k].insert( Match(shape.source(*h), sourceAdded) );
 				}
@@ -334,57 +319,111 @@ void Node::distributeZ(
 
 void Node::reconstruct(
 	const vector<map<vertex_descriptor, vertex_descriptor> >& matchVertexIn,
-	const vector<vector<vertex_descriptor> >& onBorderBackw,
-	const vector<vector<vertex_descriptor> >& onBorderForthw,
+	const vector<double>& weights, // needed to adapt the textures
 	vector<Mesh>* nShapes) {
 
 	for (unsigned int i = 0 ; i < nShapes->size() ; i++) {
 		Mesh::Face_range::iterator f, f_end;
-	    for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
-	    	bool addFace = true;
+    for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+    	bool addFace = true;
 
-	    	vector<vertex_descriptor> aroundNewFace;
+    	vector<vertex_descriptor> aroundNewFace;
 
-	    	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-		    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
-		        v != v_end; v++) {
+    	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+	    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+	        v != v_end; v++) {
 
-		    	if (matchVertexIn[i].find(*v) == matchVertexIn[i].end()) {
-		    		addFace = false;
-		    		break;
-		    	}
+	    	if (matchVertexIn[i].find(*v) == matchVertexIn[i].end()) {
+	    		addFace = false;
+	    		break;
+	    	}
 
-		    	else {
-		    		aroundNewFace.push_back(matchVertexIn[i].at(*v));
-		    	}
-		    }
-
-		    if (addFace) {
-		    	if (aroundNewFace.size() == 3)
-			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2]);
-
-			    else if (aroundNewFace.size() == 4)
-			    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1], aroundNewFace[2], aroundNewFace[3]);
-
-			    else
-	    			cout << "Extrude: This face has more than 4 vertices" << endl;
-		    }
+	    	else {
+	    		aroundNewFace.push_back(matchVertexIn[i].at(*v));
+	    	}
 	    }
+
+	    if (addFace) {
+		    if (aroundNewFace.size() == 4)
+		    	(*nShapes)[i].add_face(aroundNewFace[0], aroundNewFace[1],
+																 aroundNewFace[2], aroundNewFace[3]);
+
+		    else
+    			cerr << "Extrude: This face is not a quad: " << *f << endl;
+	    }
+    }
+	}
+}
+
+void Node::preserveTextures(Axis axis, const vector<Node*>& nodes,
+																			 const vector<double>& weights) {
+	selectFace("");
+	switch(axis) { // Textures on ends don't need to be splitted
+		case X:
+			selectFace("xneg"); nodes.front()->selectFace("xneg");
+			nodes.front()->setTexture(iTexCoord[selectedFaces.front()]);
+			selectFace(""); nodes.front()->selectFace("");
+
+			selectFace("xpos"); nodes.back()->selectFace("xpos");
+			nodes.back()->setTexture(iTexCoord[selectedFaces.front()]);
+			selectFace(""); nodes.back()->selectFace("");
+
+			selectFace("ypos"); selectFace("yneg"); selectFace("zpos"); selectFace("zpos");
+			break;
+		case Y:
+			selectFace("yneg"); nodes.front()->selectFace("yneg");
+			nodes.front()->setTexture(iTexCoord[selectedFaces.front()]);
+			selectFace(""); nodes.front()->selectFace("");
+
+			selectFace("ypos"); nodes.back()->selectFace("ypos");
+			nodes.back()->setTexture(iTexCoord[selectedFaces.front()]);
+			selectFace(""); nodes.back()->selectFace("");
+
+			selectFace("xpos"); selectFace("xneg"); selectFace("zpos"); selectFace("zpos");
+			break;
+		case Z:
+			selectFace("zneg"); nodes.front()->selectFace("zneg");
+			nodes.front()->setTexture(iTexCoord[selectedFaces.front()]);
+			selectFace(""); nodes.front()->selectFace("");
+
+			selectFace("zpos"); nodes.back()->selectFace("zpos");
+			nodes.back()->setTexture(iTexCoord[selectedFaces.front()]);
+			selectFace(""); nodes.back()->selectFace("");
+
+			selectFace("xpos"); selectFace("xpos"); selectFace("ypos"); selectFace("yneg");
+			break;
+
+	}
+	list<face_descriptor> save = selectedFaces;
+
+	// Split textures on the sides
+	for (auto it = selectedFaces.begin() ; it != selectedFaces.end() ; it++) {
+		if (iTexCoord[*it] == 0) {
+			for (unsigned int i = 0 ; i < nodes.size() ; i++) {
+				nodes[i]->selectFace("");
+				nodes[i]->selectFace(getFaceString(*it));
+				nodes[i]->setTexture(0);
+				nodes[i]->selectFace("");
+			}
+		}
+
+		else {
+			int indexFirstNewTexture;
+			if (axis == Y)
+				indexFirstNewTexture = shapeTree->splitTexture(iTexCoord[*it], weights, VERTICAL);
+			else
+				indexFirstNewTexture = shapeTree->splitTexture(iTexCoord[*it], weights, HORIZONTAL);
+
+			for (unsigned int i = 0 ; i < nodes.size() ; i++) {
+				nodes[i]->selectFace("");
+				nodes[i]->selectFace(getFaceString(*it));
+				nodes[i]->setTexture(indexFirstNewTexture + i*4);
+				nodes[i]->selectFace("");
+			}
+		}
 	}
 
-    // Faces on border : we don't need them
-
-	/*for (unsigned int i = 0 ; i < onBorderForthw.size() ; i++) {
-		if (onBorderForthw.size() == 4) {
-			(*nShapes)[i].add_face(onBorderForthw[i][0], onBorderForthw[i][3], onBorderForthw[i][2], onBorderForthw[i][1]);
-		}
-
-		if (onBorderBackw.size() == 4) {
-			(*nShapes)[i].add_face(onBorderBackw[i][1], onBorderBackw[i][2], onBorderBackw[i][3], onBorderBackw[i][0]);
-		}
-
-		// TODO : Else, do a delaunay triangulation to create the faces on a separator
-	}*/
+	selectedFaces = save;
 }
 
 struct CompX {
@@ -436,14 +475,10 @@ void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, strin
 			break;
 	}
 
-	vector<double> weights = driver.getWeights();
-	actions = driver.getActions();
-
 	// Useful variables
 
-	vector<vector<vertex_descriptor> > onBorderForthw, onBorderBackw;
-	onBorderForthw.resize(weights.size());
-	onBorderBackw.resize(weights.size());
+	vector<double> weights = driver.getWeights();
+	actions = driver.getActions();
 
 	vector<map<vertex_descriptor, vertex_descriptor> > matchVertexIn; // Matches a vertex of shape to a vertex of a sub shape
 	matchVertexIn.resize(weights.size());
@@ -455,80 +490,82 @@ void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, strin
 
 	switch(axis) {
 		case X:
-			distributeX(&matchVertexIn, &onBorderBackw, &onBorderForthw, &nShapes, vertices, weights);
+			distributeX(&matchVertexIn, &nShapes, vertices, weights);
 			break;
 		case Y:
-			distributeY(&matchVertexIn, &onBorderBackw, &onBorderForthw, &nShapes, vertices, weights);
+			distributeY(&matchVertexIn, &nShapes, vertices, weights);
 			break;
 		case Z:
-			distributeZ(&matchVertexIn, &onBorderBackw, &onBorderForthw, &nShapes, vertices, weights);
+			distributeZ(&matchVertexIn, &nShapes, vertices, weights);
 			break;
 	}
 
 	// Reconstruct faces
 
-	reconstruct(matchVertexIn, onBorderBackw, onBorderForthw, &nShapes);
+	reconstruct(matchVertexIn, weights, &nShapes);
 
 	// Store results
 
-	Node* subd = new Node(this, true);
+	Node* subd = new Node(shapeTree, this, true);
 	subd->setShape(shape);
 
 	nodes.resize(weights.size());
 
 	for (unsigned int i = 0 ; i < nShapes.size() ; i++) {
-		nodes[i] = new Node(subd, true);
+		nodes[i] = new Node(shapeTree, subd, true);
 		nodes[i]->setShape(nShapes[i]);
 		subd->addChild(nodes[i]);
 	}
 
+	// Set right textures in subnodes
+	preserveTextures(axis, nodes, weights);
+
 	addChild(subd);
+}
+
+string Node::getFaceString(face_descriptor f) {
+	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+	vector<vertex_descriptor> indices;
+	for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(f), shape);
+			v != v_end; v++) {
+		indices.push_back(*v);
+	}
+
+	CGAL::Vector_3<Kernel> normal = CGAL::unit_normal(shape.point(indices[0]),
+																									 	shape.point(indices[1]),
+																									 	shape.point(indices[2]));
+
+	if (normal * CGAL::Vector_3<Kernel>(1,0,0) > 0)
+		return "xpos";
+	else if (normal * CGAL::Vector_3<Kernel>(-1,0,0) > 0)
+		return "xneg";
+	else if (normal * CGAL::Vector_3<Kernel>(0,1,0) > 0)
+		return "ypos";
+	else if (normal * CGAL::Vector_3<Kernel>(0,-1,0) > 0)
+		return "yneg";
+	else if (normal * CGAL::Vector_3<Kernel>(0,0,1) > 0)
+		return "zpos";
+	else if (normal * CGAL::Vector_3<Kernel>(0,0,-1) > 0)
+		return "zneg";
+
+	return "";
 }
 
 void Node::selectFace(string face) {
 	firstTimeSelect = false;
-	bool clear = false;
-	CGAL::Vector_3<Kernel> wantedNormal;
-	if (face == "xpos")
-		wantedNormal = CGAL::Vector_3<Kernel>(1,0,0);
-	else if (face == "xneg")
-		wantedNormal = CGAL::Vector_3<Kernel>(-1,0,0);
-	else if (face == "ypos")
-		wantedNormal = CGAL::Vector_3<Kernel>(0,1,0);
-	else if (face == "yneg")
-		wantedNormal = CGAL::Vector_3<Kernel>(0,-1,0);
-	else if (face == "zpos")
-		wantedNormal = CGAL::Vector_3<Kernel>(0,0,1);
-	else if (face == "zneg")
-		wantedNormal = CGAL::Vector_3<Kernel>(0,0,-1);
- 	else
-		clear = true;
+	bool clear = true;
+
+	Mesh::Face_range::iterator f, f_end;
+
+	for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+		if (getFaceString(*f) == face) {
+			selectedFaces.push_back(*f);
+			clear = false;
+		}
+	}
 
 	if (clear)
 		selectedFaces.clear();
-
-	else {
-		CGAL::Vector_3<Kernel> normal;
-		vector<vertex_descriptor> iPrevShape;
-
-		Mesh::Face_range::iterator f, f_end;
-		CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-
-		for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
-			vector<vertex_descriptor> indices;
-	    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
-	        v != v_end; v++) {
-	    	indices.push_back(*v);
-	    }
-
-			normal = CGAL::unit_normal(shape.point(indices[0]),
-																 shape.point(indices[1]),
-																 shape.point(indices[2]));
-
-			if (normal * wantedNormal > 0)
-			 	selectedFaces.push_back(*f);
-		}
-	}
 }
 
 void Node::setTexture(int indexFirstCoord) {

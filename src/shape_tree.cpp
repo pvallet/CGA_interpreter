@@ -7,7 +7,7 @@
 using namespace std;
 
 ACT::ShapeTree::ShapeTree() :
-	root(NULL, true),
+	root(this, NULL, true),
 	texCoord(4, Point_2(0,0)) // This stands for no texture
 {
 }
@@ -15,6 +15,10 @@ ACT::ShapeTree::ShapeTree() :
 void ACT::ShapeTree::addTextureRect(string name, double x0, double y0, double x1, double y1) {
 	textures[name] = texCoord.size();
 
+	addTextureCoord(x0, y0, x1, y1);
+}
+
+void ACT::ShapeTree::addTextureCoord(double x0, double y0, double x1, double y1) {
 	texCoord.push_back(Point_2(x0, y0));
 	texCoord.push_back(Point_2(x1, y0));
 	texCoord.push_back(Point_2(x1, y1));
@@ -31,8 +35,7 @@ void ACT::ShapeTree::outputGeometryOFF() {
 
 void ACT::ShapeTree::displayGeometryOFF() {
 	outputGeometryOFF();
-	cout << endl;
-	if (execl("./viewer", "./viewer") == -1)
+	if (execl("./viewer", "./viewer", NULL) == -1)
 		cout << strerror(errno) << endl;
 }
 
@@ -92,8 +95,7 @@ void ACT::ShapeTree::outputGeometryOBJ() {
 
 void ACT::ShapeTree::displayGeometryOBJ() {
 	outputGeometryOBJ();
-	cout << endl;
-	if (execl("/usr/bin/meshlab", "meshlab", "./out.obj") == -1)
+	if (execl("/usr/bin/meshlab", "meshlab", "./out.obj", NULL) == -1)
 		cout << strerror(errno) << endl;
 }
 
@@ -161,11 +163,10 @@ int ACT::ShapeTree::executeRule() {
 }
 
 void ACT::ShapeTree::split(char axis, string pattern) {
-	vector<Node*> 	resultNodes;
-	vector<string> 	resultActions;
+	vector<Node*> resultNodes;
+	vector<string> resultActions;
 
 	Node* save = affectedNode;
-
 	switch(axis) {
 		case 'x': case 'X':
 			affectedNode->split(X, resultNodes, resultActions, pattern);
@@ -187,14 +188,26 @@ void ACT::ShapeTree::split(char axis, string pattern) {
 }
 
 void ACT::ShapeTree::selectFaces(string expression) {
+	if (affectedNode->isFirstTimeSelect())
+		affectedNode->selectFace("");
+
 	if (expression == "all")
 		affectedNode->selectAllFaces();
-
-	else {
-		if (affectedNode->isFirstTimeSelect())
-			affectedNode->selectFace("");
-		affectedNode->selectFace(expression);
+	else if (expression == "x") {
+		affectedNode->selectFace("xpos");
+		affectedNode->selectFace("xneg");
 	}
+	else if (expression == "y") {
+		affectedNode->selectFace("ypos");
+		affectedNode->selectFace("yneg");
+	}
+	else if (expression == "z") {
+		affectedNode->selectFace("zpos");
+		affectedNode->selectFace("zneg");
+	}
+
+	else
+		affectedNode->selectFace(expression);
 }
 
 void ACT::ShapeTree::setTexture(string texture) {
@@ -202,4 +215,62 @@ void ACT::ShapeTree::setTexture(string texture) {
 		affectedNode->noTexture();
 	else
 		affectedNode->setTexture(textures[texture]);
+}
+
+// base[0] = texCoord[texID]
+
+/* base[3] --- base[2]
+ * 	 |						|
+ * base[0] --- base[1] */
+
+int ACT::ShapeTree::splitTexture(int texID, const vector<double>& weights,
+																						Orientation orientation) {
+	TexSplitKey tsk;
+	tsk.texID = texID;
+	tsk.weights = weights;
+	tsk.orientation = orientation;
+
+	if (subTextureLocation.find(tsk) == subTextureLocation.end()) {
+		int res = texCoord.size();
+		double x0 = texCoord[texID].x();
+		double x1 = texCoord[texID+1].x();
+		double y0 = texCoord[texID].y();
+		double y1 = texCoord[texID+2].y();
+
+		double totalWeight = 0;
+		for (unsigned int i = 0 ; i < weights.size() ; i++)
+			totalWeight += weights[i];
+
+		double ratio;
+
+		switch (orientation) {
+			case VERTICAL:
+				ratio = (y1 - y0) / totalWeight;
+				y1 = y0 + weights[0] * ratio;
+				addTextureCoord(x0, y0, x1, y1);
+				for (unsigned int i = 1 ; i < weights.size() ; i++) {
+					y0 = y1;
+					y1 += weights[i] * ratio;
+					addTextureCoord(x0, y0, x1, y1);
+				}
+				break;
+			case HORIZONTAL:
+				ratio = (x1 - x0) / totalWeight;
+				x1 = x0 + weights[0] * ratio;
+				addTextureCoord(x0, y0, x1, y1);
+				for (unsigned int i = 1 ; i < weights.size() ; i++) {
+					x0 = x1;
+					x1 += weights[i] * ratio;
+					addTextureCoord(x0, y0, x1, y1);
+				}
+				break;
+		}
+
+		subTextureLocation.insert(pair<TexSplitKey, int>(tsk, res));
+		return res;
+	}
+
+	else {
+		return subTextureLocation[tsk];
+	}
 }
