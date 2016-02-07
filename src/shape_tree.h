@@ -67,6 +67,7 @@ public:
 	void split(char axis, string pattern);
 	void selectFaces(string expression); // For the moment only [(x|y|z)(pos|neg)] | all
 	void setTexture(string texture);
+	void removeFaces();
 
 	// weights.size() new textures are created, it returns the index to the 1st
 	int splitTexture(int texID, const vector<double>& weights, Orientation orientation);

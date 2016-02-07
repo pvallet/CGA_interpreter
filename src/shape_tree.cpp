@@ -217,6 +217,10 @@ void ACT::ShapeTree::setTexture(string texture) {
 		affectedNode->setTexture(textures[texture]);
 }
 
+void ACT::ShapeTree::removeFaces() {
+	affectedNode = affectedNode->removeFaces();
+}
+
 // base[0] = texCoord[texID]
 
 /* base[3] --- base[2]

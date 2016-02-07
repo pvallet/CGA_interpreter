@@ -51,6 +51,7 @@ public:
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
 	void selectFace(string face); // Only (x|y|z)(pos|neg), otherwise unselect everything
 	void setTexture(int indexFirstCoord);
+	Node* removeFaces();
 
 private:
 

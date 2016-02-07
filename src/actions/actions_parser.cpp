@@ -527,20 +527,20 @@ namespace ACT {
         {
           switch (yyn)
             {
-  case 8:
-#line 69 "actions.y" // lalr1.cc:847
+  case 9:
+#line 71 "actions.y" // lalr1.cc:847
     {st.addToRule(toStr((yystack_[0].value.sval)));}
 #line 534 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 9:
-#line 70 "actions.y" // lalr1.cc:847
+  case 10:
+#line 72 "actions.y" // lalr1.cc:847
     {st.addToRule(toStr((yystack_[1].value.sval)),toStr((yystack_[0].value.sval)));}
 #line 540 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 11:
-#line 75 "actions.y" // lalr1.cc:847
+  case 12:
+#line 77 "actions.y" // lalr1.cc:847
     {char *ss = (char *) malloc (strlen((yystack_[1].value.sval)) + strlen((yystack_[0].value.sval)) + 1);
 											strcpy(ss,(yystack_[1].value.sval)); free((yystack_[1].value.sval));
 											strcat(ss,(yystack_[0].value.sval)); free((yystack_[0].value.sval));
@@ -548,40 +548,46 @@ namespace ACT {
 #line 549 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 12:
-#line 79 "actions.y" // lalr1.cc:847
+  case 13:
+#line 81 "actions.y" // lalr1.cc:847
     {(yylhs.value.sval) = strdup((yystack_[0].value.sval)); free((yystack_[0].value.sval));}
 #line 555 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 13:
-#line 83 "actions.y" // lalr1.cc:847
+  case 14:
+#line 85 "actions.y" // lalr1.cc:847
     {st.extrude((yystack_[1].value.dval));}
 #line 561 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 14:
-#line 88 "actions.y" // lalr1.cc:847
+  case 15:
+#line 90 "actions.y" // lalr1.cc:847
     {	char axis = (yystack_[4].value.sval)[0];
 		 	st.split(axis, toStr((yystack_[2].value.sval)) + toStr((yystack_[1].value.sval)) + toStr((yystack_[0].value.sval)));
 	 	}
 #line 569 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 15:
-#line 94 "actions.y" // lalr1.cc:847
+  case 16:
+#line 96 "actions.y" // lalr1.cc:847
     { st.selectFaces((yystack_[1].value.sval));}
 #line 575 "actions_parser.cpp" // lalr1.cc:847
     break;
 
-  case 16:
-#line 98 "actions.y" // lalr1.cc:847
-    { st.setTexture((yystack_[1].value.sval));}
+  case 17:
+#line 100 "actions.y" // lalr1.cc:847
+    { st.removeFaces();}
 #line 581 "actions_parser.cpp" // lalr1.cc:847
     break;
 
+  case 18:
+#line 104 "actions.y" // lalr1.cc:847
+    { st.setTexture((yystack_[1].value.sval));}
+#line 587 "actions_parser.cpp" // lalr1.cc:847
+    break;
 
-#line 585 "actions_parser.cpp" // lalr1.cc:847
+
+#line 591 "actions_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -743,79 +749,79 @@ namespace ACT {
   }
 
 
-  const signed char ACT_Parser::yypact_ninf_ = -15;
+  const signed char ACT_Parser::yypact_ninf_ = -16;
 
   const signed char ACT_Parser::yytable_ninf_ = -1;
 
   const signed char
   ACT_Parser::yypact_[] =
   {
-       8,   -14,   -13,   -11,   -10,    -3,   -15,     0,   -15,   -15,
-     -15,   -15,   -15,    13,    16,    19,    20,   -15,   -15,   -15,
-       9,    10,    11,    12,   -15,    14,   -15,   -15,    25,   -15,
-      -1,   -15,   -15
+       9,   -15,   -14,   -12,   -11,    -4,     5,   -16,     0,   -16,
+     -16,   -16,   -16,   -16,   -16,    16,    21,    22,    23,    10,
+     -16,   -16,   -16,    11,    12,    13,    14,   -16,   -16,    24,
+     -16,   -16,    28,   -16,    -1,   -16,   -16
   };
 
   const unsigned char
   ACT_Parser::yydefact_[] =
   {
-       0,     0,     0,     0,     0,     8,    10,     0,     3,     4,
-       5,     7,     6,     0,     0,     0,     0,     9,     1,     2,
-       0,     0,     0,     0,    13,     0,    15,    16,     0,    12,
-       0,    11,    14
+       0,     0,     0,     0,     0,     0,     9,    11,     0,     3,
+       4,     5,     7,     8,     6,     0,     0,     0,     0,     0,
+      10,     1,     2,     0,     0,     0,     0,    17,    14,     0,
+      16,    18,     0,    13,     0,    12,    15
   };
 
   const signed char
   ACT_Parser::yypgoto_[] =
   {
-     -15,   -15,    23,   -15,   -15,   -15,   -15,   -15
+     -16,   -16,    25,   -16,   -16,   -16,   -16,   -16,   -16
   };
 
   const signed char
   ACT_Parser::yydefgoto_[] =
   {
-      -1,     7,     8,    30,     9,    10,    11,    12
+      -1,     8,     9,    34,    10,    11,    12,    13,    14
   };
 
   const unsigned char
   ACT_Parser::yytable_[] =
   {
-      18,    13,    14,    31,    15,    16,     1,     2,     3,     4,
-      32,    17,     5,     6,     1,     2,     3,     4,    20,    21,
-       5,     6,    22,    23,    28,    24,    25,    26,    27,    29,
-      19
+      21,    15,    16,    35,    17,    18,     1,     2,     3,     4,
+       5,    36,    19,     6,     7,     1,     2,     3,     4,     5,
+      20,    23,     6,     7,    24,    25,    26,    27,    28,    29,
+      30,    31,    33,    22,     0,    32
   };
 
-  const unsigned char
+  const signed char
   ACT_Parser::yycheck_[] =
   {
-       0,    15,    15,     4,    15,    15,     6,     7,     8,     9,
-      11,    14,    12,    13,     6,     7,     8,     9,     5,     3,
-      12,    13,     3,     3,    10,    16,    16,    16,    16,     4,
-       7
+       0,    16,    16,     4,    16,    16,     6,     7,     8,     9,
+      10,    12,    16,    13,    14,     6,     7,     8,     9,    10,
+      15,     5,    13,    14,     3,     3,     3,    17,    17,    17,
+      17,    17,     4,     8,    -1,    11
   };
 
   const unsigned char
   ACT_Parser::yystos_[] =
   {
-       0,     6,     7,     8,     9,    12,    13,    18,    19,    21,
-      22,    23,    24,    15,    15,    15,    15,    14,     0,    19,
-       5,     3,     3,     3,    16,    16,    16,    16,    10,     4,
-      20,     4,    11
+       0,     6,     7,     8,     9,    10,    13,    14,    19,    20,
+      22,    23,    24,    25,    26,    16,    16,    16,    16,    16,
+      15,     0,    20,     5,     3,     3,     3,    17,    17,    17,
+      17,    17,    11,     4,    21,     4,    12
   };
 
   const unsigned char
   ACT_Parser::yyr1_[] =
   {
-       0,    17,    18,    18,    19,    19,    19,    19,    19,    19,
-      19,    20,    20,    21,    22,    23,    24
+       0,    18,    19,    19,    20,    20,    20,    20,    20,    20,
+      20,    20,    21,    21,    22,    23,    24,    25,    26
   };
 
   const unsigned char
   ACT_Parser::yyr2_[] =
   {
-       0,     2,     2,     1,     1,     1,     1,     1,     1,     2,
-       1,     2,     1,     4,     7,     4,     4
+       0,     2,     2,     1,     1,     1,     1,     1,     1,     1,
+       2,     1,     2,     1,     4,     7,     4,     3,     4
   };
 
 
@@ -826,17 +832,18 @@ namespace ACT {
   const ACT_Parser::yytname_[] =
   {
   "$end", "error", "$undefined", "STRING", "CODE", "DOUBLE", "EXTRUDE",
-  "SPLIT", "SELECT_FACES", "SET_TEXTURE", "BEG_PTRN", "END_PTRN", "RULE",
-  "DEADRULE", "ACTIONS", "'('", "')'", "$accept", "actions", "action",
-  "code", "extrude", "split", "selectFaces", "setTexture", YY_NULLPTR
+  "SPLIT", "SELECT_FACES", "SET_TEXTURE", "REMOVE_FACES", "BEG_PTRN",
+  "END_PTRN", "RULE", "DEADRULE", "ACTIONS", "'('", "')'", "$accept",
+  "actions", "action", "code", "extrude", "split", "selectFaces",
+  "removeFaces", "setTexture", YY_NULLPTR
   };
 
 
   const unsigned char
   ACT_Parser::yyrline_[] =
   {
-       0,    60,    60,    61,    65,    66,    67,    68,    69,    70,
-      71,    75,    79,    83,    87,    94,    98
+       0,    61,    61,    62,    66,    67,    68,    69,    70,    71,
+      72,    73,    77,    81,    85,    89,    96,   100,   104
   };
 
   // Print the state stack on the debug stream.
@@ -881,7 +888,7 @@ namespace ACT {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      15,    16,     2,     2,     2,     2,     2,     2,     2,     2,
+      16,    17,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -903,9 +910,10 @@ namespace ACT {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15
     };
-    const unsigned int user_token_number_max_ = 269;
+    const unsigned int user_token_number_max_ = 270;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -918,8 +926,8 @@ namespace ACT {
 
 #line 5 "actions.y" // lalr1.cc:1155
 } // ACT
-#line 922 "actions_parser.cpp" // lalr1.cc:1155
-#line 101 "actions.y" // lalr1.cc:1156
+#line 930 "actions_parser.cpp" // lalr1.cc:1155
+#line 107 "actions.y" // lalr1.cc:1156
 
 
 void ACT::ACT_Parser::error( const std::string &err_message ) {

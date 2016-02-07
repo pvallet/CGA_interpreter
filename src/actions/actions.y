@@ -46,6 +46,7 @@ std::string toStr(char* ptr);
 %token				SPLIT
 %token				SELECT_FACES
 %token				SET_TEXTURE
+%token				REMOVE_FACES
 %token <sval> BEG_PTRN
 %token <sval> END_PTRN
 %token <sval> RULE
@@ -66,6 +67,7 @@ action:
 	| split
 	| setTexture
 	| selectFaces
+	| removeFaces
 	| RULE						{st.addToRule(toStr($1));}
 	| RULE ACTIONS		{st.addToRule(toStr($1),toStr($2));}
 	| DEADRULE
@@ -92,6 +94,10 @@ split:
 
 selectFaces:
 	SELECT_FACES '(' STRING ')' { st.selectFaces($3);}
+	;
+
+removeFaces:
+	REMOVE_FACES '(' ')' { st.removeFaces();}
 	;
 
 setTexture:

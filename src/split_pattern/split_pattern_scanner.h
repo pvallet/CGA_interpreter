@@ -4,7 +4,6 @@
 #define yyFlexLexer spFlexLexer
 #include <FlexLexer.h>
 
-
 #include "split_pattern_parser.h"
 
 namespace SP {

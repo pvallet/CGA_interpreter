@@ -24,7 +24,7 @@ int main() {
   Rule* WithoutBalc = new Rule("WithoutBalc", "selectFaces(\"z\") setTexture(\"withoutbalc\")");
   Rule* WithBalc = new Rule("WithBalc", "selectFaces(\"z\") setTexture(\"withbalc\") split(\"x\") {~56:Trash | ~200:Balcony | ~200:Balcony | ~56:Trash}");
   Rule* Balcony = new Rule("Balcony", "split(\"y\") {~90: selectFaces(\"z\") extrude(0.15) TextureBalc | ~100:Trash}");
-  Rule* TextureBalc = new Rule("TextureBalc", "selectFaces(\"z\") setTexture(\"longbalc\") selectFaces(\"\") selectFaces(\"x\") setTexture(\"shortbalc\")");
+  Rule* TextureBalc = new Rule("TextureBalc", "selectFaces(\"z\") setTexture(\"longbalc\") selectFaces(\"\") selectFaces(\"x\") setTexture(\"shortbalc\") selectFaces(\"\") selectFaces(\"ypos\") removeFaces()");
 
   shapeTree.addRule(GlobalShape);
   shapeTree.addRule(ColumnA);

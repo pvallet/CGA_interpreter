@@ -574,6 +574,45 @@ void Node::setTexture(int indexFirstCoord) {
 	}
 }
 
+Node* Node::removeFaces() {
+	Mesh nShape;
+	Mesh::Vertex_range::iterator v, v_end;
+	for (boost::tie(v,v_end) = shape.vertices(); v != v_end ; v++) {
+		nShape.add_vertex(shape.point(*v));
+	}
+
+	map<face_descriptor, int> nITexCoord;
+
+	Mesh::Face_range::iterator f, f_end;
+	for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+		// Copy only unselected faces
+		bool copyFace = true;
+		for (auto it = selectedFaces.begin() ; it != selectedFaces.end() ; it++) {
+			if (*it == *f)
+				copyFace = false;
+		}
+
+		if (copyFace) {
+			vector<vertex_descriptor> iPrevShape;
+			CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+
+			for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+					v != v_end; v++){
+				iPrevShape.push_back(*v);
+			}
+			face_descriptor nf = nShape.add_face(iPrevShape[0], iPrevShape[1],
+																					 iPrevShape[2], iPrevShape[3]);
+			nITexCoord.insert(pair<face_descriptor, int>(nf, iTexCoord[*f]));
+		}
+	}
+
+	Node* rm = new Node(shapeTree, this, true);
+	rm->setShape(nShape);
+	rm->setITexCoord(nITexCoord);
+	addChild(rm);
+	return rm;
+}
+
 Node::~Node() {
 	for (auto it = children.begin() ; it != children.end() ; it++) {
 		delete *it;
