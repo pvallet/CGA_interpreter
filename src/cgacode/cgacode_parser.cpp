@@ -31,11 +31,11 @@
 // version 2.2 of Bison.
 
 // Take the name prefix into account.
-#define yylex   actlex
+#define yylex   cclex
 
 // First part of user declarations.
 
-#line 39 "actions_parser.cpp" // lalr1.cc:399
+#line 39 "cgacode_parser.cpp" // lalr1.cc:399
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -45,29 +45,29 @@
 #  endif
 # endif
 
-#include "actions_parser.h"
+#include "cgacode_parser.h"
 
 // User implementation prologue.
 
-#line 53 "actions_parser.cpp" // lalr1.cc:407
+#line 53 "cgacode_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
-#line 18 "actions.y" // lalr1.cc:408
+#line 18 "cgacode.y" // lalr1.cc:408
 
   #include <iostream>
   #include <cstdlib>
   #include <fstream>
-	#include <string>
 
-	#include "../shape_tree.h"
+	#include "cgacode_driver.h"
 
 #undef yylex
-#define yylex scanner.actlex
+#define yylex scanner.cclex
 
-	namespace ACT {
+	namespace CC {
+		extern int line_num;
 		std::string toStr(char* ptr);
 	}
 
-#line 71 "actions_parser.cpp" // lalr1.cc:408
+#line 71 "cgacode_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -88,7 +88,7 @@
 #define YYUSE(E) ((void) (E))
 
 // Enable debugging if requested.
-#if ACTDEBUG
+#if CCDEBUG
 
 // A pseudo ostream that takes yydebug_ into account.
 # define YYCDEBUG if (yydebug_) (*yycdebug_)
@@ -115,14 +115,14 @@
       yystack_print_ ();                \
   } while (false)
 
-#else // !ACTDEBUG
+#else // !CCDEBUG
 
 # define YYCDEBUG if (false) std::cerr
 # define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE(Symbol)
 # define YY_REDUCE_PRINT(Rule)           static_cast<void>(0)
 # define YY_STACK_PRINT()                static_cast<void>(0)
 
-#endif // !ACTDEBUG
+#endif // !CCDEBUG
 
 #define yyerrok         (yyerrstatus_ = 0)
 #define yyclearin       (yyempty = true)
@@ -132,22 +132,22 @@
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 5 "actions.y" // lalr1.cc:474
-namespace ACT {
-#line 138 "actions_parser.cpp" // lalr1.cc:474
+#line 5 "cgacode.y" // lalr1.cc:474
+namespace CC {
+#line 138 "cgacode_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
-  ACT_Parser::ACT_Parser (ACT_Scanner  &scanner_yyarg, ShapeTree &st_yyarg)
+  CC_Parser::CC_Parser (CC_Scanner  &scanner_yyarg, CC_Driver   &driver_yyarg)
     :
-#if ACTDEBUG
+#if CCDEBUG
       yydebug_ (false),
       yycdebug_ (&std::cerr),
 #endif
       scanner (scanner_yyarg),
-      st (st_yyarg)
+      driver (driver_yyarg)
   {}
 
-  ACT_Parser::~ACT_Parser ()
+  CC_Parser::~CC_Parser ()
   {}
 
 
@@ -156,20 +156,20 @@ namespace ACT {
   `---------------*/
 
   inline
-  ACT_Parser::syntax_error::syntax_error (const std::string& m)
+  CC_Parser::syntax_error::syntax_error (const std::string& m)
     : std::runtime_error (m)
   {}
 
   // basic_symbol.
   template <typename Base>
   inline
-  ACT_Parser::basic_symbol<Base>::basic_symbol ()
+  CC_Parser::basic_symbol<Base>::basic_symbol ()
     : value ()
   {}
 
   template <typename Base>
   inline
-  ACT_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+  CC_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
     : Base (other)
     , value ()
   {
@@ -179,7 +179,7 @@ namespace ACT {
 
   template <typename Base>
   inline
-  ACT_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
+  CC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v)
     : Base (t)
     , value (v)
   {}
@@ -188,21 +188,21 @@ namespace ACT {
   /// Constructor for valueless symbols.
   template <typename Base>
   inline
-  ACT_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
+  CC_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t)
     : Base (t)
     , value ()
   {}
 
   template <typename Base>
   inline
-  ACT_Parser::basic_symbol<Base>::~basic_symbol ()
+  CC_Parser::basic_symbol<Base>::~basic_symbol ()
   {
   }
 
   template <typename Base>
   inline
   void
-  ACT_Parser::basic_symbol<Base>::move (basic_symbol& s)
+  CC_Parser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move(s);
     value = s.value;
@@ -210,23 +210,23 @@ namespace ACT {
 
   // by_type.
   inline
-  ACT_Parser::by_type::by_type ()
+  CC_Parser::by_type::by_type ()
      : type (empty)
   {}
 
   inline
-  ACT_Parser::by_type::by_type (const by_type& other)
+  CC_Parser::by_type::by_type (const by_type& other)
     : type (other.type)
   {}
 
   inline
-  ACT_Parser::by_type::by_type (token_type t)
+  CC_Parser::by_type::by_type (token_type t)
     : type (yytranslate_ (t))
   {}
 
   inline
   void
-  ACT_Parser::by_type::move (by_type& that)
+  CC_Parser::by_type::move (by_type& that)
   {
     type = that.type;
     that.type = empty;
@@ -234,7 +234,7 @@ namespace ACT {
 
   inline
   int
-  ACT_Parser::by_type::type_get () const
+  CC_Parser::by_type::type_get () const
   {
     return type;
   }
@@ -242,42 +242,42 @@ namespace ACT {
 
   // by_state.
   inline
-  ACT_Parser::by_state::by_state ()
+  CC_Parser::by_state::by_state ()
     : state (empty)
   {}
 
   inline
-  ACT_Parser::by_state::by_state (const by_state& other)
+  CC_Parser::by_state::by_state (const by_state& other)
     : state (other.state)
   {}
 
   inline
   void
-  ACT_Parser::by_state::move (by_state& that)
+  CC_Parser::by_state::move (by_state& that)
   {
     state = that.state;
     that.state = empty;
   }
 
   inline
-  ACT_Parser::by_state::by_state (state_type s)
+  CC_Parser::by_state::by_state (state_type s)
     : state (s)
   {}
 
   inline
-  ACT_Parser::symbol_number_type
-  ACT_Parser::by_state::type_get () const
+  CC_Parser::symbol_number_type
+  CC_Parser::by_state::type_get () const
   {
     return state == empty ? 0 : yystos_[state];
   }
 
   inline
-  ACT_Parser::stack_symbol_type::stack_symbol_type ()
+  CC_Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
 
   inline
-  ACT_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
+  CC_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
     : super_type (s)
   {
     value = that.value;
@@ -286,8 +286,8 @@ namespace ACT {
   }
 
   inline
-  ACT_Parser::stack_symbol_type&
-  ACT_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
+  CC_Parser::stack_symbol_type&
+  CC_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
     value = that.value;
@@ -298,7 +298,7 @@ namespace ACT {
   template <typename Base>
   inline
   void
-  ACT_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  CC_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
@@ -307,10 +307,10 @@ namespace ACT {
     YYUSE (yysym.type_get ());
   }
 
-#if ACTDEBUG
+#if CCDEBUG
   template <typename Base>
   void
-  ACT_Parser::yy_print_ (std::ostream& yyo,
+  CC_Parser::yy_print_ (std::ostream& yyo,
                                      const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
@@ -325,7 +325,7 @@ namespace ACT {
 
   inline
   void
-  ACT_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
+  CC_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
   {
     stack_symbol_type t (s, sym);
     yypush_ (m, t);
@@ -333,7 +333,7 @@ namespace ACT {
 
   inline
   void
-  ACT_Parser::yypush_ (const char* m, stack_symbol_type& s)
+  CC_Parser::yypush_ (const char* m, stack_symbol_type& s)
   {
     if (m)
       YY_SYMBOL_PRINT (m, s);
@@ -342,40 +342,40 @@ namespace ACT {
 
   inline
   void
-  ACT_Parser::yypop_ (unsigned int n)
+  CC_Parser::yypop_ (unsigned int n)
   {
     yystack_.pop (n);
   }
 
-#if ACTDEBUG
+#if CCDEBUG
   std::ostream&
-  ACT_Parser::debug_stream () const
+  CC_Parser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-  ACT_Parser::set_debug_stream (std::ostream& o)
+  CC_Parser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-  ACT_Parser::debug_level_type
-  ACT_Parser::debug_level () const
+  CC_Parser::debug_level_type
+  CC_Parser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-  ACT_Parser::set_debug_level (debug_level_type l)
+  CC_Parser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
-#endif // ACTDEBUG
+#endif // CCDEBUG
 
-  inline ACT_Parser::state_type
-  ACT_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
+  inline CC_Parser::state_type
+  CC_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - yyntokens_] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
@@ -385,19 +385,19 @@ namespace ACT {
   }
 
   inline bool
-  ACT_Parser::yy_pact_value_is_default_ (int yyvalue)
+  CC_Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
   inline bool
-  ACT_Parser::yy_table_value_is_error_ (int yyvalue)
+  CC_Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-  ACT_Parser::parse ()
+  CC_Parser::parse ()
   {
     /// Whether yyla contains a lookahead.
     bool yyempty = true;
@@ -528,67 +528,38 @@ namespace ACT {
         {
           switch (yyn)
             {
-  case 9:
-#line 72 "actions.y" // lalr1.cc:847
-    {st.addToRule(toStr((yystack_[0].value.sval)));}
-#line 535 "actions_parser.cpp" // lalr1.cc:847
+  case 5:
+#line 67 "cgacode.y" // lalr1.cc:847
+    {driver.initFromFile(toStr((yystack_[0].value.sval)));}
+#line 535 "cgacode_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 6:
+#line 68 "cgacode.y" // lalr1.cc:847
+    {driver.setTextureFile(toStr((yystack_[0].value.sval)));}
+#line 541 "cgacode_parser.cpp" // lalr1.cc:847
+    break;
+
+  case 7:
+#line 70 "cgacode.y" // lalr1.cc:847
+    {driver.addTextureRect(toStr((yystack_[4].value.sval)), (yystack_[3].value.fval), (yystack_[2].value.fval), (yystack_[1].value.fval), (yystack_[0].value.fval));}
+#line 547 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
-#line 73 "actions.y" // lalr1.cc:847
-    {st.addToRule(toStr((yystack_[1].value.sval)),toStr((yystack_[0].value.sval)));}
-#line 541 "actions_parser.cpp" // lalr1.cc:847
+#line 79 "cgacode.y" // lalr1.cc:847
+    {driver.addRule(toStr((yystack_[3].value.sval)), (yystack_[2].value.fval), toStr((yystack_[0].value.sval)));}
+#line 553 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
-  case 12:
-#line 78 "actions.y" // lalr1.cc:847
-    {char *ss = (char *) malloc (strlen((yystack_[1].value.sval)) + strlen((yystack_[0].value.sval)) + 1);
-											strcpy(ss,(yystack_[1].value.sval)); free((yystack_[1].value.sval));
-											strcat(ss,(yystack_[0].value.sval)); free((yystack_[0].value.sval));
-											(yylhs.value.sval) = ss; }
-#line 550 "actions_parser.cpp" // lalr1.cc:847
-    break;
-
-  case 13:
-#line 82 "actions.y" // lalr1.cc:847
-    {(yylhs.value.sval) = strdup((yystack_[0].value.sval)); free((yystack_[0].value.sval));}
-#line 556 "actions_parser.cpp" // lalr1.cc:847
-    break;
-
-  case 14:
-#line 86 "actions.y" // lalr1.cc:847
-    {st.extrude((yystack_[1].value.dval));}
-#line 562 "actions_parser.cpp" // lalr1.cc:847
-    break;
-
-  case 15:
-#line 91 "actions.y" // lalr1.cc:847
-    {	char axis = (yystack_[4].value.sval)[0];
-		 	st.split(axis, toStr((yystack_[2].value.sval)) + toStr((yystack_[1].value.sval)) + toStr((yystack_[0].value.sval)));
-	 	}
-#line 570 "actions_parser.cpp" // lalr1.cc:847
-    break;
-
-  case 16:
-#line 97 "actions.y" // lalr1.cc:847
-    { st.selectFaces((yystack_[1].value.sval));}
-#line 576 "actions_parser.cpp" // lalr1.cc:847
-    break;
-
-  case 17:
-#line 101 "actions.y" // lalr1.cc:847
-    { st.removeFaces();}
-#line 582 "actions_parser.cpp" // lalr1.cc:847
-    break;
-
-  case 18:
-#line 105 "actions.y" // lalr1.cc:847
-    { st.setTexture((yystack_[1].value.sval));}
-#line 588 "actions_parser.cpp" // lalr1.cc:847
+  case 11:
+#line 80 "cgacode.y" // lalr1.cc:847
+    {driver.addRule(toStr((yystack_[2].value.sval)), 1, toStr((yystack_[0].value.sval)));}
+#line 559 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 592 "actions_parser.cpp" // lalr1.cc:847
+#line 563 "cgacode_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -737,119 +708,113 @@ namespace ACT {
   }
 
   void
-  ACT_Parser::error (const syntax_error& yyexc)
+  CC_Parser::error (const syntax_error& yyexc)
   {
     error (yyexc.what());
   }
 
   // Generate an error message.
   std::string
-  ACT_Parser::yysyntax_error_ (state_type, symbol_number_type) const
+  CC_Parser::yysyntax_error_ (state_type, symbol_number_type) const
   {
     return YY_("syntax error");
   }
 
 
-  const signed char ACT_Parser::yypact_ninf_ = -16;
+  const signed char CC_Parser::yypact_ninf_ = -4;
 
-  const signed char ACT_Parser::yytable_ninf_ = -1;
+  const signed char CC_Parser::yytable_ninf_ = -1;
 
   const signed char
-  ACT_Parser::yypact_[] =
+  CC_Parser::yypact_[] =
   {
-       9,   -15,   -14,   -12,   -11,    -4,     5,   -16,     0,   -16,
-     -16,   -16,   -16,   -16,   -16,    16,    21,    22,    23,    10,
-     -16,   -16,   -16,    11,    12,    13,    14,   -16,   -16,    24,
-     -16,   -16,    28,   -16,    -1,   -16,   -16
+       1,    -2,     0,     2,    10,    -3,    -4,    -4,    -4,     3,
+      -4,     5,    -4,     4,    -1,     5,    -4,     6,     8,     9,
+      -4,    11,    12,    -4,    -4,    -4
   };
 
   const unsigned char
-  ACT_Parser::yydefact_[] =
+  CC_Parser::yydefact_[] =
   {
-       0,     0,     0,     0,     0,     0,     9,    11,     0,     3,
-       4,     5,     7,     8,     6,     0,     0,     0,     0,     0,
-      10,     1,     2,     0,     0,     0,     0,    17,    14,     0,
-      16,    18,     0,    13,     0,    12,    15
+       0,     0,     0,     0,     0,     0,     4,     5,     6,     0,
+       1,     0,     3,     0,     0,     2,     9,     0,     0,     0,
+       8,     0,     0,    11,     7,    10
   };
 
   const signed char
-  ACT_Parser::yypgoto_[] =
+  CC_Parser::yypgoto_[] =
   {
-     -16,   -16,    25,   -16,   -16,   -16,   -16,   -16,   -16
+      -4,    -4,    -4,    15,    -4,    13
   };
 
   const signed char
-  ACT_Parser::yydefgoto_[] =
+  CC_Parser::yydefgoto_[] =
   {
-      -1,     8,     9,    34,    10,    11,    12,    13,    14
+      -1,     4,     5,     6,    15,    16
   };
 
   const unsigned char
-  ACT_Parser::yytable_[] =
+  CC_Parser::yytable_[] =
   {
-      21,    15,    16,    35,    17,    18,     1,     2,     3,     4,
-       5,    36,    19,     6,     7,     1,     2,     3,     4,     5,
-      20,    23,     6,     7,    24,    25,    26,    27,    28,    29,
-      30,    31,    33,    22,     0,    32
+       1,     2,     3,    11,     1,     2,     3,    18,    19,     7,
+      10,     8,    14,     9,     0,    13,    17,    22,    21,    23,
+      12,     0,    25,    24,     0,     0,     0,     0,    20
   };
 
   const signed char
-  ACT_Parser::yycheck_[] =
+  CC_Parser::yycheck_[] =
   {
-       0,    16,    16,     4,    16,    16,     6,     7,     8,     9,
-      10,    12,    16,    13,    14,     6,     7,     8,     9,    10,
-      15,     5,    13,    14,     3,     3,     3,    17,    17,    17,
-      17,    17,     4,     8,    -1,    11
+       3,     4,     5,     6,     3,     4,     5,     8,     9,    11,
+       0,    11,     7,    11,    -1,    12,    12,     9,    12,    10,
+       5,    -1,    10,    12,    -1,    -1,    -1,    -1,    15
   };
 
   const unsigned char
-  ACT_Parser::yystos_[] =
+  CC_Parser::yystos_[] =
   {
-       0,     6,     7,     8,     9,    10,    13,    14,    19,    20,
-      22,    23,    24,    25,    26,    16,    16,    16,    16,    16,
-      15,     0,    20,     5,     3,     3,     3,    17,    17,    17,
-      17,    17,    11,     4,    21,     4,    12
+       0,     3,     4,     5,    14,    15,    16,    11,    11,    11,
+       0,     6,    16,    12,     7,    17,    18,    12,     8,     9,
+      18,    12,     9,    10,    12,    10
   };
 
   const unsigned char
-  ACT_Parser::yyr1_[] =
+  CC_Parser::yyr1_[] =
   {
-       0,    18,    19,    19,    20,    20,    20,    20,    20,    20,
-      20,    20,    21,    21,    22,    23,    24,    25,    26
+       0,    13,    14,    15,    15,    16,    16,    16,    17,    17,
+      18,    18
   };
 
   const unsigned char
-  ACT_Parser::yyr2_[] =
+  CC_Parser::yyr2_[] =
   {
-       0,     2,     2,     1,     1,     1,     1,     1,     1,     1,
-       2,     1,     2,     1,     4,     7,     4,     3,     4
+       0,     2,     3,     2,     1,     2,     2,     6,     2,     1,
+       4,     3
   };
 
 
-#if ACTDEBUG
+#if CCDEBUG
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
-  const ACT_Parser::yytname_[] =
+  const CC_Parser::yytname_[] =
   {
-  "$end", "error", "$undefined", "STRING", "CODE", "DOUBLE", "EXTRUDE",
-  "SPLIT", "SELECT_FACES", "SET_TEXTURE", "REMOVE_FACES", "BEG_PTRN",
-  "END_PTRN", "RULE", "DEADRULE", "ACTIONS", "'('", "')'", "$accept",
-  "actions", "action", "code", "extrude", "split", "selectFaces",
-  "removeFaces", "setTexture", YY_NULLPTR
+  "$end", "error", "$undefined", "INIT_FROM_FILE", "SET_TEXTURE_FILE",
+  "ADD_TEXTURE_RECT", "SEPARATOR", "RULE_NAME", "WEIGHT", "RULE",
+  "RULE_BODY", "STRING", "DOUBLE", "$accept", "skeleton", "commands",
+  "command", "rules", "rule", YY_NULLPTR
   };
 
 
   const unsigned char
-  ACT_Parser::yyrline_[] =
+  CC_Parser::yyrline_[] =
   {
-       0,    62,    62,    63,    67,    68,    69,    70,    71,    72,
-      73,    74,    78,    82,    86,    90,    97,   101,   105
+       0,    58,    58,    62,    63,    67,    68,    69,    74,    75,
+      79,    80
   };
 
   // Print the state stack on the debug stream.
   void
-  ACT_Parser::yystack_print_ ()
+  CC_Parser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
@@ -862,7 +827,7 @@ namespace ACT {
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  ACT_Parser::yy_reduce_print_ (int yyrule)
+  CC_Parser::yy_reduce_print_ (int yyrule)
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -874,12 +839,12 @@ namespace ACT {
       YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
                        yystack_[(yynrhs) - (yyi + 1)]);
   }
-#endif // ACTDEBUG
+#endif // CCDEBUG
 
   // Symbol number corresponding to token number t.
   inline
-  ACT_Parser::token_number_type
-  ACT_Parser::yytranslate_ (int t)
+  CC_Parser::token_number_type
+  CC_Parser::yytranslate_ (int t)
   {
     static
     const token_number_type
@@ -889,7 +854,7 @@ namespace ACT {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      16,    17,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -911,10 +876,9 @@ namespace ACT {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15
+       5,     6,     7,     8,     9,    10,    11,    12
     };
-    const unsigned int user_token_number_max_ = 270;
+    const unsigned int user_token_number_max_ = 267;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -925,17 +889,17 @@ namespace ACT {
       return undef_token_;
   }
 
-#line 5 "actions.y" // lalr1.cc:1155
-} // ACT
-#line 931 "actions_parser.cpp" // lalr1.cc:1155
-#line 108 "actions.y" // lalr1.cc:1156
+#line 5 "cgacode.y" // lalr1.cc:1155
+} // CC
+#line 895 "cgacode_parser.cpp" // lalr1.cc:1155
+#line 83 "cgacode.y" // lalr1.cc:1156
 
 
-void ACT::ACT_Parser::error( const std::string &err_message ) {
-   std::cerr << "Actions: Error: " << err_message << "\n";
+void CC::CC_Parser::error( const std::string &err_message ) {
+   std::cerr << "CGA Code : error: " << err_message << " Line: " << CC::line_num << "\n";
 }
 
-std::string ACT::toStr(char* ptr) {
+std::string CC::toStr(char* ptr) {
   std::string ret = (ptr != NULL) ? std::string(ptr, (strlen(ptr))) : std::string("");
   delete[] ptr; // Delete memory allocated by lexer.
   return ret;

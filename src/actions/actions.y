@@ -16,18 +16,19 @@
 %parse-param { ShapeTree &st }
 
 %code{
-   #include <iostream>
-   #include <cstdlib>
-   #include <fstream>
-	 #include <string>
+  #include <iostream>
+  #include <cstdlib>
+  #include <fstream>
+	#include <string>
 
-	 #include "../shape_tree.h"
+	#include "../shape_tree.h"
 
 #undef yylex
 #define yylex scanner.actlex
 
-extern int line_num;
-std::string toStr(char* ptr);
+	namespace ACT {
+		std::string toStr(char* ptr);
+	}
 }
 
 %define api.prefix {act}
@@ -107,10 +108,10 @@ setTexture:
 %%
 
 void ACT::ACT_Parser::error( const std::string &err_message ) {
-   std::cerr << "Actions: Error: " << err_message << " Line: " << line_num << "\n";
+   std::cerr << "Actions: Error: " << err_message << "\n";
 }
 
-std::string toStr(char* ptr) {
+std::string ACT::toStr(char* ptr) {
   std::string ret = (ptr != NULL) ? std::string(ptr, (strlen(ptr))) : std::string("");
   delete[] ptr; // Delete memory allocated by lexer.
   return ret;

@@ -62,9 +62,7 @@
 #undef yylex
 #define yylex scanner.splex
 
-extern int line_num;
-
-#line 68 "split_pattern_parser.cpp" // lalr1.cc:408
+#line 66 "split_pattern_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -131,7 +129,7 @@ extern int line_num;
 
 #line 5 "split_pattern.y" // lalr1.cc:474
 namespace SP {
-#line 135 "split_pattern_parser.cpp" // lalr1.cc:474
+#line 133 "split_pattern_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
   SP_Parser::SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver   &driver_yyarg)
@@ -526,30 +524,30 @@ namespace SP {
           switch (yyn)
             {
   case 2:
-#line 48 "split_pattern.y" // lalr1.cc:847
+#line 46 "split_pattern.y" // lalr1.cc:847
     {driver.wasConstScope();}
-#line 532 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 530 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 3:
-#line 49 "split_pattern.y" // lalr1.cc:847
+#line 47 "split_pattern.y" // lalr1.cc:847
     {driver.exitSubScope();}
-#line 538 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 536 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 4:
-#line 53 "split_pattern.y" // lalr1.cc:847
+#line 51 "split_pattern.y" // lalr1.cc:847
     {
 			Elmt* elmt = new Elmt();
 			elmt->type = SCOPE;
 			driver.addElement(elmt);
 			driver.enterSubScope();
 		}
-#line 549 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 547 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 9:
-#line 69 "split_pattern.y" // lalr1.cc:847
+#line 67 "split_pattern.y" // lalr1.cc:847
     {
 		Elmt* elmt = new Elmt();
 		elmt->type = RELWGHT;
@@ -557,11 +555,11 @@ namespace SP {
 		elmt->actions = std::string((yystack_[0].value.sval));
 		driver.addElement(elmt);
 	}
-#line 561 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 559 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
-#line 77 "split_pattern.y" // lalr1.cc:847
+#line 75 "split_pattern.y" // lalr1.cc:847
     {
 		Elmt* elmt = new Elmt();
 		elmt->type = ABSWGHT;
@@ -569,11 +567,11 @@ namespace SP {
 		elmt->actions = std::string((yystack_[0].value.sval));
 		driver.addElement(elmt);
 	}
-#line 573 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 571 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 577 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 575 "split_pattern_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -816,8 +814,8 @@ namespace SP {
   const unsigned char
   SP_Parser::yyrline_[] =
   {
-       0,    48,    48,    49,    53,    53,    63,    64,    68,    69,
-      77,    87
+       0,    46,    46,    47,    51,    51,    61,    62,    66,    67,
+      75,    85
   };
 
   // Print the state stack on the debug stream.
@@ -899,10 +897,10 @@ namespace SP {
 
 #line 5 "split_pattern.y" // lalr1.cc:1155
 } // SP
-#line 903 "split_pattern_parser.cpp" // lalr1.cc:1155
-#line 90 "split_pattern.y" // lalr1.cc:1156
+#line 901 "split_pattern_parser.cpp" // lalr1.cc:1155
+#line 88 "split_pattern.y" // lalr1.cc:1156
 
 
 void SP::SP_Parser::error( const std::string &err_message ) {
-   std::cerr << "Split pattern : error: " << err_message << " Line: " << line_num << "\n";
+   std::cerr << "Split pattern : error: " << err_message << std::endl;
 }

@@ -12,19 +12,23 @@ class Node;
 
 class Rule {
 public:
-  Rule (string _name, string _actions);
+  Rule (string _name);
   virtual ~Rule ();
 
+  void addAction(string action, double weight);
   void addNode(Node* node, const string& actions = string());
   inline const string& getName() {return name;}
   inline const list<Node*>& getNodes() const {return affectedNodes;}
-  inline string getActions(Node* node) const {return actions + additionalActions.at(node);}
+  string getActions(Node* node) const; // Chose action at random according to the weights
 
 private:
   string name;
   list<Node*> affectedNodes;
   map<Node*,string> additionalActions;
-  string actions;
+  vector<string> actions;
+  vector<double> weights;
+
+  double totalWeight;
 };
 
 // This list is to be generated and then sent to the action lexer to identify rules

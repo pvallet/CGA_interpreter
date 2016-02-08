@@ -10,7 +10,6 @@
   #define YY_NO_UNISTD_H
   int param_count = 0;
   int pattern_count = 0;
-  int lineNum = 1;
 %}
 
 %option prefix="act"
@@ -26,7 +25,7 @@
 
 %%
 
-[ \r\t]*				;
+[ \r\t\n]*			;
 \(              { param_count = 1; BEGIN(PARAM); return '(';}
 <PARAM>\(       { param_count++; return '('; }
 <PARAM>\)       { param_count--;
@@ -64,6 +63,5 @@ removeFaces     { return token::REMOVE_FACES; }
                   else return token::DEADRULE;
                 }
 <REMAINING>.*   { yylval->sval = strdup(yytext); return token::ACTIONS;}
-\n              { lineNum++; }
 
 %%

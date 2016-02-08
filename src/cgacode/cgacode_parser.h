@@ -31,23 +31,23 @@
 // version 2.2 of Bison.
 
 /**
- ** \file actions_parser.h
- ** Define the ACT::parser class.
+ ** \file cgacode_parser.h
+ ** Define the CC::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_ACT_ACTIONS_PARSER_H_INCLUDED
-# define YY_ACT_ACTIONS_PARSER_H_INCLUDED
+#ifndef YY_CC_CGACODE_PARSER_H_INCLUDED
+# define YY_CC_CGACODE_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 8 "actions.y" // lalr1.cc:372
+#line 8 "cgacode.y" // lalr1.cc:372
 
-	namespace ACT {
-		class ACT_Scanner;
-		class ShapeTree;
+	namespace CC {
+		class CC_Scanner;
+		class CC_Driver;
 	}
 
-#line 51 "actions_parser.h" // lalr1.cc:372
+#line 51 "cgacode_parser.h" // lalr1.cc:372
 
 
 # include <vector>
@@ -112,43 +112,44 @@
 #endif
 
 /* Debug traces.  */
-#ifndef ACTDEBUG
+#ifndef CCDEBUG
 # if defined YYDEBUG
 #if YYDEBUG
-#   define ACTDEBUG 1
+#   define CCDEBUG 1
 #  else
-#   define ACTDEBUG 0
+#   define CCDEBUG 0
 #  endif
 # else /* ! defined YYDEBUG */
-#  define ACTDEBUG 1
+#  define CCDEBUG 1
 # endif /* ! defined YYDEBUG */
-#endif  /* ! defined ACTDEBUG */
+#endif  /* ! defined CCDEBUG */
 
-#line 5 "actions.y" // lalr1.cc:372
-namespace ACT {
-#line 130 "actions_parser.h" // lalr1.cc:372
+#line 5 "cgacode.y" // lalr1.cc:372
+namespace CC {
+#line 130 "cgacode_parser.h" // lalr1.cc:372
 
 
 
 
 
   /// A Bison parser.
-  class ACT_Parser
+  class CC_Parser
   {
   public:
-#ifndef ACTSTYPE
+#ifndef CCSTYPE
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 38 "actions.y" // lalr1.cc:372
+    #line 38 "cgacode.y" // lalr1.cc:372
 
-	double dval;
-	char*	 sval;
+	float fval;
+	int ival;
+	char* sval;
 
-#line 149 "actions_parser.h" // lalr1.cc:372
+#line 150 "cgacode_parser.h" // lalr1.cc:372
     };
 #else
-    typedef ACTSTYPE semantic_type;
+    typedef CCSTYPE semantic_type;
 #endif
 
     /// Syntax errors thrown from user actions.
@@ -162,19 +163,16 @@ namespace ACT {
     {
       enum yytokentype
       {
-        STRING = 258,
-        CODE = 259,
-        DOUBLE = 260,
-        EXTRUDE = 261,
-        SPLIT = 262,
-        SELECT_FACES = 263,
-        SET_TEXTURE = 264,
-        REMOVE_FACES = 265,
-        BEG_PTRN = 266,
-        END_PTRN = 267,
-        RULE = 268,
-        DEADRULE = 269,
-        ACTIONS = 270
+        INIT_FROM_FILE = 258,
+        SET_TEXTURE_FILE = 259,
+        ADD_TEXTURE_RECT = 260,
+        SEPARATOR = 261,
+        RULE_NAME = 262,
+        WEIGHT = 263,
+        RULE = 264,
+        RULE_BODY = 265,
+        STRING = 266,
+        DOUBLE = 267
       };
     };
 
@@ -262,14 +260,14 @@ namespace ACT {
 
 
     /// Build a parser object.
-    ACT_Parser (ACT_Scanner  &scanner_yyarg, ShapeTree &st_yyarg);
-    virtual ~ACT_Parser ();
+    CC_Parser (CC_Scanner  &scanner_yyarg, CC_Driver   &driver_yyarg);
+    virtual ~CC_Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
     virtual int parse ();
 
-#if ACTDEBUG
+#if CCDEBUG
     /// The current debugging stream.
     std::ostream& debug_stream () const YY_ATTRIBUTE_PURE;
     /// Set the current debugging stream.
@@ -292,8 +290,8 @@ namespace ACT {
 
   private:
     /// This class is not copyable.
-    ACT_Parser (const ACT_Parser&);
-    ACT_Parser& operator= (const ACT_Parser&);
+    CC_Parser (const CC_Parser&);
+    CC_Parser& operator= (const CC_Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -357,7 +355,7 @@ namespace ACT {
   static const unsigned char yyr2_[];
 
 
-#if ACTDEBUG
+#if CCDEBUG
     /// For a symbol, its name in clear.
     static const char* const yytname_[];
 
@@ -456,27 +454,27 @@ namespace ACT {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 35,     ///< Last index in yytable_.
-      yynnts_ = 9,  ///< Number of nonterminal symbols.
+      yylast_ = 28,     ///< Last index in yytable_.
+      yynnts_ = 6,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 21, ///< Termination state number.
+      yyfinal_ = 10, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 18  ///< Number of tokens.
+      yyntokens_ = 13  ///< Number of tokens.
     };
 
 
     // User arguments.
-    ACT_Scanner  &scanner;
-    ShapeTree &st;
+    CC_Scanner  &scanner;
+    CC_Driver   &driver;
   };
 
 
-#line 5 "actions.y" // lalr1.cc:372
-} // ACT
-#line 478 "actions_parser.h" // lalr1.cc:372
+#line 5 "cgacode.y" // lalr1.cc:372
+} // CC
+#line 476 "cgacode_parser.h" // lalr1.cc:372
 
 
 
 
-#endif // !YY_ACT_ACTIONS_PARSER_H_INCLUDED
+#endif // !YY_CC_CGACODE_PARSER_H_INCLUDED

@@ -140,7 +140,7 @@ namespace SP {
     /// Symbol semantic values.
     union semantic_type
     {
-    #line 35 "split_pattern.y" // lalr1.cc:372
+    #line 33 "split_pattern.y" // lalr1.cc:372
 
 	float fval;
 	int ival;

@@ -1,10 +1,10 @@
-#ifndef actHEADER_H
-#define actHEADER_H 1
-#define actIN_HEADER 1
+#ifndef ccHEADER_H
+#define ccHEADER_H 1
+#define ccIN_HEADER 1
 
-#line 6 "actions_lexer.h"
+#line 6 "cgacode_lexer.h"
 
-#line 8 "actions_lexer.h"
+#line 8 "cgacode_lexer.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -27,7 +27,7 @@
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-    #define yyFlexLexer actFlexLexer
+    #define yyFlexLexer ccFlexLexer
 /* %endif */
 
 /* %if-c-only */
@@ -255,9 +255,9 @@ struct yy_buffer_state
 /* %endif */
 /* %endif */
 
-void *actalloc (yy_size_t  );
-void *actrealloc (void *,yy_size_t  );
-void actfree (void *  );
+void *ccalloc (yy_size_t  );
+void *ccrealloc (void *,yy_size_t  );
+void ccfree (void *  );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
@@ -277,16 +277,15 @@ int yyFlexLexer::yylex()
 	return 0;
 	}
 
-#define YY_DECL int ACT::ACT_Scanner::yylex()
+#define YY_DECL int CC::CC_Scanner::yylex()
 
 /* %if-c-only Standard (non-C++) definition */
 /* %endif */
 
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
-#define PARAM 1
-#define PATTERN 2
-#define REMAINING 3
+#define RULES 1
+#define RULEBODY 2
 
 #endif
 
@@ -393,9 +392,9 @@ static int yy_flex_strlen (yyconst char * );
 #undef YY_DECL
 #endif
 
-#line 67 "actions.l"
+#line 44 "cgacode.l"
 
 
-#line 400 "actions_lexer.h"
-#undef actIN_HEADER
-#endif /* actHEADER_H */
+#line 399 "cgacode_lexer.h"
+#undef ccIN_HEADER
+#endif /* ccHEADER_H */

@@ -47,8 +47,8 @@ public:
 
 	inline Node* getRoot() {return &root;}
 
-	inline void initFromFile(string path) {root.load(path);}
-	inline void setTextureFile(string path) {texturePath = path;}
+	void initFromFile(string path);
+	void setTextureFile(string path);
 	// Name a sub rectangle of the texture file that will constitute a texture to be applied
 	void addTextureRect(string name, double x0, double y0, double x1, double y1);
 

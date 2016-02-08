@@ -44,7 +44,7 @@ void SP::SP_Driver::parse( const char * const string ) {
    }
    catch( std::bad_alloc &ba )
    {
-      std::cerr << "Failed to allocate scanner: (" <<
+      std::cerr << "Split_pattern: Failed to allocate scanner: (" <<
          ba.what() << "), exiting!!\n";
       exit( EXIT_FAILURE );
    }
@@ -57,14 +57,14 @@ void SP::SP_Driver::parse( const char * const string ) {
    }
    catch( std::bad_alloc &ba )
    {
-      std::cerr << "Failed to allocate parser: (" <<
+      std::cerr << "Split_pattern: Failed to allocate parser: (" <<
          ba.what() << "), exiting!!\n";
       exit( EXIT_FAILURE );
    }
    const int accept( 0 );
    if( parser->parse() != accept )
    {
-      std::cerr << "Parse failed !\n";
+      std::cerr << "Split_pattern: Parse failed !\n";
    }
 }
 

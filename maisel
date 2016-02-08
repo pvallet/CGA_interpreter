@@ -1,0 +1,23 @@
+initFromFile "plane.off"
+setTextureFile "res/maisel.png"
+addTextureRect "withoutbalc" 0. 0.625 1. 1.
+addTextureRect "withbalc" 0. 0.25 1. 0.625
+addTextureRect "longbalc" 0. 0. 0.488 0.21875
+addTextureRect "shortbalc" 0.4746 0. 0.6543 0.21875
+
+%%
+
+GlobalShape --> extrude(4.8) split("x") {~1: ColumnA | ~1: ColumnB }* ;;
+
+ColumnA --> split("y") {~0.4: WithBalc | ~0.4: WithoutBalc }* ;;
+ColumnB --> split("y") {~0.4: WithoutBalc | ~0.4: WithBalc }* ;;
+
+WithoutBalc --> selectFaces("z") setTexture("withoutbalc") ;;
+WithBalc --> selectFaces("z") setTexture("withbalc")
+             split("x") {~56:Trash | ~200:Balcony | ~200:Balcony | ~56:Trash} ;;
+
+Balcony --> split("y") {~90: selectFaces("z") extrude(0.15) TextureBalc | ~100:Trash} ;;
+
+TextureBalc --> selectFaces("z") setTexture("longbalc") selectFaces("")
+                selectFaces("x") setTexture("shortbalc") selectFaces("")
+                selectFaces("ypos") removeFaces() ;;

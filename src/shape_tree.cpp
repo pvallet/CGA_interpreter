@@ -12,6 +12,14 @@ ACT::ShapeTree::ShapeTree() :
 {
 }
 
+void ACT::ShapeTree::initFromFile(string path) {
+	root.load(path);
+}
+
+void ACT::ShapeTree::setTextureFile(string path) {
+	texturePath = path;
+}
+
 void ACT::ShapeTree::addTextureRect(string name, double x0, double y0, double x1, double y1) {
 	textures[name] = texCoord.size();
 
@@ -36,7 +44,7 @@ void ACT::ShapeTree::outputGeometryOFF() {
 void ACT::ShapeTree::displayGeometryOFF() {
 	outputGeometryOFF();
 	if (execl("./viewer", "./viewer", NULL) == -1)
-		cout << strerror(errno) << endl;
+		cerr << strerror(errno) << endl;
 }
 
 void ACT::ShapeTree::outputGeometryOBJ() {
@@ -96,7 +104,7 @@ void ACT::ShapeTree::outputGeometryOBJ() {
 void ACT::ShapeTree::displayGeometryOBJ() {
 	outputGeometryOBJ();
 	if (execl("/usr/bin/meshlab", "meshlab", "./out.obj", NULL) == -1)
-		cout << strerror(errno) << endl;
+		cerr << strerror(errno) << endl;
 }
 
 void ACT::ShapeTree::setInitRule(Rule* rule) {
@@ -116,7 +124,7 @@ void ACT::ShapeTree::executeActions(const string& actions) {
 	}
 	catch( std::bad_alloc &ba )
 	{
-		 std::cerr << "Failed to allocate scanner: (" <<
+		 std::cerr << "Actions: Failed to allocate scanner: (" <<
 				ba.what() << "), exiting!!\n";
 		 exit( EXIT_FAILURE );
 	}
@@ -128,7 +136,7 @@ void ACT::ShapeTree::executeActions(const string& actions) {
 	}
 	catch( std::bad_alloc &ba )
 	{
-		 std::cerr << "Failed to allocate parser: (" <<
+		 std::cerr << "Actions: Failed to allocate parser: (" <<
 				ba.what() << "), exiting!!\n";
 		 exit( EXIT_FAILURE );
 	}
@@ -136,7 +144,7 @@ void ACT::ShapeTree::executeActions(const string& actions) {
 
 	if( parser->parse() != accept )
 	{
-		 std::cerr << "Parse failed !\n";
+		 std::cerr << "Actions: Parse failed !\n";
 	}
 }
 

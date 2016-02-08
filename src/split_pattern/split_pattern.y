@@ -24,8 +24,6 @@
 
 #undef yylex
 #define yylex scanner.splex
-
-extern int line_num;
 }
 
 %define api.prefix {sp}
@@ -90,5 +88,5 @@ var_block:
 %%
 
 void SP::SP_Parser::error( const std::string &err_message ) {
-   std::cerr << "Split pattern : error: " << err_message << " Line: " << line_num << "\n";
+   std::cerr << "Split pattern : error: " << err_message << std::endl;
 }

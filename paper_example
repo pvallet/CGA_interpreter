@@ -1,0 +1,6 @@
+initFromFile "plane.off"
+
+%%
+
+Parcel  --> split("x") {~1: BldArea | ~1: GreenSpace | ~1: BldArea}
+BldArea --> extrude(5) split("y") {0.4: Floor}*

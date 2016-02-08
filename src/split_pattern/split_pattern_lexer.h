@@ -390,7 +390,7 @@ static int yy_flex_strlen (yyconst char * );
 #undef YY_DECL
 #endif
 
-#line 31 "split_pattern.l"
+#line 28 "split_pattern.l"
 
 
 #line 397 "split_pattern_lexer.h"
