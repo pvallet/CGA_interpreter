@@ -52,6 +52,10 @@ void CC::CC_Driver::initFromFile(const string& path) {
   shapeTree->initFromFile(path);
 }
 
+void CC::CC_Driver::setOutputFilename(const string& filename) {
+  shapeTree->setOutputFilename(filename);
+}
+
 void CC::CC_Driver::setTextureFile(const string& path) {
   shapeTree->setTextureFile(path);
 }

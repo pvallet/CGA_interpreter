@@ -19,6 +19,7 @@ public:
   void parseFile( const string& fileName );
 
   void initFromFile(const string& path);
+  void setOutputFilename(const string& filename);
   void setTextureFile(const string& path);
   void addTextureRect(const string& name, double x0, double y0, double x1, double y1);
 

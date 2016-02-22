@@ -529,37 +529,43 @@ namespace CC {
           switch (yyn)
             {
   case 5:
-#line 67 "cgacode.y" // lalr1.cc:847
+#line 68 "cgacode.y" // lalr1.cc:847
     {driver.initFromFile(toStr((yystack_[0].value.sval)));}
 #line 535 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 6:
-#line 68 "cgacode.y" // lalr1.cc:847
-    {driver.setTextureFile(toStr((yystack_[0].value.sval)));}
+#line 69 "cgacode.y" // lalr1.cc:847
+    {driver.setOutputFilename(toStr((yystack_[0].value.sval)));}
 #line 541 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 7:
 #line 70 "cgacode.y" // lalr1.cc:847
-    {driver.addTextureRect(toStr((yystack_[4].value.sval)), (yystack_[3].value.fval), (yystack_[2].value.fval), (yystack_[1].value.fval), (yystack_[0].value.fval));}
+    {driver.setTextureFile(toStr((yystack_[0].value.sval)));}
 #line 547 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
-  case 10:
-#line 79 "cgacode.y" // lalr1.cc:847
-    {driver.addRule(toStr((yystack_[3].value.sval)), (yystack_[2].value.fval), toStr((yystack_[0].value.sval)));}
+  case 8:
+#line 72 "cgacode.y" // lalr1.cc:847
+    {driver.addTextureRect(toStr((yystack_[4].value.sval)), (yystack_[3].value.fval), (yystack_[2].value.fval), (yystack_[1].value.fval), (yystack_[0].value.fval));}
 #line 553 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 11:
-#line 80 "cgacode.y" // lalr1.cc:847
-    {driver.addRule(toStr((yystack_[2].value.sval)), 1, toStr((yystack_[0].value.sval)));}
+#line 81 "cgacode.y" // lalr1.cc:847
+    {driver.addRule(toStr((yystack_[3].value.sval)), (yystack_[2].value.fval), toStr((yystack_[0].value.sval)));}
 #line 559 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
+  case 12:
+#line 82 "cgacode.y" // lalr1.cc:847
+    {driver.addRule(toStr((yystack_[2].value.sval)), 1, toStr((yystack_[0].value.sval)));}
+#line 565 "cgacode_parser.cpp" // lalr1.cc:847
+    break;
 
-#line 563 "cgacode_parser.cpp" // lalr1.cc:847
+
+#line 569 "cgacode_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -728,67 +734,69 @@ namespace CC {
   const signed char
   CC_Parser::yypact_[] =
   {
-       1,    -2,     0,     2,    10,    -3,    -4,    -4,    -4,     3,
-      -4,     5,    -4,     4,    -1,     5,    -4,     6,     8,     9,
-      -4,    11,    12,    -4,    -4,    -4
+       2,    -1,     1,     3,     4,    12,    -3,    -4,    -4,    -4,
+      -4,     5,    -4,     6,    -4,     7,     0,     6,    -4,     8,
+       9,    11,    -4,    10,    13,    -4,    -4,    -4
   };
 
   const unsigned char
   CC_Parser::yydefact_[] =
   {
-       0,     0,     0,     0,     0,     0,     4,     5,     6,     0,
-       1,     0,     3,     0,     0,     2,     9,     0,     0,     0,
-       8,     0,     0,    11,     7,    10
+       0,     0,     0,     0,     0,     0,     0,     4,     5,     6,
+       7,     0,     1,     0,     3,     0,     0,     2,    10,     0,
+       0,     0,     9,     0,     0,    12,     8,    11
   };
 
   const signed char
   CC_Parser::yypgoto_[] =
   {
-      -4,    -4,    -4,    15,    -4,    13
+      -4,    -4,    -4,    19,    -4,    14
   };
 
   const signed char
   CC_Parser::yydefgoto_[] =
   {
-      -1,     4,     5,     6,    15,    16
+      -1,     5,     6,     7,    17,    18
   };
 
   const unsigned char
   CC_Parser::yytable_[] =
   {
-       1,     2,     3,    11,     1,     2,     3,    18,    19,     7,
-      10,     8,    14,     9,     0,    13,    17,    22,    21,    23,
-      12,     0,    25,    24,     0,     0,     0,     0,    20
+       1,     2,     3,     4,    13,     1,     2,     3,     4,    20,
+      21,     8,    12,     9,    16,    10,    11,     0,    15,    24,
+      19,    23,    25,    26,    27,    14,     0,     0,     0,     0,
+       0,    22
   };
 
   const signed char
   CC_Parser::yycheck_[] =
   {
-       3,     4,     5,     6,     3,     4,     5,     8,     9,    11,
-       0,    11,     7,    11,    -1,    12,    12,     9,    12,    10,
-       5,    -1,    10,    12,    -1,    -1,    -1,    -1,    15
+       3,     4,     5,     6,     7,     3,     4,     5,     6,     9,
+      10,    12,     0,    12,     8,    12,    12,    -1,    13,    10,
+      13,    13,    11,    13,    11,     6,    -1,    -1,    -1,    -1,
+      -1,    17
   };
 
   const unsigned char
   CC_Parser::yystos_[] =
   {
-       0,     3,     4,     5,    14,    15,    16,    11,    11,    11,
-       0,     6,    16,    12,     7,    17,    18,    12,     8,     9,
-      18,    12,     9,    10,    12,    10
+       0,     3,     4,     5,     6,    15,    16,    17,    12,    12,
+      12,    12,     0,     7,    17,    13,     8,    18,    19,    13,
+       9,    10,    19,    13,    10,    11,    13,    11
   };
 
   const unsigned char
   CC_Parser::yyr1_[] =
   {
-       0,    13,    14,    15,    15,    16,    16,    16,    17,    17,
-      18,    18
+       0,    14,    15,    16,    16,    17,    17,    17,    17,    18,
+      18,    19,    19
   };
 
   const unsigned char
   CC_Parser::yyr2_[] =
   {
-       0,     2,     3,     2,     1,     2,     2,     6,     2,     1,
-       4,     3
+       0,     2,     3,     2,     1,     2,     2,     2,     6,     2,
+       1,     4,     3
   };
 
 
@@ -798,18 +806,18 @@ namespace CC {
   const char*
   const CC_Parser::yytname_[] =
   {
-  "$end", "error", "$undefined", "INIT_FROM_FILE", "SET_TEXTURE_FILE",
-  "ADD_TEXTURE_RECT", "SEPARATOR", "RULE_NAME", "WEIGHT", "RULE",
-  "RULE_BODY", "STRING", "DOUBLE", "$accept", "skeleton", "commands",
-  "command", "rules", "rule", YY_NULLPTR
+  "$end", "error", "$undefined", "INIT_FROM_FILE", "SET_OUTPUT_FILENAME",
+  "SET_TEXTURE_FILE", "ADD_TEXTURE_RECT", "SEPARATOR", "RULE_NAME",
+  "WEIGHT", "RULE", "RULE_BODY", "STRING", "DOUBLE", "$accept", "skeleton",
+  "commands", "command", "rules", "rule", YY_NULLPTR
   };
 
 
   const unsigned char
   CC_Parser::yyrline_[] =
   {
-       0,    58,    58,    62,    63,    67,    68,    69,    74,    75,
-      79,    80
+       0,    59,    59,    63,    64,    68,    69,    70,    71,    76,
+      77,    81,    82
   };
 
   // Print the state stack on the debug stream.
@@ -876,9 +884,9 @@ namespace CC {
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12
+       5,     6,     7,     8,     9,    10,    11,    12,    13
     };
-    const unsigned int user_token_number_max_ = 267;
+    const unsigned int user_token_number_max_ = 268;
     const token_number_type undef_token_ = 2;
 
     if (static_cast<int>(t) <= yyeof_)
@@ -891,8 +899,8 @@ namespace CC {
 
 #line 5 "cgacode.y" // lalr1.cc:1155
 } // CC
-#line 895 "cgacode_parser.cpp" // lalr1.cc:1155
-#line 83 "cgacode.y" // lalr1.cc:1156
+#line 903 "cgacode_parser.cpp" // lalr1.cc:1155
+#line 85 "cgacode.y" // lalr1.cc:1156
 
 
 void CC::CC_Parser::error( const std::string &err_message ) {

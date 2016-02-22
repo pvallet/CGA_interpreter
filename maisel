@@ -1,4 +1,5 @@
 initFromFile "plane.off"
+setOutputFilename "maisel.obj"
 setTextureFile "res/maisel.png"
 addTextureRect "withoutbalc" 0. 0.625 1. 1.
 addTextureRect "withbalc" 0. 0.25 1. 0.625

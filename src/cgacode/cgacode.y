@@ -42,6 +42,7 @@
 }
 
 %token				INIT_FROM_FILE
+%token				SET_OUTPUT_FILENAME
 %token 				SET_TEXTURE_FILE
 %token				ADD_TEXTURE_RECT
 %token				SEPARATOR
@@ -64,8 +65,9 @@ commands:
 	;
 
 command:
-	INIT_FROM_FILE STRING				{driver.initFromFile(toStr($2));}
-	| SET_TEXTURE_FILE STRING 	{driver.setTextureFile(toStr($2));}
+	INIT_FROM_FILE STRING					{driver.initFromFile(toStr($2));}
+	| SET_OUTPUT_FILENAME STRING	{driver.setOutputFilename(toStr($2));}
+	| SET_TEXTURE_FILE STRING 		{driver.setTextureFile(toStr($2));}
 	| ADD_TEXTURE_RECT STRING DOUBLE DOUBLE DOUBLE DOUBLE
 		{driver.addTextureRect(toStr($2), $3, $4, $5, $6);}
 	;

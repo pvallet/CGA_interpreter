@@ -164,15 +164,16 @@ namespace CC {
       enum yytokentype
       {
         INIT_FROM_FILE = 258,
-        SET_TEXTURE_FILE = 259,
-        ADD_TEXTURE_RECT = 260,
-        SEPARATOR = 261,
-        RULE_NAME = 262,
-        WEIGHT = 263,
-        RULE = 264,
-        RULE_BODY = 265,
-        STRING = 266,
-        DOUBLE = 267
+        SET_OUTPUT_FILENAME = 259,
+        SET_TEXTURE_FILE = 260,
+        ADD_TEXTURE_RECT = 261,
+        SEPARATOR = 262,
+        RULE_NAME = 263,
+        WEIGHT = 264,
+        RULE = 265,
+        RULE_BODY = 266,
+        STRING = 267,
+        DOUBLE = 268
       };
     };
 
@@ -454,13 +455,13 @@ namespace CC {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 28,     ///< Last index in yytable_.
+      yylast_ = 31,     ///< Last index in yytable_.
       yynnts_ = 6,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 10, ///< Termination state number.
+      yyfinal_ = 12, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 13  ///< Number of tokens.
+      yyntokens_ = 14  ///< Number of tokens.
     };
 
 
@@ -472,7 +473,7 @@ namespace CC {
 
 #line 5 "cgacode.y" // lalr1.cc:372
 } // CC
-#line 476 "cgacode_parser.h" // lalr1.cc:372
+#line 477 "cgacode_parser.h" // lalr1.cc:372
 
 
 

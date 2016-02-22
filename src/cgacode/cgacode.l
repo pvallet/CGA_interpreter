@@ -26,6 +26,7 @@
 
 [ \r\t]*				    ;
 initFromFile        { return token::INIT_FROM_FILE;}
+setOutputFilename   { return token::SET_OUTPUT_FILENAME;}
 setTextureFile      { return token::SET_TEXTURE_FILE;}
 addTextureRect      { return token::ADD_TEXTURE_RECT;}
 \"[^\n"]*\"         { yylval->sval = strdup(&yytext[1]);

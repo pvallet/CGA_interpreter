@@ -8,12 +8,28 @@ using namespace std;
 
 ACT::ShapeTree::ShapeTree() :
 	root(this, NULL, true),
+	outType(OFF),
+	filename("out.off"),
 	texCoord(4, Point_2(0,0)) // This stands for no texture
 {
 }
 
 void ACT::ShapeTree::initFromFile(string path) {
 	root.load(path);
+}
+
+void ACT::ShapeTree::setOutputFilename(string _filename) {
+	filename = _filename;
+	string extension = filename.substr(filename.size()-4);
+
+	if (extension == ".off" || extension == ".OFF")
+		outType = OFF;
+	else if (extension == ".obj" || extension == ".OBJ")
+		outType = OBJ;
+	else {
+		cerr << "Error in setOutputFilename: unknown extension: " << extension << endl;
+		outType = OFF;
+	}
 }
 
 void ACT::ShapeTree::setTextureFile(string path) {
@@ -33,9 +49,23 @@ void ACT::ShapeTree::addTextureCoord(double x0, double y0, double x1, double y1)
 	texCoord.push_back(Point_2(x0, y1));
 }
 
+void ACT::ShapeTree::outputGeometry() {
+	if (outType == OFF)
+		outputGeometryOFF();
+	else
+		outputGeometryOBJ();
+}
+
+void ACT::ShapeTree::displayGeometry() {
+	if (outType == OFF)
+		displayGeometryOFF();
+	else
+		displayGeometryOBJ();
+}
+
 void ACT::ShapeTree::outputGeometryOFF() {
   ofstream output;
-	output.open("out.off", ios::trunc);
+	output.open(filename, ios::trunc);
 	MeshResult res = root.getSubGeometry();
 	output << res.mesh;
 	output.close();
@@ -48,7 +78,8 @@ void ACT::ShapeTree::displayGeometryOFF() {
 }
 
 void ACT::ShapeTree::outputGeometryOBJ() {
-	string out("out");
+	string out(filename);
+	out.erase(out.size()-4,4);
 
 	MeshResult res = root.getSubGeometry();
 

@@ -10,6 +10,7 @@
 using namespace std;
 
 enum Orientation {VERTICAL, HORIZONTAL};
+enum OutputType {OFF, OBJ};
 
 // To identify the location of subtextures
 typedef struct TexSplitKey {
@@ -48,14 +49,14 @@ public:
 	inline Node* getRoot() {return &root;}
 
 	void initFromFile(string path);
+	void setOutputFilename(string _filename);
 	void setTextureFile(string path);
 	// Name a sub rectangle of the texture file that will constitute a texture to be applied
 	void addTextureRect(string name, double x0, double y0, double x1, double y1);
 
-	void outputGeometryOFF();
-	void displayGeometryOFF();
-	void outputGeometryOBJ();
-	void displayGeometryOBJ();
+	void outputGeometry();
+	void displayGeometry();
+
 	inline void addRule(Rule* rule) {rules.push_back(rule);}
 	void setInitRule(Rule* rule);
 
@@ -77,10 +78,17 @@ private:
 	void executeActions(const string& actions);
 	void addTextureCoord(double x0, double y0, double x1, double y1);
 
+	void outputGeometryOFF();
+	void displayGeometryOFF();
+	void outputGeometryOBJ();
+	void displayGeometryOBJ();
+
 	Node root;
 	Node* affectedNode; // To execute actions on
 	std::list<Rule*> rules;
 	Rule* initRule;
+	OutputType outType;
+	string filename;
 
 	string texturePath;
 	vector<Point_2> texCoord;

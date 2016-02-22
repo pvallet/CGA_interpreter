@@ -26,7 +26,7 @@ int main(int argv, char* argc[]) {
 
   while (shapeTree.executeRule() != -1);
 
-  shapeTree.outputGeometryOBJ();
+  shapeTree.outputGeometry();
 
   return 0;
 }
