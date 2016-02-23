@@ -11,7 +11,7 @@ CC::CC_Driver::~CC_Driver() {
   }
 }
 
-void CC::CC_Driver::parseFile( const string& fileName ) {
+string CC::CC_Driver::parseFile( const string& fileName ) {
    ifstream input;
    input.open(fileName);
 
@@ -46,6 +46,8 @@ void CC::CC_Driver::parseFile( const string& fileName ) {
    }
 
    input.close();
+
+   return initRule;
 }
 
 void CC::CC_Driver::initFromFile(const string& path) {
@@ -65,7 +67,7 @@ void CC::CC_Driver::addTextureRect(const string& name, double x0, double y0, dou
 }
 
 void CC::CC_Driver::addRule(const string& name, double weight, const string& body) {
-  bool initRule = rules.empty();
+  bool isInitRule = rules.empty();
 
   if (rules.find(name) == rules.end()) {
     Rule* rule = new Rule(name);
@@ -73,8 +75,8 @@ void CC::CC_Driver::addRule(const string& name, double weight, const string& bod
     RuleNames::getInstance().addRule(name);
     shapeTree->addRule(rule);
 
-    if (initRule)
-      shapeTree->setInitRule(rule);
+    if (isInitRule)
+      initRule = name;
   }
 
   rules[name]->addAction(body, weight);

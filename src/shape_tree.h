@@ -1,9 +1,10 @@
 #pragma once
 
 #include <string>
+#include <map>
 
-#include "node.h"
 #include "rule.h"
+#include "node.h"
 #include "actions/actions_parser.h"
 #include "actions/actions_scanner.h"
 
@@ -57,8 +58,8 @@ public:
 	void outputGeometry();
 	void displayGeometry();
 
-	inline void addRule(Rule* rule) {rules.push_back(rule);}
-	void setInitRule(Rule* rule);
+	void addRule(Rule* rule);
+	void setInitRule(string rule);
 
 	int executeRule(); // Returns -1 if there is no more rule to be executed
 
@@ -85,8 +86,8 @@ private:
 
 	Node root;
 	Node* affectedNode; // To execute actions on
-	std::list<Rule*> rules;
-	Rule* initRule;
+	std::list<Rule*> activeRules;
+	std::map<string, Rule*> rules;
 	OutputType outType;
 	string filename;
 

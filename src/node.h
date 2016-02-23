@@ -38,7 +38,7 @@ public:
 	void selectAllFaces();
 	void noTexture();
 	void load(string path);
-	inline void setShape(Mesh _shape) {shape = _shape; selectAllFaces(); noTexture();}
+	void setShape(Mesh _shape);
 	void setVisible(bool _visible);
 	inline void setParent(Node* _parent) {parent = _parent;}
 	void addChild(Node* _child);

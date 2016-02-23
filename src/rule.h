@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-using namespace std;
+#include "node.h"
 
-class Node;
+using namespace std;
 
 class Rule {
 public:
@@ -21,7 +21,7 @@ public:
   inline const list<Node*>& getNodes() const {return affectedNodes;}
   string getActions(Node* node) const; // Chose action at random according to the weights
 
-private:
+public:
   string name;
   list<Node*> affectedNodes;
   map<Node*,string> additionalActions;

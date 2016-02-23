@@ -1,0 +1,8 @@
+initFromFile "plane.off"
+
+%%
+
+Playground --> split("x") {~1: TowerBlock | ~2:Trash | ~1: TowerBlock } ;;
+
+TowerBlock 8 --> selectFaces("ypos") extrude(2) TowerBlock ;;
+TowerBlock --> extrude(2) ;;

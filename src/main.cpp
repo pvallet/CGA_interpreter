@@ -19,10 +19,14 @@ int main(int argv, char* argc[]) {
   std::string sourceCode = argc[1];
 
   ACT::ShapeTree shapeTree;
+  shapeTree.setOutputFilename(sourceCode + ".off");
+
+  // We need to complete the parsing of the code before initializing the queue
+  // of active rules.
 
   CC::CC_Driver cgacodeDriver(&shapeTree);
-
-  cgacodeDriver.parseFile(sourceCode);
+  std::string initRule = cgacodeDriver.parseFile(sourceCode);
+  shapeTree.setInitRule(initRule);
 
   while (shapeTree.executeRule() != -1);
 

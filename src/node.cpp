@@ -48,6 +48,12 @@ void Node::load(string path) {
 	noTexture();
 }
 
+void Node::setShape(Mesh _shape) {
+	shape = _shape;
+	selectAllFaces();
+	noTexture();
+}
+
 void Node::setVisible(bool _visible) {
 	if (_visible) {
 		visible = true;
@@ -392,8 +398,8 @@ void Node::preserveTextures(Axis axis, const vector<Node*>& nodes,
 
 			selectFace("xpos"); selectFace("xpos"); selectFace("ypos"); selectFace("yneg");
 			break;
-
 	}
+
 	list<face_descriptor> save = selectedFaces;
 
 	// Split textures on the sides
@@ -421,6 +427,11 @@ void Node::preserveTextures(Axis axis, const vector<Node*>& nodes,
 				nodes[i]->selectFace("");
 			}
 		}
+	}
+
+	// Select faces of children
+	for (unsigned int i = 0 ; i < nodes.size() ; i++) {
+		nodes[i]->selectAllFaces();
 	}
 
 	selectedFaces = save;

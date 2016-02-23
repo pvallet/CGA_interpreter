@@ -16,7 +16,8 @@ public:
   CC_Driver(ACT::ShapeTree* _shapeTree);
   virtual ~CC_Driver();
 
-  void parseFile( const string& fileName );
+  // Returns the name of the init rule
+  string parseFile( const string& fileName );
 
   void initFromFile(const string& path);
   void setOutputFilename(const string& filename);
@@ -31,6 +32,8 @@ private:
 
   ACT::ShapeTree* shapeTree;
   map<string, Rule*> rules;
+
+  string initRule;
 };
 
 } /* End nameCCace CC */

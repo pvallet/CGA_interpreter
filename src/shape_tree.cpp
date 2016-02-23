@@ -138,11 +138,6 @@ void ACT::ShapeTree::displayGeometryOBJ() {
 		cerr << strerror(errno) << endl;
 }
 
-void ACT::ShapeTree::setInitRule(Rule* rule) {
-	initRule = rule;
-	rule->addNode(&root);
-}
-
 void ACT::ShapeTree::executeActions(const string& actions) {
 	ACT::ACT_Parser  *parser  = nullptr;
   ACT::ACT_Scanner *scanner = nullptr;
@@ -179,21 +174,41 @@ void ACT::ShapeTree::executeActions(const string& actions) {
 	}
 }
 
-void ACT::ShapeTree::addToRule(string rule, string actions) {
-	for (auto it = rules.begin() ; it != rules.end() ; it++) {
-		if ((*it)->getName() == rule)
+void ACT::ShapeTree::addRule(Rule* rule) {
+	rules.insert(pair<string, Rule*>(rule->getName(), rule));
+}
+
+void ACT::ShapeTree::setInitRule(string ruleName) {
+	affectedNode = &root;
+	addToRule(ruleName);
+}
+
+void ACT::ShapeTree::addToRule(string ruleName, string actions) {
+	bool active = false;
+	for (auto it = activeRules.begin() ; it != activeRules.end() ; it++) {
+		if ((*it)->getName() == ruleName) {
 			(*it)->addNode(affectedNode, actions);
+			active = true;
+		}
+	}
+
+	if (!active) {
+		if (rules.find(ruleName) != rules.end()) { // else don't do anything
+			activeRules.push_back(new Rule(*rules[ruleName]));
+			activeRules.back()->addNode(affectedNode);
+		}
 	}
 }
 
 int ACT::ShapeTree::executeRule() {
-	if (!rules.empty())	{
-		for (	auto it = rules.front()->getNodes().begin() ;
-					it != rules.front()->getNodes().end() ; it++) {
+	if (!activeRules.empty())	{
+		for (	auto it = activeRules.front()->getNodes().begin() ;
+					it != activeRules.front()->getNodes().end() ; it++) {
 			affectedNode = *it;
-			executeActions(rules.front()->getActions(*it));
+			executeActions(activeRules.front()->getActions(*it));
 		}
-		rules.pop_front();
+		//delete activeRules.front();
+		activeRules.pop_front();
 		return 0;
 	}
 
