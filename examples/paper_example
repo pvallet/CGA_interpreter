@@ -2,6 +2,15 @@ initFromFile "plane.off"
 
 %%
 
-Parcel  --> split("x") {~1: BldArea | ~1: GreenSpace | ~1: BldArea} ;;
+Parcel  --> split("x") {~1: extrude(15) Tower | ~1: GreenSpace | ~1: extrude(12) Tower} ;;
 
-BldArea --> extrude(5) split("y") {0.4: Floor}* ;;
+Tower --> split("y") { 2:Base | 4.8: Floors | 0.4: Bridge | 3.2: Floors | 0.4: Bridge | 1: Floors } ;;
+
+Bridge --> Floor ;;
+Floors --> split("y") {0.4: Floor}* ;;
+
+Floor --> translate(0.2, 0, 0) Floor2 ;;
+Floor --> translate(-0.2, 0, 0) Floor2 ;;
+
+Floor2 --> translate(0, 0, 0.2) ;;
+Floor2 --> translate(0, 0, -0.2) ;;

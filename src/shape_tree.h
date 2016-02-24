@@ -20,7 +20,7 @@ typedef struct TexSplitKey {
 	Orientation 		orientation;
 } TexSplitKey;
 
-// Lexicographic order
+// Lexicographic order for texture split keys
 struct tskComp {
 	bool operator() (const TexSplitKey& t1, const TexSplitKey& t2) const {
 		if 			(t1.texID != t2.texID)
@@ -65,6 +65,7 @@ public:
 
 	// Apply actions to the affected node
 	void addToRule(string rule, string actions = string());
+	inline void translate(double dx, double dy, double dz) {affectedNode = affectedNode->translate(dx,dy,dz);}
 	inline void extrude(double value) {affectedNode = affectedNode->extrude(value);}
 	void split(char axis, string pattern);
 	void selectFaces(string expression); // For the moment only [(x|y|z)(pos|neg)] | all

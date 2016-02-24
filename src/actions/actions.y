@@ -43,6 +43,7 @@
 %token <sval> STRING
 %token <sval> CODE
 %token <dval> DOUBLE
+%token				TRANSLATE
 %token				EXTRUDE
 %token				SPLIT
 %token				SELECT_FACES
@@ -64,7 +65,8 @@ actions:
 	;
 
 action:
-	extrude
+	translate
+	| extrude
 	| split
 	| setTexture
 	| selectFaces
@@ -80,6 +82,10 @@ code:
 											strcat(ss,$2); free($2);
 											$$ = ss; }
 	| CODE					{$$ = strdup($1); free($1);}
+	;
+
+translate:
+	TRANSLATE '(' DOUBLE ',' DOUBLE ',' DOUBLE ')' {st.translate($3,$5,$7);}
 	;
 
 extrude:

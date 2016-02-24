@@ -37,8 +37,9 @@
 <PARAM>\"[^\"]*\"         { yylval->sval = strdup(&yytext[1]);
                             yylval->sval[strlen(yylval->sval) - 1] = '\0';
                             return token::STRING;}
-<PARAM>[0-9]+\.?[0-9]*    { yylval->dval = atof(yytext);   return token::DOUBLE;}
+<PARAM>-?[0-9]+\.?[0-9]*  { yylval->dval = atof(yytext);   return token::DOUBLE;}
 <PARAM>\,                 { return ',';}
+translate       { return token::TRANSLATE; }
 extrude         { return token::EXTRUDE; }
 split           { return token::SPLIT; }
 selectFaces     { return token::SELECT_FACES; }
@@ -47,15 +48,15 @@ removeFaces     { return token::REMOVE_FACES; }
 \{              { pattern_count = 1; BEGIN(PATTERN); yylval->sval = strdup(yytext); return token::BEG_PTRN;}
 <PATTERN>\{     { pattern_count++; yylval->sval = strdup(yytext); return token::CODE; }
 <PATTERN>\}\*   { pattern_count--; yylval->sval = strdup(yytext);
-                  if (param_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
+                  if (pattern_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
                   else return token::CODE;
                 }
 <PATTERN>\}     { pattern_count--; yylval->sval = strdup(yytext);
-                  if (param_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
+                  if (pattern_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
                   else return token::CODE;
                 }
 <PATTERN>[^\{\}]* { yylval->sval = strdup(yytext); return token::CODE;}
-[a-zA-Z]*       { yylval->sval = strdup(yytext);
+[a-zA-Z][a-zA-Z0-9]*  { yylval->sval = strdup(yytext);
                   if (RuleNames::getInstance().isRule(yytext)) {
                     BEGIN(REMAINING);
                     return token::RULE;

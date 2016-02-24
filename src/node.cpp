@@ -116,6 +116,51 @@ MeshResult Node::getSubGeometry() {
  	}
 }
 
+Node* Node::translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz) {
+	Mesh nShape;
+	map<vertex_descriptor, vertex_descriptor> idxInNewShape;
+	CGAL::Vector_3<Kernel> translation(dx,dy,dz);
+
+	Mesh::Vertex_range::iterator v, v_end;
+	for (boost::tie(v,v_end) = shape.vertices(); v != v_end ; v++) {
+		idxInNewShape.insert(pair<vertex_descriptor, vertex_descriptor>(
+			*v, nShape.add_vertex(shape.point(*v) + translation)));
+	}
+
+	map<face_descriptor, int> nITexCoord;
+
+	Mesh::Face_range::iterator f, f_end;
+	for (boost::tie(f,f_end) = shape.faces(); f != f_end ; f++) {
+		vector<vertex_descriptor> vFace;
+
+		CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+    for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+        v != v_end; v++){
+    	vFace.push_back(*v);
+    }
+
+		face_descriptor nFace;
+
+		if (vFace.size() == 3)
+			nFace = nShape.add_face(idxInNewShape[vFace[0]],
+															idxInNewShape[vFace[1]],
+															idxInNewShape[vFace[2]]);
+		else // vFace.size() == 4
+			nFace = nShape.add_face(idxInNewShape[vFace[0]],
+															idxInNewShape[vFace[1]],
+															idxInNewShape[vFace[2]],
+															idxInNewShape[vFace[3]]);
+
+		nITexCoord.insert(pair<face_descriptor, int>( nFace, iTexCoord[*f] ));
+	}
+
+	Node* tr = new Node(shapeTree, this, true);
+	tr->setShape(nShape);
+	tr->setITexCoord(nITexCoord);
+	addChild(tr);
+	return tr;
+}
+
 Node* Node::extrude(Kernel::RT height) {
 	Mesh nShape;
   for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {

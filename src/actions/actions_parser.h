@@ -165,16 +165,17 @@ namespace ACT {
         STRING = 258,
         CODE = 259,
         DOUBLE = 260,
-        EXTRUDE = 261,
-        SPLIT = 262,
-        SELECT_FACES = 263,
-        SET_TEXTURE = 264,
-        REMOVE_FACES = 265,
-        BEG_PTRN = 266,
-        END_PTRN = 267,
-        RULE = 268,
-        DEADRULE = 269,
-        ACTIONS = 270
+        TRANSLATE = 261,
+        EXTRUDE = 262,
+        SPLIT = 263,
+        SELECT_FACES = 264,
+        SET_TEXTURE = 265,
+        REMOVE_FACES = 266,
+        BEG_PTRN = 267,
+        END_PTRN = 268,
+        RULE = 269,
+        DEADRULE = 270,
+        ACTIONS = 271
       };
     };
 
@@ -344,7 +345,7 @@ namespace ACT {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const signed char yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -456,13 +457,13 @@ namespace ACT {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 35,     ///< Last index in yytable_.
-      yynnts_ = 9,  ///< Number of nonterminal symbols.
+      yylast_ = 43,     ///< Last index in yytable_.
+      yynnts_ = 10,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 21, ///< Termination state number.
+      yyfinal_ = 24, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 18  ///< Number of tokens.
+      yyntokens_ = 20  ///< Number of tokens.
     };
 
 
@@ -474,7 +475,7 @@ namespace ACT {
 
 #line 5 "actions.y" // lalr1.cc:372
 } // ACT
-#line 478 "actions_parser.h" // lalr1.cc:372
+#line 479 "actions_parser.h" // lalr1.cc:372
 
 
 

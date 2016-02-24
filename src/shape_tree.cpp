@@ -74,7 +74,7 @@ void ACT::ShapeTree::outputGeometryOFF() {
 void ACT::ShapeTree::displayGeometryOFF() {
 	outputGeometryOFF();
 	if (execl("./viewer", "./viewer", NULL) == -1)
-		cerr << strerror(errno) << endl;
+		cerr << "Unable to launch viewer: " << strerror(errno) << endl;
 }
 
 void ACT::ShapeTree::outputGeometryOBJ() {
@@ -135,7 +135,7 @@ void ACT::ShapeTree::outputGeometryOBJ() {
 void ACT::ShapeTree::displayGeometryOBJ() {
 	outputGeometryOBJ();
 	if (execl("/usr/bin/meshlab", "meshlab", "./out.obj", NULL) == -1)
-		cerr << strerror(errno) << endl;
+		cerr << "Unable to launch mehslab: " << strerror(errno) << endl;
 }
 
 void ACT::ShapeTree::executeActions(const string& actions) {

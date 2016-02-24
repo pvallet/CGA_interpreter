@@ -47,6 +47,7 @@ public:
 	MeshResult getSubGeometry();
 	inline bool isFirstTimeSelect() {return firstTimeSelect;}
 
+	Node* translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz);
 	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
 	void selectFace(string face); // Only (x|y|z)(pos|neg), otherwise unselect everything
@@ -93,5 +94,5 @@ private:
 	bool firstTimeSelect;
 
 protected:
-	void setITexCoord(const map<face_descriptor, int>& _iTexCoord) {iTexCoord = _iTexCoord;}
+	inline void setITexCoord(const map<face_descriptor, int>& _iTexCoord) {iTexCoord = _iTexCoord;}
 };
