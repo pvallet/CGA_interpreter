@@ -1,7 +1,7 @@
 %{
   #include <iostream>
+  #include "split_pattern_scanner_internal.h"
   #include "split_pattern_parser.h"
-  #include "split_pattern_scanner.h"
 
   typedef SP::SP_Parser::token token;
 
@@ -9,7 +9,7 @@
 %}
 
 %option prefix="sp"
-%option outfile="split_pattern_lexer.cpp" header-file="split_pattern_lexer.h"
+%option outfile="split_pattern_scanner.cpp"
 %option debug
 %option noyywrap
 %option c++

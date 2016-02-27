@@ -51,12 +51,13 @@
 
 #line 53 "cgacode_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
-#line 18 "cgacode.y" // lalr1.cc:408
+#line 19 "cgacode.y" // lalr1.cc:408
 
   #include <iostream>
   #include <cstdlib>
   #include <fstream>
 
+	#include "cgacode_scanner.h"
 	#include "cgacode_driver.h"
 
 #undef yylex
@@ -67,7 +68,7 @@
 		std::string toStr(char* ptr);
 	}
 
-#line 71 "cgacode_parser.cpp" // lalr1.cc:408
+#line 72 "cgacode_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -134,7 +135,7 @@
 
 #line 5 "cgacode.y" // lalr1.cc:474
 namespace CC {
-#line 138 "cgacode_parser.cpp" // lalr1.cc:474
+#line 139 "cgacode_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
   CC_Parser::CC_Parser (CC_Scanner  &scanner_yyarg, CC_Driver   &driver_yyarg)
@@ -531,41 +532,41 @@ namespace CC {
   case 5:
 #line 68 "cgacode.y" // lalr1.cc:847
     {driver.initFromFile(toStr((yystack_[0].value.sval)));}
-#line 535 "cgacode_parser.cpp" // lalr1.cc:847
+#line 536 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 6:
 #line 69 "cgacode.y" // lalr1.cc:847
     {driver.setOutputFilename(toStr((yystack_[0].value.sval)));}
-#line 541 "cgacode_parser.cpp" // lalr1.cc:847
+#line 542 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 7:
 #line 70 "cgacode.y" // lalr1.cc:847
     {driver.setTextureFile(toStr((yystack_[0].value.sval)));}
-#line 547 "cgacode_parser.cpp" // lalr1.cc:847
+#line 548 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 8:
 #line 72 "cgacode.y" // lalr1.cc:847
     {driver.addTextureRect(toStr((yystack_[4].value.sval)), (yystack_[3].value.fval), (yystack_[2].value.fval), (yystack_[1].value.fval), (yystack_[0].value.fval));}
-#line 553 "cgacode_parser.cpp" // lalr1.cc:847
+#line 554 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 11:
 #line 81 "cgacode.y" // lalr1.cc:847
     {driver.addRule(toStr((yystack_[3].value.sval)), (yystack_[2].value.fval), toStr((yystack_[0].value.sval)));}
-#line 559 "cgacode_parser.cpp" // lalr1.cc:847
+#line 560 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
   case 12:
 #line 82 "cgacode.y" // lalr1.cc:847
     {driver.addRule(toStr((yystack_[2].value.sval)), 1, toStr((yystack_[0].value.sval)));}
-#line 565 "cgacode_parser.cpp" // lalr1.cc:847
+#line 566 "cgacode_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 569 "cgacode_parser.cpp" // lalr1.cc:847
+#line 570 "cgacode_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -899,7 +900,7 @@ namespace CC {
 
 #line 5 "cgacode.y" // lalr1.cc:1155
 } // CC
-#line 903 "cgacode_parser.cpp" // lalr1.cc:1155
+#line 904 "cgacode_parser.cpp" // lalr1.cc:1155
 #line 85 "cgacode.y" // lalr1.cc:1156
 
 

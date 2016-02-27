@@ -40,7 +40,7 @@
 #ifndef YY_ACT_ACTIONS_PARSER_H_INCLUDED
 # define YY_ACT_ACTIONS_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 8 "actions.y" // lalr1.cc:372
+#line 9 "actions.y" // lalr1.cc:372
 
 	namespace ACT {
 		class ACT_Scanner;

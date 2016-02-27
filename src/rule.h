@@ -21,7 +21,7 @@ public:
   inline const list<Node*>& getNodes() const {return affectedNodes;}
   string getActions(Node* node) const; // Chose action at random according to the weights
 
-public:
+private:
   string name;
   list<Node*> affectedNodes;
   map<Node*,string> additionalActions;

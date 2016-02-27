@@ -3,6 +3,7 @@
 %debug
 %defines "cgacode_parser.h"
 %define api.namespace{CC}
+%define api.prefix {cc}
 %define parser_class_name {CC_Parser}
 
 %code requires{
@@ -20,6 +21,7 @@
   #include <cstdlib>
   #include <fstream>
 
+	#include "cgacode_scanner.h"
 	#include "cgacode_driver.h"
 
 #undef yylex
@@ -30,8 +32,6 @@
 		std::string toStr(char* ptr);
 	}
 }
-
-%define api.prefix {cc}
 
 %output  "cgacode_parser.cpp"
 

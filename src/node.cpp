@@ -116,6 +116,23 @@ MeshResult Node::getSubGeometry() {
  	}
 }
 
+vector<Point_3> Node::getCeiling() {
+	list<face_descriptor> save = selectedFaces;
+
+	selectFace(""); selectFace("ypos");
+
+	vector<Point_3> result;
+
+	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+	for(boost::tie(v, v_end) = vertices_around_face(
+															shape.halfedge(selectedFaces.front()), shape);
+			v != v_end; v++){
+		result.push_back(shape.point(*v));
+	}
+
+	return result;
+}
+
 Node* Node::translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz) {
 	Mesh nShape;
 	map<vertex_descriptor, vertex_descriptor> idxInNewShape;

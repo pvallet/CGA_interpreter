@@ -70,7 +70,11 @@ public:
 	void split(char axis, string pattern);
 	void selectFaces(string expression); // For the moment only [(x|y|z)(pos|neg)] | all
 	void setTexture(string texture);
-	void removeFaces();
+	inline void removeFaces() {affectedNode = affectedNode->removeFaces();}
+	void roof();
+
+	inline void setRoofAngle(double _roofAngle) {roofAngle = _roofAngle;}
+	void computeRoof();
 
 	// weights.size() new textures are created, it returns the index to the 1st
 	int splitTexture(int texID, const vector<double>& weights, Orientation orientation);
@@ -91,6 +95,9 @@ private:
 	std::map<string, Rule*> rules;
 	OutputType outType;
 	string filename;
+
+	double roofAngle;
+	map<Kernel, Mesh> roofLevels;
 
 	string texturePath;
 	vector<Point_2> texCoord;

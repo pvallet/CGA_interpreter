@@ -1,8 +1,8 @@
 %{
   #include <iostream>
   #include <string>
+  #include "actions_scanner_internal.h"
   #include "actions_parser.h"
-  #include "actions_scanner.h"
   #include "../rule.h"
 
   typedef ACT::ACT_Parser::token token;
@@ -13,7 +13,7 @@
 %}
 
 %option prefix="act"
-%option outfile="actions_lexer.cpp" header-file="actions_lexer.h"
+%option outfile="actions_scanner.cpp"
 %option debug
 %option noyywrap
 %option c++

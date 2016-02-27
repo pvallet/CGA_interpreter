@@ -46,6 +46,7 @@ public:
 	inline bool isVisible() {return visible;}
 	MeshResult getSubGeometry();
 	inline bool isFirstTimeSelect() {return firstTimeSelect;}
+	vector<Point_3> getCeiling();
 
 	Node* translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz);
 	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape

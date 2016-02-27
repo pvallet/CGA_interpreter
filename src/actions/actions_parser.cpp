@@ -51,13 +51,14 @@
 
 #line 53 "actions_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
-#line 18 "actions.y" // lalr1.cc:408
+#line 19 "actions.y" // lalr1.cc:408
 
   #include <iostream>
   #include <cstdlib>
   #include <fstream>
 	#include <string>
 
+	#include "actions_scanner.h"
 	#include "../shape_tree.h"
 
 #undef yylex
@@ -67,7 +68,7 @@
 		std::string toStr(char* ptr);
 	}
 
-#line 71 "actions_parser.cpp" // lalr1.cc:408
+#line 72 "actions_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -134,7 +135,7 @@
 
 #line 5 "actions.y" // lalr1.cc:474
 namespace ACT {
-#line 138 "actions_parser.cpp" // lalr1.cc:474
+#line 139 "actions_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
   ACT_Parser::ACT_Parser (ACT_Scanner  &scanner_yyarg, ShapeTree &st_yyarg)
@@ -531,13 +532,13 @@ namespace ACT {
   case 10:
 #line 74 "actions.y" // lalr1.cc:847
     {st.addToRule(toStr((yystack_[0].value.sval)));}
-#line 535 "actions_parser.cpp" // lalr1.cc:847
+#line 536 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 11:
 #line 75 "actions.y" // lalr1.cc:847
     {st.addToRule(toStr((yystack_[1].value.sval)),toStr((yystack_[0].value.sval)));}
-#line 541 "actions_parser.cpp" // lalr1.cc:847
+#line 542 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 13:
@@ -546,25 +547,25 @@ namespace ACT {
 											strcpy(ss,(yystack_[1].value.sval)); free((yystack_[1].value.sval));
 											strcat(ss,(yystack_[0].value.sval)); free((yystack_[0].value.sval));
 											(yylhs.value.sval) = ss; }
-#line 550 "actions_parser.cpp" // lalr1.cc:847
+#line 551 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 14:
 #line 84 "actions.y" // lalr1.cc:847
     {(yylhs.value.sval) = strdup((yystack_[0].value.sval)); free((yystack_[0].value.sval));}
-#line 556 "actions_parser.cpp" // lalr1.cc:847
+#line 557 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 15:
 #line 88 "actions.y" // lalr1.cc:847
     {st.translate((yystack_[5].value.dval),(yystack_[3].value.dval),(yystack_[1].value.dval));}
-#line 562 "actions_parser.cpp" // lalr1.cc:847
+#line 563 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 16:
 #line 92 "actions.y" // lalr1.cc:847
     {st.extrude((yystack_[1].value.dval));}
-#line 568 "actions_parser.cpp" // lalr1.cc:847
+#line 569 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 17:
@@ -572,29 +573,29 @@ namespace ACT {
     {	char axis = (yystack_[4].value.sval)[0];
 		 	st.split(axis, toStr((yystack_[2].value.sval)) + toStr((yystack_[1].value.sval)) + toStr((yystack_[0].value.sval)));
 	 	}
-#line 576 "actions_parser.cpp" // lalr1.cc:847
+#line 577 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 18:
 #line 103 "actions.y" // lalr1.cc:847
     { st.selectFaces((yystack_[1].value.sval));}
-#line 582 "actions_parser.cpp" // lalr1.cc:847
+#line 583 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 19:
 #line 107 "actions.y" // lalr1.cc:847
     { st.removeFaces();}
-#line 588 "actions_parser.cpp" // lalr1.cc:847
+#line 589 "actions_parser.cpp" // lalr1.cc:847
     break;
 
   case 20:
 #line 111 "actions.y" // lalr1.cc:847
     { st.setTexture((yystack_[1].value.sval));}
-#line 594 "actions_parser.cpp" // lalr1.cc:847
+#line 595 "actions_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 598 "actions_parser.cpp" // lalr1.cc:847
+#line 599 "actions_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -941,7 +942,7 @@ namespace ACT {
 
 #line 5 "actions.y" // lalr1.cc:1155
 } // ACT
-#line 945 "actions_parser.cpp" // lalr1.cc:1155
+#line 946 "actions_parser.cpp" // lalr1.cc:1155
 #line 114 "actions.y" // lalr1.cc:1156
 
 

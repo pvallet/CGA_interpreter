@@ -3,6 +3,7 @@
 %debug
 %defines "split_pattern_parser.h"
 %define api.namespace{SP}
+%define api.prefix {sp}
 %define parser_class_name {SP_Parser}
 
 %code requires{
@@ -20,13 +21,12 @@
    #include <cstdlib>
    #include <fstream>
 
+	 #include "split_pattern_scanner.h"
 	 #include "split_pattern_driver.h"
 
 #undef yylex
 #define yylex scanner.splex
 }
-
-%define api.prefix {sp}
 
 %output  "split_pattern_parser.cpp"
 

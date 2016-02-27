@@ -3,6 +3,7 @@
 %debug
 %defines "actions_parser.h"
 %define api.namespace{ACT}
+%define api.prefix {act}
 %define parser_class_name {ACT_Parser}
 
 %code requires{
@@ -21,6 +22,7 @@
   #include <fstream>
 	#include <string>
 
+	#include "actions_scanner.h"
 	#include "../shape_tree.h"
 
 #undef yylex
@@ -30,8 +32,6 @@
 		std::string toStr(char* ptr);
 	}
 }
-
-%define api.prefix {act}
 
 %output  "actions_parser.cpp"
 

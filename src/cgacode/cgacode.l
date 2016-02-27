@@ -1,7 +1,7 @@
 %{
   #include <iostream>
+  #include "cgacode_scanner_internal.h"
   #include "cgacode_parser.h"
-  #include "cgacode_scanner.h"
 
   typedef CC::CC_Parser::token token;
 
@@ -9,11 +9,12 @@
 
   namespace CC {
     int line_num = 1;
+    int param_count = 0;
   }
 %}
 
 %option prefix="cc"
-%option outfile="cgacode_lexer.cpp" header-file="cgacode_lexer.h"
+%option outfile="cgacode_scanner.cpp"
 %option debug
 %option noyywrap
 %option c++
@@ -33,7 +34,7 @@ addTextureRect      { return token::ADD_TEXTURE_RECT;}
                       yylval->sval[strlen(yylval->sval) - 1] = '\0';
                       return token::STRING;}
 [0-9]+\.?[0-9]*     { yylval->fval = atof(yytext); return token::DOUBLE; }
-"%%"               { BEGIN(RULES); return token::SEPARATOR; }
+"%%"                { BEGIN(RULES); return token::SEPARATOR; }
 <RULES>[a-zA-Z][a-zA-Z0-9]* {
                       yylval->sval = strdup(yytext); return token::RULE_NAME;}
 <RULES>[0-9]+\.?[0-9]* {

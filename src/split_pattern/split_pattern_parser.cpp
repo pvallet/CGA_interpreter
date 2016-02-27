@@ -51,18 +51,19 @@
 
 #line 53 "split_pattern_parser.cpp" // lalr1.cc:407
 // Unqualified %code blocks.
-#line 18 "split_pattern.y" // lalr1.cc:408
+#line 19 "split_pattern.y" // lalr1.cc:408
 
    #include <iostream>
    #include <cstdlib>
    #include <fstream>
 
+	 #include "split_pattern_scanner.h"
 	 #include "split_pattern_driver.h"
 
 #undef yylex
 #define yylex scanner.splex
 
-#line 66 "split_pattern_parser.cpp" // lalr1.cc:408
+#line 67 "split_pattern_parser.cpp" // lalr1.cc:408
 
 
 #ifndef YY_
@@ -129,7 +130,7 @@
 
 #line 5 "split_pattern.y" // lalr1.cc:474
 namespace SP {
-#line 133 "split_pattern_parser.cpp" // lalr1.cc:474
+#line 134 "split_pattern_parser.cpp" // lalr1.cc:474
 
   /// Build a parser object.
   SP_Parser::SP_Parser (SP_Scanner  &scanner_yyarg, SP_Driver   &driver_yyarg)
@@ -526,13 +527,13 @@ namespace SP {
   case 2:
 #line 46 "split_pattern.y" // lalr1.cc:847
     {driver.wasConstScope();}
-#line 530 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 531 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 3:
 #line 47 "split_pattern.y" // lalr1.cc:847
     {driver.exitSubScope();}
-#line 536 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 537 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 4:
@@ -543,7 +544,7 @@ namespace SP {
 			driver.addElement(elmt);
 			driver.enterSubScope();
 		}
-#line 547 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 548 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 9:
@@ -555,7 +556,7 @@ namespace SP {
 		elmt->actions = std::string((yystack_[0].value.sval));
 		driver.addElement(elmt);
 	}
-#line 559 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 560 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
   case 10:
@@ -567,11 +568,11 @@ namespace SP {
 		elmt->actions = std::string((yystack_[0].value.sval));
 		driver.addElement(elmt);
 	}
-#line 571 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 572 "split_pattern_parser.cpp" // lalr1.cc:847
     break;
 
 
-#line 575 "split_pattern_parser.cpp" // lalr1.cc:847
+#line 576 "split_pattern_parser.cpp" // lalr1.cc:847
             default:
               break;
             }
@@ -897,7 +898,7 @@ namespace SP {
 
 #line 5 "split_pattern.y" // lalr1.cc:1155
 } // SP
-#line 901 "split_pattern_parser.cpp" // lalr1.cc:1155
+#line 902 "split_pattern_parser.cpp" // lalr1.cc:1155
 #line 88 "split_pattern.y" // lalr1.cc:1156
 
 

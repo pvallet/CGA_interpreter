@@ -271,8 +271,21 @@ void ACT::ShapeTree::setTexture(string texture) {
 		affectedNode->setTexture(textures[texture]);
 }
 
-void ACT::ShapeTree::removeFaces() {
-	affectedNode = affectedNode->removeFaces();
+void ACT::ShapeTree::roof() {
+	// vector<Point_3> ceiling = affectedNode->getCeiling();
+	// vector<vertex_descriptor> newIndices;
+	//
+	// for (unsigned int i = 0 ; i < ceiling.size() ; i++) {
+	// 	newIndices.push_back(roofLevels[ceiling.front().y()].add_vertex(ceiling[i]));
+	// }
+	//
+	// if (ceiling.size() == 4) {
+	//
+	// }
+}
+
+void ACT::ShapeTree::computeRoof() {
+
 }
 
 // base[0] = texCoord[texID]

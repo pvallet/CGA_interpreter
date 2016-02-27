@@ -20,7 +20,7 @@ clean:
 	rm -f *~ $(EXE) $(OBJS) $(OBJS2) $(OBJS3) $(OBJS4)
 
 rm_parsers:
-	cd src/ ;	for d in $(DIRS); do (cd $$d ; rm -f *_parser* *_lexer* stack.hh) done
+	cd src/ ;	for d in $(DIRS); do (cd $$d ; rm -f *_parser* *_scanner.cpp stack.hh) done
 
 gen_parsers:
 	cd src/ ;	for d in $(DIRS); do (cd $$d ; flex -d *.l ; bison *.y) done
@@ -32,9 +32,9 @@ obj/main.o: src/main.cpp
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
 obj/%.o: src/%.cpp src/%.h
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
-obj/actions/%.o: src/actions/%.cpp src/actions/%.h
+obj/actions/%.o: src/actions/%.cpp
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
-obj/split_pattern/%.o: src/split_pattern/%.cpp src/split_pattern/%.h
+obj/split_pattern/%.o: src/split_pattern/%.cpp
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
-obj/cgacode/%.o: src/split_pattern/%.cpp src/split_pattern/%.h
+obj/cgacode/%.o: src/cgacode/%.cpp
 	g++ -c $< -o $@ $(LIBS) $(CFLAGS)

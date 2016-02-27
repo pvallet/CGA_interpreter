@@ -36,4 +36,4 @@ private:
   string initRule;
 };
 
-} /* End nameCCace CC */
+} /* End namespace CC */

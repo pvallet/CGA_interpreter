@@ -40,7 +40,7 @@
 #ifndef YY_CC_CGACODE_PARSER_H_INCLUDED
 # define YY_CC_CGACODE_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 8 "cgacode.y" // lalr1.cc:372
+#line 9 "cgacode.y" // lalr1.cc:372
 
 	namespace CC {
 		class CC_Scanner;

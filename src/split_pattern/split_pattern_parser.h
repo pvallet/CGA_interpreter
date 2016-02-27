@@ -40,7 +40,7 @@
 #ifndef YY_SP_SPLIT_PATTERN_PARSER_H_INCLUDED
 # define YY_SP_SPLIT_PATTERN_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
-#line 8 "split_pattern.y" // lalr1.cc:372
+#line 9 "split_pattern.y" // lalr1.cc:372
 
 	namespace SP {
 		class SP_Scanner;
