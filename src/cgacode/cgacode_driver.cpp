@@ -1,4 +1,5 @@
 #include "cgacode_driver.h"
+#include <cmath>
 #include <fstream>
 
 CC::CC_Driver::CC_Driver(ACT::ShapeTree* _shapeTree) :
@@ -54,6 +55,10 @@ void CC::CC_Driver::initFromFile(const string& path) {
   shapeTree->initFromFile(path);
 }
 
+void CC::CC_Driver::initFromRect(double x, double y) {
+  shapeTree->initFromRect(x,y);
+}
+
 void CC::CC_Driver::setOutputFilename(const string& filename) {
   shapeTree->setOutputFilename(filename);
 }
@@ -64,6 +69,28 @@ void CC::CC_Driver::setTextureFile(const string& path) {
 
 void CC::CC_Driver::addTextureRect(const string& name, double x0, double y0, double x1, double y1) {
   shapeTree->addTextureRect(name, x0, y0, x1, y1);
+}
+
+void CC::CC_Driver::setRoofAngle(double angle) {
+  shapeTree->setRoofAngle(angle*M_PI/180);
+}
+
+void CC::CC_Driver::setRecDepth(const string& ruleName, double depth) {
+  if (rules.find(ruleName) == rules.end())
+    std::cerr << "Error: trying to access to rule: " << ruleName
+              << " which is not declared yet." << std::endl;
+
+  else
+    rules[ruleName]->setRecDepth(depth);
+}
+
+void CC::CC_Driver::setFallback(const string& ruleName, const string& fallback) {
+  if (rules.find(ruleName) == rules.end())
+    std::cerr << "Error: trying to access to rule: " << ruleName
+              << " which is not declared yet." << std::endl;
+
+  else
+    rules[ruleName]->setFallback(fallback);
 }
 
 void CC::CC_Driver::addRule(const string& name, double weight, const string& body) {

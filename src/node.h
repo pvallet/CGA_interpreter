@@ -4,19 +4,9 @@
 #include <list>
 #include <string>
 
-#include <CGAL/Simple_cartesian.h>
-#include <CGAL/Surface_mesh.h>
+#include "utils.h"
 
 using namespace std;
-
-typedef CGAL::Simple_cartesian<double>     	Kernel;
-typedef Kernel::Point_3						Point_3;
-typedef Kernel::Point_2						Point_2;
-typedef Kernel::Vector_3					Vector_3;
-typedef CGAL::Surface_mesh<Point_3>        	Mesh;
-typedef Mesh::Vertex_index 				vertex_descriptor;
-typedef Mesh::Halfedge_index 			halfedge_descriptor;
-typedef Mesh::Face_index 					face_descriptor;
 
 typedef struct MeshResult {
 	Mesh mesh;
@@ -37,7 +27,7 @@ public:
 
 	void selectAllFaces();
 	void noTexture();
-	void load(string path);
+	void load(const string& path);
 	void setShape(Mesh _shape);
 	void setVisible(bool _visible);
 	inline void setParent(Node* _parent) {parent = _parent;}
@@ -46,12 +36,12 @@ public:
 	inline bool isVisible() {return visible;}
 	MeshResult getSubGeometry();
 	inline bool isFirstTimeSelect() {return firstTimeSelect;}
-	vector<Point_3> getCeiling();
+	void getCeiling(vector<vector<Point_3> >& result);
 
 	Node* translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz);
 	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
-	void selectFace(string face); // Only (x|y|z)(pos|neg), otherwise unselect everything
+	void selectFace(const string& face); // Only (x|y|z)(pos|neg), otherwise unselect everything
 	void setTexture(int indexFirstCoord);
 	Node* removeFaces();
 

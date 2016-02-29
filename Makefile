@@ -5,7 +5,7 @@ SRCS2 =	$(wildcard src/actions/*.cpp)
 SRCS3 =	$(wildcard src/split_pattern/*.cpp)
 SRCS4 =	$(wildcard src/cgacode/*.cpp)
 
-LIBS	=  -lCGAL
+LIBS	=  -lCGAL -lCGAL_Core -lmpfr -lgmp -lboost_thread -lboost_system
 CFLAGS = -Wall -std=c++11 -g -frounding-math
 
 OBJS	= $(addprefix obj/,$(notdir $(SRCS:.cpp=.o)))
@@ -29,12 +29,12 @@ obj:
 	mkdir obj; cd obj; for d in $(DIRS); do (mkdir $$d) done
 
 obj/main.o: src/main.cpp
-	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
+	g++ -c $< -o $@ $(CFLAGS)
 obj/%.o: src/%.cpp src/%.h
-	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
+	g++ -c $< -o $@ $(CFLAGS)
 obj/actions/%.o: src/actions/%.cpp
-	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
+	g++ -c $< -o $@ $(CFLAGS)
 obj/split_pattern/%.o: src/split_pattern/%.cpp
-	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
+	g++ -c $< -o $@ $(CFLAGS)
 obj/cgacode/%.o: src/cgacode/%.cpp
-	g++ -c $< -o $@ $(LIBS) $(CFLAGS)
+	g++ -c $< -o $@ $(CFLAGS)

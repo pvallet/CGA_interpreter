@@ -1,6 +1,8 @@
 #include "shape_tree.h"
+#include "custom_join.h"
 
 #include <cerrno>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 
@@ -14,11 +16,28 @@ ACT::ShapeTree::ShapeTree() :
 {
 }
 
-void ACT::ShapeTree::initFromFile(string path) {
+void ACT::ShapeTree::initFromFile(const string& path) {
 	root.load(path);
 }
 
-void ACT::ShapeTree::setOutputFilename(string _filename) {
+void ACT::ShapeTree::initFromRect(double x, double y) {
+	Mesh axiom;
+	vector<vertex_descriptor> vertices;
+
+	vertices.push_back(axiom.add_vertex(Point_3(-x/2, 0, -y/2)));
+	vertices.push_back(axiom.add_vertex(Point_3(-x/2, 0,  y/2)));
+	vertices.push_back(axiom.add_vertex(Point_3( x/2, 0,  y/2)));
+	vertices.push_back(axiom.add_vertex(Point_3( x/2, 0, -y/2)));
+
+	axiom.add_face(	vertices[0],
+									vertices[1],
+									vertices[2],
+									vertices[3]);
+
+	root.setShape(axiom);
+}
+
+void ACT::ShapeTree::setOutputFilename(const string& _filename) {
 	filename = _filename;
 	string extension = filename.substr(filename.size()-4);
 
@@ -32,11 +51,11 @@ void ACT::ShapeTree::setOutputFilename(string _filename) {
 	}
 }
 
-void ACT::ShapeTree::setTextureFile(string path) {
+void ACT::ShapeTree::setTextureFile(const string& path) {
 	texturePath = path;
 }
 
-void ACT::ShapeTree::addTextureRect(string name, double x0, double y0, double x1, double y1) {
+void ACT::ShapeTree::addTextureRect(const string& name, double x0, double y0, double x1, double y1) {
 	textures[name] = texCoord.size();
 
 	addTextureCoord(x0, y0, x1, y1);
@@ -67,13 +86,14 @@ void ACT::ShapeTree::outputGeometryOFF() {
   ofstream output;
 	output.open(filename, ios::trunc);
 	MeshResult res = root.getSubGeometry();
+	res.mesh += roof;
 	output << res.mesh;
 	output.close();
 }
 
 void ACT::ShapeTree::displayGeometryOFF() {
 	outputGeometryOFF();
-	if (execl("./viewer", "./viewer", NULL) == -1)
+	if (execl("./mview", "./mview", "filename", NULL) == -1)
 		cerr << "Unable to launch viewer: " << strerror(errno) << endl;
 }
 
@@ -178,12 +198,12 @@ void ACT::ShapeTree::addRule(Rule* rule) {
 	rules.insert(pair<string, Rule*>(rule->getName(), rule));
 }
 
-void ACT::ShapeTree::setInitRule(string ruleName) {
+void ACT::ShapeTree::setInitRule(const string& ruleName) {
 	affectedNode = &root;
 	addToRule(ruleName);
 }
 
-void ACT::ShapeTree::addToRule(string ruleName, string actions) {
+void ACT::ShapeTree::addToRule(const string& ruleName, const string& actions) {
 	bool active = false;
 	for (auto it = activeRules.begin() ; it != activeRules.end() ; it++) {
 		if ((*it)->getName() == ruleName) {
@@ -194,8 +214,22 @@ void ACT::ShapeTree::addToRule(string ruleName, string actions) {
 
 	if (!active) {
 		if (rules.find(ruleName) != rules.end()) { // else don't do anything
-			activeRules.push_back(new Rule(*rules[ruleName]));
-			activeRules.back()->addNode(affectedNode);
+			if (rules[ruleName]->getRecDepth() > 0) {
+				activeRules.push_back(new Rule(*rules[ruleName]));
+				activeRules.back()->addNode(affectedNode, actions);
+				rules[ruleName]->setRecDepth(rules[ruleName]->getRecDepth() - 1);
+			}
+
+			else if (rules[ruleName]->getRecDepth() == -1) {
+				activeRules.push_back(new Rule(*rules[ruleName]));
+				activeRules.back()->addNode(affectedNode, actions);
+			}
+
+			else {
+				activeRules.push_back(new Rule(*rules[ruleName]));
+				activeRules.back()->setFallbackMode(true);
+				activeRules.back()->addNode(affectedNode, actions);
+			}
 		}
 	}
 }
@@ -205,9 +239,12 @@ int ACT::ShapeTree::executeRule() {
 		for (	auto it = activeRules.front()->getNodes().begin() ;
 					it != activeRules.front()->getNodes().end() ; it++) {
 			affectedNode = *it;
+			std::cout << activeRules.front()->getName() << " " <<
+									 activeRules.front()->getActions(*it) << std::endl;
 			executeActions(activeRules.front()->getActions(*it));
 		}
-		//delete activeRules.front();
+
+		delete activeRules.front();
 		activeRules.pop_front();
 		return 0;
 	}
@@ -216,7 +253,7 @@ int ACT::ShapeTree::executeRule() {
 		return -1;
 }
 
-void ACT::ShapeTree::split(char axis, string pattern) {
+void ACT::ShapeTree::split(char axis, const string& pattern) {
 	vector<Node*> resultNodes;
 	vector<string> resultActions;
 
@@ -241,7 +278,7 @@ void ACT::ShapeTree::split(char axis, string pattern) {
 	affectedNode = save;
 }
 
-void ACT::ShapeTree::selectFaces(string expression) {
+void ACT::ShapeTree::selectFaces(const string& expression) {
 	if (affectedNode->isFirstTimeSelect())
 		affectedNode->selectFace("");
 
@@ -264,28 +301,75 @@ void ACT::ShapeTree::selectFaces(string expression) {
 		affectedNode->selectFace(expression);
 }
 
-void ACT::ShapeTree::setTexture(string texture) {
+void ACT::ShapeTree::setTexture(const string& texture) {
 	if (textures.find(texture) == textures.end())
 		affectedNode->noTexture();
 	else
 		affectedNode->setTexture(textures[texture]);
 }
 
-void ACT::ShapeTree::roof() {
-	// vector<Point_3> ceiling = affectedNode->getCeiling();
-	// vector<vertex_descriptor> newIndices;
-	//
-	// for (unsigned int i = 0 ; i < ceiling.size() ; i++) {
-	// 	newIndices.push_back(roofLevels[ceiling.front().y()].add_vertex(ceiling[i]));
-	// }
-	//
-	// if (ceiling.size() == 4) {
-	//
-	// }
+void ACT::ShapeTree::addToRoof() {
+	vector<vector<Point_3> > ceiling;
+	affectedNode->getCeiling(ceiling);
+
+	for (unsigned int i = 0 ; i < ceiling.size() ; i++) {
+		Kernel::FT level = ceiling[i].front().y();
+
+		Polygon_2 newPieceOfRoof;
+
+		for (int j = ceiling[i].size()-1 ; j >= 0 ; j--) {
+			newPieceOfRoof.push_back(Point_2(ceiling[i][j].x(), ceiling[i][j].z()));
+		}
+
+		roofLevels[level].push_back(Polygon_with_holes_2(newPieceOfRoof));
+
+		std::list<Polygon_with_holes_2> res;
+		CstmCGAL::join (roofLevels[level], res);
+
+		roofLevels[level] = res;
+
+		auto it = roofLevels.find(level);
+		auto prev = it;
+
+		if (it != roofLevels.begin()) {
+			do {
+				it--;
+				list<Polygon_with_holes_2> res;
+				CstmCGAL::join (it->second, prev->second,	res);
+				it->second = res;
+				prev--;
+			} while (it != roofLevels.begin());
+		}
+	}
 }
 
 void ACT::ShapeTree::computeRoof() {
+	// We run through the loop in reverse to be able to remove useless geometry in a future version
+	for (auto lvl = roofLevels.rbegin() ; lvl != roofLevels.rend() ; lvl++) {
+		for (auto it = lvl->second.begin() ; it != lvl->second.end() ; it++) {
+			SsPtr iss = CGAL::create_interior_straight_skeleton_2(*it);
+			map<Ss::Vertex_const_handle, vertex_descriptor> vertices;
 
+		  for ( Ss::Vertex_const_iterator v = iss->vertices_begin(); v != iss->vertices_end(); v++ ) {
+		    vertices.insert(pair<Ss::Vertex_const_handle, vertex_descriptor>(
+		      v, roof.add_vertex(Point_3(v->point().x(), lvl->first + tan(roofAngle)*v->time(), v->point().y())) ));
+		  }
+
+		  for ( Ss::Face_const_iterator f = iss->faces_begin(); f != iss->faces_end(); ++f ) {
+		    vector<vertex_descriptor> face;
+		    Ss::Halfedge_const_handle hbegin = f->halfedge();
+		    Ss::Halfedge_const_handle h = hbegin;
+		    do {
+		      face.push_back(vertices[h->vertex()]);
+		      h = h->prev();
+		    } while (h != hbegin);
+
+				roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
+		    // face_descriptor newf = roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
+				// CstmCGAL::splitFace(roof, newf);
+		  }
+		}
+	}
 }
 
 // base[0] = texCoord[texID]

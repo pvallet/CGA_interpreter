@@ -42,10 +42,14 @@
 }
 
 %token				INIT_FROM_FILE
+%token				INIT_FROM_RECT
 %token				SET_OUTPUT_FILENAME
 %token 				SET_TEXTURE_FILE
 %token				ADD_TEXTURE_RECT
+%token				SET_ROOF_ANGLE
 %token				SEPARATOR
+%token				SET_REC_DEPTH
+%token				FALLBACK
 %token <sval> RULE_NAME
 %token <fval> WEIGHT
 %token				RULE
@@ -65,11 +69,13 @@ commands:
 	;
 
 command:
-	INIT_FROM_FILE STRING					{driver.initFromFile(toStr($2));}
-	| SET_OUTPUT_FILENAME STRING	{driver.setOutputFilename(toStr($2));}
-	| SET_TEXTURE_FILE STRING 		{driver.setTextureFile(toStr($2));}
+	INIT_FROM_FILE STRING						{driver.initFromFile(toStr($2));}
+	| INIT_FROM_RECT DOUBLE DOUBLE	{driver.initFromRect($2,$3);}
+	| SET_OUTPUT_FILENAME STRING		{driver.setOutputFilename(toStr($2));}
+	| SET_TEXTURE_FILE STRING 			{driver.setTextureFile(toStr($2));}
 	| ADD_TEXTURE_RECT STRING DOUBLE DOUBLE DOUBLE DOUBLE
 		{driver.addTextureRect(toStr($2), $3, $4, $5, $6);}
+	| SET_ROOF_ANGLE DOUBLE					{driver.setRoofAngle($2);}
 	;
 
 rules:
@@ -78,8 +84,14 @@ rules:
 	;
 
 rule:
-	RULE_NAME WEIGHT RULE RULE_BODY		{driver.addRule(toStr($1), $2, toStr($4));}
-	| RULE_NAME RULE RULE_BODY				{driver.addRule(toStr($1), 1, toStr($3));}
+	SET_REC_DEPTH RULE_NAME WEIGHT 			{driver.setRecDepth(toStr($2), $3);}
+	| FALLBACK RULE_NAME RULE RULE_BODY	{driver.setFallback(toStr($2), toStr($4));}
+	| rule_declaration
+	;
+
+rule_declaration:
+	RULE_NAME WEIGHT RULE RULE_BODY			{driver.addRule(toStr($1), $2, toStr($4));}
+	| RULE_NAME RULE RULE_BODY					{driver.addRule(toStr($1), 1, toStr($3));}
 	;
 
 %%

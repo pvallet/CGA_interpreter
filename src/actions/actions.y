@@ -49,6 +49,7 @@
 %token				SELECT_FACES
 %token				SET_TEXTURE
 %token				REMOVE_FACES
+%token				ROOF
 %token <sval> BEG_PTRN
 %token <sval> END_PTRN
 %token <sval> RULE
@@ -71,6 +72,7 @@ action:
 	| setTexture
 	| selectFaces
 	| removeFaces
+	| ROOF '(' ')'		{st.addToRoof();}
 	| RULE						{st.addToRule(toStr($1));}
 	| RULE ACTIONS		{st.addToRule(toStr($1),toStr($2));}
 	| DEADRULE

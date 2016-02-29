@@ -20,9 +20,14 @@ public:
   string parseFile( const string& fileName );
 
   void initFromFile(const string& path);
+  void initFromRect(double x, double y);
   void setOutputFilename(const string& filename);
   void setTextureFile(const string& path);
   void addTextureRect(const string& name, double x0, double y0, double x1, double y1);
+  void setRoofAngle(double angle); // Also converts angle from degrees to radians
+
+  void setRecDepth(const string& ruleName, double depth);
+  void setFallback(const string& ruleName, const string& fallback);
 
   void addRule(const string& name, double weight, const string& body);
 

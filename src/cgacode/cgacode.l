@@ -27,14 +27,18 @@
 
 [ \r\t]*				    ;
 initFromFile        { return token::INIT_FROM_FILE;}
+initFromRect        { return token::INIT_FROM_RECT;}
 setOutputFilename   { return token::SET_OUTPUT_FILENAME;}
 setTextureFile      { return token::SET_TEXTURE_FILE;}
 addTextureRect      { return token::ADD_TEXTURE_RECT;}
+setRoofAngle        { return token::SET_ROOF_ANGLE;}
 \"[^\n"]*\"         { yylval->sval = strdup(&yytext[1]);
                       yylval->sval[strlen(yylval->sval) - 1] = '\0';
                       return token::STRING;}
 [0-9]+\.?[0-9]*     { yylval->fval = atof(yytext); return token::DOUBLE; }
 "%%"                { BEGIN(RULES); return token::SEPARATOR; }
+<RULES>setRecDepth  { return token::SET_REC_DEPTH;}
+<RULES>fallback     { return token::FALLBACK;}
 <RULES>[a-zA-Z][a-zA-Z0-9]* {
                       yylval->sval = strdup(yytext); return token::RULE_NAME;}
 <RULES>[0-9]+\.?[0-9]* {

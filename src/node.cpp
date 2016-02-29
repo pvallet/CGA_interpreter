@@ -39,7 +39,7 @@ void Node::noTexture() {
 	}
 }
 
-void Node::load(string path) {
+void Node::load(const string& path) {
 	ifstream input;
 	input.open(path);
 	input >> shape;
@@ -116,21 +116,22 @@ MeshResult Node::getSubGeometry() {
  	}
 }
 
-vector<Point_3> Node::getCeiling() {
+void Node::getCeiling(vector<vector<Point_3> >& result) {
 	list<face_descriptor> save = selectedFaces;
 
 	selectFace(""); selectFace("ypos");
 
-	vector<Point_3> result;
-
-	CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-	for(boost::tie(v, v_end) = vertices_around_face(
-															shape.halfedge(selectedFaces.front()), shape);
-			v != v_end; v++){
-		result.push_back(shape.point(*v));
+	for (auto f = selectedFaces.begin() ; f != selectedFaces.end() ; f++) {
+		vector<Point_3> 					innerResult;
+		CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+		for(boost::tie(v, v_end) = vertices_around_face(shape.halfedge(*f), shape);
+				v != v_end; v++){
+			innerResult.push_back(shape.point(*v));
+		}
+		result.push_back(innerResult);
 	}
 
-	return result;
+	selectedFaces = save;
 }
 
 Node* Node::translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz) {
@@ -527,73 +528,81 @@ void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, strin
 		vertices.push_back(*v);
 	}
 
-	switch(axis) {
-		case X:
-			struct CompX compX; compX.shape = &shape;
-			sort(vertices.begin(), vertices.end(), compX);
-			driver.computePattern(shape.point(vertices.back()).x()
-													- shape.point(vertices.front()).x());
-			break;
-		case Y:
-			struct CompY compY; compY.shape = &shape;
-			sort(vertices.begin(), vertices.end(), compY);
-			driver.computePattern(shape.point(vertices.back()).y()
-													- shape.point(vertices.front()).y());
-			break;
-		case Z:
-			struct CompZ compZ; compZ.shape = &shape;
-			sort(vertices.begin(), vertices.end(), compZ);
-			driver.computePattern(shape.point(vertices.back()).z()
-													- shape.point(vertices.front()).z());
-			break;
+	if (!vertices.empty()) {
+
+		switch(axis) {
+			case X:
+				struct CompX compX; compX.shape = &shape;
+				sort(vertices.begin(), vertices.end(), compX);
+				driver.computePattern(shape.point(vertices.back()).x()
+														- shape.point(vertices.front()).x());
+				break;
+			case Y:
+				struct CompY compY; compY.shape = &shape;
+				sort(vertices.begin(), vertices.end(), compY);
+				driver.computePattern(shape.point(vertices.back()).y()
+														- shape.point(vertices.front()).y());
+				break;
+			case Z:
+				struct CompZ compZ; compZ.shape = &shape;
+				sort(vertices.begin(), vertices.end(), compZ);
+				driver.computePattern(shape.point(vertices.back()).z()
+														- shape.point(vertices.front()).z());
+				break;
+		}
+
+		// Useful variables
+
+		vector<double> weights = driver.getWeights();
+		actions = driver.getActions();
+
+		vector<map<vertex_descriptor, vertex_descriptor> > matchVertexIn; // Matches a vertex of shape to a vertex of a sub shape
+		matchVertexIn.resize(weights.size());
+
+		vector<Mesh> nShapes;
+		nShapes.resize(weights.size());
+
+		// Distribute Vertices
+
+		switch(axis) {
+			case X:
+				distributeX(&matchVertexIn, &nShapes, vertices, weights);
+				break;
+			case Y:
+				distributeY(&matchVertexIn, &nShapes, vertices, weights);
+				break;
+			case Z:
+				distributeZ(&matchVertexIn, &nShapes, vertices, weights);
+				break;
+		}
+
+		// Reconstruct faces
+
+		reconstruct(matchVertexIn, weights, &nShapes);
+
+		// Store results
+
+		Node* subd = new Node(shapeTree, this, true);
+		subd->setShape(shape);
+
+		nodes.resize(weights.size());
+
+		for (unsigned int i = 0 ; i < nShapes.size() ; i++) {
+			nodes[i] = new Node(shapeTree, subd, true);
+			nodes[i]->setShape(nShapes[i]);
+			subd->addChild(nodes[i]);
+		}
+
+		// Set right textures in subnodes
+		preserveTextures(axis, nodes, weights);
+
+		addChild(subd);
 	}
 
-	// Useful variables
-
-	vector<double> weights = driver.getWeights();
-	actions = driver.getActions();
-
-	vector<map<vertex_descriptor, vertex_descriptor> > matchVertexIn; // Matches a vertex of shape to a vertex of a sub shape
-	matchVertexIn.resize(weights.size());
-
-	vector<Mesh> nShapes;
-	nShapes.resize(weights.size());
-
-	// Distribute Vertices
-
-	switch(axis) {
-		case X:
-			distributeX(&matchVertexIn, &nShapes, vertices, weights);
-			break;
-		case Y:
-			distributeY(&matchVertexIn, &nShapes, vertices, weights);
-			break;
-		case Z:
-			distributeZ(&matchVertexIn, &nShapes, vertices, weights);
-			break;
+	else { // Vertices.emtpy() == true
+		nodes.clear();
+		actions.clear();
 	}
-
-	// Reconstruct faces
-
-	reconstruct(matchVertexIn, weights, &nShapes);
-
-	// Store results
-
-	Node* subd = new Node(shapeTree, this, true);
-	subd->setShape(shape);
-
-	nodes.resize(weights.size());
-
-	for (unsigned int i = 0 ; i < nShapes.size() ; i++) {
-		nodes[i] = new Node(shapeTree, subd, true);
-		nodes[i]->setShape(nShapes[i]);
-		subd->addChild(nodes[i]);
-	}
-
-	// Set right textures in subnodes
-	preserveTextures(axis, nodes, weights);
-
-	addChild(subd);
 }
 
 string Node::getFaceString(face_descriptor f) {
@@ -624,7 +633,7 @@ string Node::getFaceString(face_descriptor f) {
 	return "";
 }
 
-void Node::selectFace(string face) {
+void Node::selectFace(const string& face) {
 	firstTimeSelect = false;
 	bool clear = true;
 

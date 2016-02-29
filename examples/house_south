@@ -1,0 +1,39 @@
+initFromRect 10 10
+setRoofAngle 20
+
+%%
+
+Foundations --> split("x") {~1: EdgeZ1 | ~2: Center1 | ~1: Garage } ;;
+
+Garage --> split("z") {~3: EdgeZ1 | 3: GrowLevel roof()} ;;
+
+Center1 --> split("z") {~1.5: Edge1 | ~3: Room} ;;
+
+EdgeZ1 --> split("z") {~2: Edge1 | ~1: Edge1} ;;
+EdgeZ1 --> split("z") {~1: Edge1 | ~3: Edge1} ;;
+EdgeZ1 --> Edge1 ;;
+
+EdgeZ2 --> split("z") {~2: Edge2 | ~1: Edge2} ;;
+EdgeZ2 --> split("z") {~1: Edge2 | ~3: Edge2} ;;
+EdgeZ2 --> Edge2 ;;
+
+Edge1 --> Nothing ;;
+Edge1 --> GrowLevel roof() ;;
+
+Edge2 --> Terrace ;;
+Edge2 --> roof() ;;
+Edge2 --> GrowLevel roof() ;;
+
+Terrace --> selectFaces("") selectFaces("ypos") extrude(0.8) selectFaces("ypos") removeFaces() ;;
+
+Room --> GrowLevel roof() ;;
+Room --> GrowLevel Center ;;
+
+Center    --> split("z") {~1:Edge2 | ~3:Room} ;;
+Center    --> split("z") {~3:Room | ~1:Edge2} ;;
+Center 3  --> Room ;;
+
+GrowLevel --> selectFaces("") selectFaces("ypos") extrude(3) ;;
+
+setRecDepth GrowLevel 3
+fallback GrowLevel --> roof() ;;

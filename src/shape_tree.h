@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <list>
 
 #include "rule.h"
 #include "node.h"
@@ -49,29 +50,30 @@ public:
 
 	inline Node* getRoot() {return &root;}
 
-	void initFromFile(string path);
-	void setOutputFilename(string _filename);
-	void setTextureFile(string path);
+	void initFromFile(const string& path);
+	void initFromRect(double x, double y);
+	void setOutputFilename(const string& _filename);
+	void setTextureFile(const string& path);
 	// Name a sub rectangle of the texture file that will constitute a texture to be applied
-	void addTextureRect(string name, double x0, double y0, double x1, double y1);
+	void addTextureRect(const string& name, double x0, double y0, double x1, double y1);
 
 	void outputGeometry();
 	void displayGeometry();
 
 	void addRule(Rule* rule);
-	void setInitRule(string rule);
+	void setInitRule(const string& rule);
 
 	int executeRule(); // Returns -1 if there is no more rule to be executed
 
 	// Apply actions to the affected node
-	void addToRule(string rule, string actions = string());
+	void addToRule(const string& rule, const string& actions = string());
 	inline void translate(double dx, double dy, double dz) {affectedNode = affectedNode->translate(dx,dy,dz);}
 	inline void extrude(double value) {affectedNode = affectedNode->extrude(value);}
-	void split(char axis, string pattern);
-	void selectFaces(string expression); // For the moment only [(x|y|z)(pos|neg)] | all
-	void setTexture(string texture);
+	void split(char axis, const string& pattern);
+	void selectFaces(const string& expression); // For the moment only [(x|y|z)(pos|neg)] | all
+	void setTexture(const string& texture);
 	inline void removeFaces() {affectedNode = affectedNode->removeFaces();}
-	void roof();
+	void addToRoof();
 
 	inline void setRoofAngle(double _roofAngle) {roofAngle = _roofAngle;}
 	void computeRoof();
@@ -97,7 +99,8 @@ private:
 	string filename;
 
 	double roofAngle;
-	map<Kernel, Mesh> roofLevels;
+	map<Kernel::FT, list<Polygon_with_holes_2> > roofLevels;
+	Mesh roof;
 
 	string texturePath;
 	vector<Point_2> texCoord;
