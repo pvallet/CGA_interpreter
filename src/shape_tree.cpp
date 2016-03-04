@@ -16,6 +16,11 @@ ACT::ShapeTree::ShapeTree() :
 {
 }
 
+ACT::ShapeTree::~ShapeTree() {
+	// for (auto it = rules.begin() ; it != rules.end() ; it++)
+	// 	delete it->second;
+}
+
 void ACT::ShapeTree::initFromFile(const string& path) {
 	root.load(path);
 }
@@ -239,8 +244,8 @@ int ACT::ShapeTree::executeRule() {
 		for (	auto it = activeRules.front()->getNodes().begin() ;
 					it != activeRules.front()->getNodes().end() ; it++) {
 			affectedNode = *it;
-			std::cout << activeRules.front()->getName() << " " <<
-									 activeRules.front()->getActions(*it) << std::endl;
+			// std::cout << activeRules.front()->getName() << " " <<
+			// 						 activeRules.front()->getActions(*it) << std::endl;
 			executeActions(activeRules.front()->getActions(*it));
 		}
 
@@ -347,12 +352,17 @@ void ACT::ShapeTree::computeRoof() {
 	// We run through the loop in reverse to be able to remove useless geometry in a future version
 	for (auto lvl = roofLevels.rbegin() ; lvl != roofLevels.rend() ; lvl++) {
 		for (auto it = lvl->second.begin() ; it != lvl->second.end() ; it++) {
-			SsPtr iss = CGAL::create_interior_straight_skeleton_2(*it);
+
+			PwhPtr itWithOffset = CstmCGAL::applyOffset(roofOffset, *it);
+
+			SsPtr iss = CGAL::create_interior_straight_skeleton_2(*itWithOffset);
 			map<Ss::Vertex_const_handle, vertex_descriptor> vertices;
 
 		  for ( Ss::Vertex_const_iterator v = iss->vertices_begin(); v != iss->vertices_end(); v++ ) {
 		    vertices.insert(pair<Ss::Vertex_const_handle, vertex_descriptor>(
-		      v, roof.add_vertex(Point_3(v->point().x(), lvl->first + tan(roofAngle)*v->time(), v->point().y())) ));
+		      v, roof.add_vertex(Point_3(	v->point().x(),
+																			lvl->first + tan(roofAngle)*(v->time()-roofOffset),
+																			v->point().y())) ));
 		  }
 
 		  for ( Ss::Face_const_iterator f = iss->faces_begin(); f != iss->faces_end(); ++f ) {

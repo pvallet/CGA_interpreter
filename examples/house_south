@@ -1,5 +1,6 @@
 initFromRect 10 10
 setRoofAngle 20
+setRoofOffset 0.3
 
 %%
 

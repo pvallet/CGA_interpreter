@@ -25,6 +25,7 @@ public:
   void setTextureFile(const string& path);
   void addTextureRect(const string& name, double x0, double y0, double x1, double y1);
   void setRoofAngle(double angle); // Also converts angle from degrees to radians
+  void setRoofOffset(double offset);
 
   void setRecDepth(const string& ruleName, double depth);
   void setFallback(const string& ruleName, const string& fallback);

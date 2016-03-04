@@ -47,6 +47,7 @@
 %token 				SET_TEXTURE_FILE
 %token				ADD_TEXTURE_RECT
 %token				SET_ROOF_ANGLE
+%token				SET_ROOF_OFFSET
 %token				SEPARATOR
 %token				SET_REC_DEPTH
 %token				FALLBACK
@@ -76,6 +77,7 @@ command:
 	| ADD_TEXTURE_RECT STRING DOUBLE DOUBLE DOUBLE DOUBLE
 		{driver.addTextureRect(toStr($2), $3, $4, $5, $6);}
 	| SET_ROOF_ANGLE DOUBLE					{driver.setRoofAngle($2);}
+	| SET_ROOF_OFFSET DOUBLE				{driver.setRoofOffset($2);}
 	;
 
 rules:

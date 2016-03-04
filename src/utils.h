@@ -15,20 +15,24 @@ typedef Mesh::Halfedge_index 								halfedge_descriptor;
 typedef Mesh::Face_index 										face_descriptor;
 
 typedef CGAL::Polygon_2<Kernel>            Polygon_2 ;
+typedef boost::shared_ptr<Polygon_2>       Polygon_2Ptr ;
 typedef CGAL::Polygon_with_holes_2<Kernel> Polygon_with_holes_2 ;
 typedef CGAL::Straight_skeleton_2<Kernel>  Ss ;
 typedef boost::shared_ptr<Ss> 						 SsPtr ;
+typedef boost::shared_ptr<Polygon_with_holes_2> PwhPtr;
 
 
 namespace CstmCGAL { // Custom CGAL
 
-/*  These were used to reduce polygons to triangles and square, which were the
-  only ones supported by the original OFF viewer. However, the function did not
-  always work when the face was concave, so I decided to change the viewer instead
-  of investing time in fixing it.
-*/
+  PwhPtr applyOffset(double offset, const Polygon_with_holes_2& poly);
 
-void splitFace(Mesh& mesh, face_descriptor f);
-void splitFaces(Mesh& mesh);
+  /*  These were used to reduce polygons to triangles and square, which were the
+    only ones supported by the original OFF viewer. However, the function did not
+    always work when the face was concave, so I decided to change the viewer instead
+    of investing time in fixing it.
+  */
+
+  void splitFace(Mesh& mesh, face_descriptor f);
+  void splitFaces(Mesh& mesh);
 
 } // End of namespace CstmCGAL

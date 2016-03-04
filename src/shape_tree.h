@@ -46,7 +46,7 @@ class ShapeTree {
 
 public:
 	ShapeTree();
-	~ShapeTree() {}
+	~ShapeTree();
 
 	inline Node* getRoot() {return &root;}
 
@@ -76,6 +76,7 @@ public:
 	void addToRoof();
 
 	inline void setRoofAngle(double _roofAngle) {roofAngle = _roofAngle;}
+	inline void setRoofOffset(double _roofOffset) {roofOffset = _roofOffset;}
 	void computeRoof();
 
 	// weights.size() new textures are created, it returns the index to the 1st
@@ -99,6 +100,7 @@ private:
 	string filename;
 
 	double roofAngle;
+	double roofOffset;
 	map<Kernel::FT, list<Polygon_with_holes_2> > roofLevels;
 	Mesh roof;
 
