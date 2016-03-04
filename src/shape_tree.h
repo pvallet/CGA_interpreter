@@ -69,7 +69,7 @@ public:
 	void addToRule(const string& rule, const string& actions = string());
 	inline void translate(double dx, double dy, double dz) {affectedNode = affectedNode->translate(dx,dy,dz);}
 	inline void extrude(double value) {affectedNode = affectedNode->extrude(value);}
-	void split(char axis, const string& pattern);
+	void split(char axis, const string& pattern, const string& actions = string());
 	void selectFaces(const string& expression); // For the moment only [(x|y|z)(pos|neg)] | all
 	void setTexture(const string& texture);
 	inline void removeFaces() {affectedNode = affectedNode->removeFaces();}
@@ -77,6 +77,8 @@ public:
 
 	inline void setRoofAngle(double _roofAngle) {roofAngle = _roofAngle;}
 	inline void setRoofOffset(double _roofOffset) {roofOffset = _roofOffset;}
+	inline void setRoofZoom(double _roofTexZoom) {roofTexZoom = _roofTexZoom;}
+	void setRoofTexture(const string& path);
 	void computeRoof();
 
 	// weights.size() new textures are created, it returns the index to the 1st
@@ -86,6 +88,8 @@ private:
 	// Parse function
 	void executeActions(const string& actions);
 	void addTextureCoord(double x0, double y0, double x1, double y1);
+
+	int insertRoofITex(Point_2 point);
 
 	void outputGeometryOFF();
 	void displayGeometryOFF();
@@ -99,14 +103,19 @@ private:
 	OutputType outType;
 	string filename;
 
+	string texturePath;
+	vector<Point_2> texCoord;
+	map<string, int> textures; // The int specifies the first index of the texture coords
+
 	double roofAngle;
 	double roofOffset;
 	map<Kernel::FT, list<Polygon_with_holes_2> > roofLevels;
 	Mesh roof;
 
-	string texturePath;
-	vector<Point_2> texCoord;
-	map<string, int> textures; // The int specifies the first index of the texture coords
+	string roofTexture;
+	double roofTexZoom; // Ratio between length in (u,v) domain and (x,y,z) domain
+	vector<Point_2> roofTexCoord;
+	map<face_descriptor, map<vertex_descriptor, int> > iRoofTexCoord;
 
 	map<TexSplitKey, int, tskComp> subTextureLocation;
 };

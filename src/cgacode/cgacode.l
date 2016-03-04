@@ -33,6 +33,8 @@ setTextureFile      { return token::SET_TEXTURE_FILE;}
 addTextureRect      { return token::ADD_TEXTURE_RECT;}
 setRoofAngle        { return token::SET_ROOF_ANGLE;}
 setRoofOffset       { return token::SET_ROOF_OFFSET;}
+setRoofZoom         { return token::SET_ROOF_ZOOM;}
+setRoofTexture      { return token::SET_ROOF_TEXTURE;}
 \"[^\n"]*\"         { yylval->sval = strdup(&yytext[1]);
                       yylval->sval[strlen(yylval->sval) - 1] = '\0';
                       return token::STRING;}

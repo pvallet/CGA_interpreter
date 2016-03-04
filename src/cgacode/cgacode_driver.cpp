@@ -79,6 +79,14 @@ void CC::CC_Driver::setRoofOffset(double offset) {
   shapeTree->setRoofOffset(offset);
 }
 
+void CC::CC_Driver::setRoofZoom(double zoom) {
+  shapeTree->setRoofZoom(zoom);
+}
+
+void CC::CC_Driver::setRoofTexture(const string& path) {
+  shapeTree->setRoofTexture(path);
+}
+
 void CC::CC_Driver::setRecDepth(const string& ruleName, double depth) {
   if (rules.find(ruleName) == rules.end())
     std::cerr << "Error: trying to access to rule: " << ruleName

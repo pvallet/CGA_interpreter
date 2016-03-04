@@ -99,10 +99,14 @@ split:
 		{	char axis = $3[0];
 		 	st.split(axis, toStr($5) + toStr($6) + toStr($7));
 	 	}
+	| SPLIT '(' STRING ')' BEG_PTRN code END_PTRN ACTIONS
+		{	char axis = $3[0];
+		 	st.split(axis, toStr($5) + toStr($6) + toStr($7), toStr($8));
+	 	}
 	;
 
 selectFaces:
-	SELECT_FACES '(' STRING ')' { st.selectFaces($3);}
+	SELECT_FACES '(' STRING ')' { st.selectFaces(toStr($3));}
 	;
 
 removeFaces:
@@ -110,7 +114,7 @@ removeFaces:
 	;
 
 setTexture:
-	SET_TEXTURE '(' STRING ')' { st.setTexture($3);}
+	SET_TEXTURE '(' STRING ')' { st.setTexture(toStr($3));}
 	;
 
 %%

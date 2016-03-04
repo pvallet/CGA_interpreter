@@ -34,7 +34,7 @@ string Rule::getActions(Node* node) const {
   else {
     double chosenAction = rand() * totalWeight / RAND_MAX;
     double partialWeight = 0;
-    int iRes;
+    int iRes = 0;
     for (unsigned int i = 0 ; i < weights.size() ; i++) {
       partialWeight += weights[i];
       if (partialWeight > chosenAction) {
@@ -42,7 +42,11 @@ string Rule::getActions(Node* node) const {
         break;
       }
     }
-    return actions[iRes] + additionalActions.at(node);
+
+    if (additionalActions.find(node) == additionalActions.end())
+      return actions[iRes];
+    else
+      return actions[iRes] + additionalActions.at(node);
   }
 }
 

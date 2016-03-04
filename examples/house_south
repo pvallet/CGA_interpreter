@@ -1,40 +1,48 @@
 initFromRect 10 10
+setOutputFilename "examples/house_south.obj"
 setRoofAngle 20
 setRoofOffset 0.3
+setRoofZoom 2
+setRoofTexture "../res/roof_south.jpg"
+setTextureFile "../res/house_south.png"
+addTextureRect "garage" 0. 0. 0.5 0.45
+addTextureRect "wall" 0.5 0. 1. 0.5
+addTextureRect "window" 0. 0.5 0.5 1.
+addTextureRect "door" 0.5 0.5. 1. 1.
 
 %%
 
-Foundations --> split("x") {~1: EdgeZ1 | ~2: Center1 | ~1: Garage } ;;
+Foundations --> split("x") {~1: Garage | ~2: Center1 | ~1: EdgeZ } ;;
 
-Garage --> split("z") {~3: EdgeZ1 | 3: GrowLevel roof()} ;;
+Garage --> split("z") {2.5: GrowLevel roof() TextureGarage | ~1: EdgeZ} ;;
 
-Center1 --> split("z") {~1.5: Edge1 | ~3: Room} ;;
+Center1 --> split("z") {~1:Front | ~2: GrowLevel Center | ~1: EdgeX} ;;
 
-EdgeZ1 --> split("z") {~2: Edge1 | ~1: Edge1} ;;
-EdgeZ1 --> split("z") {~1: Edge1 | ~3: Edge1} ;;
-EdgeZ1 --> Edge1 ;;
+Front --> split("x") {~1: GrowLevel roof() TextureEntrance Room | ~1: Edge} ;;
 
-EdgeZ2 --> split("z") {~2: Edge2 | ~1: Edge2} ;;
-EdgeZ2 --> split("z") {~1: Edge2 | ~3: Edge2} ;;
-EdgeZ2 --> Edge2 ;;
+EdgeX --> split("x") {2.5: Edge}* ;;
+EdgeZ --> split("z") {2.5: Edge}* ;;
+RoomX --> split("x") {2.5: Room}* ;;
 
-Edge1 --> Nothing ;;
-Edge1 --> GrowLevel roof() ;;
+Edge --> Nothing ;;
+Edge --> Room ;;
 
-Edge2 --> Terrace ;;
-Edge2 --> roof() ;;
-Edge2 --> GrowLevel roof() ;;
+Room --> GrowLevel roof() TextureWall ;;
+Room --> GrowLevel TextureWall Room ;;
 
-Terrace --> selectFaces("") selectFaces("ypos") extrude(0.8) selectFaces("ypos") removeFaces() ;;
+Center    --> split("z") {2.5:RoomX}* ;;
 
-Room --> GrowLevel roof() ;;
-Room --> GrowLevel Center ;;
+TextureGarage --> selectFaces("") selectFaces("zneg") setTexture("garage")
+                  selectFaces("") selectFaces("zpos") selectFaces("x") setTexture("wall") ;;
 
-Center    --> split("z") {~1:Edge2 | ~3:Room} ;;
-Center    --> split("z") {~3:Room | ~1:Edge2} ;;
-Center 3  --> Room ;;
+TextureEntrance --> TextureWall selectFaces("") selectFaces("zneg") setTexture("door") ;;
 
-GrowLevel --> selectFaces("") selectFaces("ypos") extrude(3) ;;
+TextureWall --> selectFaces("") selectFaces("all") setTexture("wall") PaintWindow ;;
+PaintWindow --> selectFaces("") selectFaces("z") setTexture("window") ;;
+PaintWindow --> selectFaces("") selectFaces("x") setTexture("window") ;;
+PaintWindow 2 --> selectFaces("all") setTexture("window") ;;
 
-setRecDepth GrowLevel 3
+GrowLevel --> selectFaces("") selectFaces("ypos") extrude(2.5) ;;
+
+setRecDepth GrowLevel 5
 fallback GrowLevel --> roof() ;;

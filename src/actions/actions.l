@@ -49,7 +49,7 @@ roof            { return token::ROOF; }
 \{              { pattern_count = 1; BEGIN(PATTERN); yylval->sval = strdup(yytext); return token::BEG_PTRN;}
 <PATTERN>\{     { pattern_count++; yylval->sval = strdup(yytext); return token::CODE; }
 <PATTERN>\}\*   { pattern_count--; yylval->sval = strdup(yytext);
-                  if (pattern_count == 0) {BEGIN(INITIAL); return token::END_PTRN;}
+                  if (pattern_count == 0) {BEGIN(REMAINING); return token::END_PTRN;}
                   else return token::CODE;
                 }
 <PATTERN>\}     { pattern_count--; yylval->sval = strdup(yytext);

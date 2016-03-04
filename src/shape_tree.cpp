@@ -12,7 +12,12 @@ ACT::ShapeTree::ShapeTree() :
 	root(this, NULL, true),
 	outType(OFF),
 	filename("out.off"),
-	texCoord(4, Point_2(0,0)) // This stands for no texture
+	texCoord(4, Point_2(0,0)), // This stands for no texture
+	roofAngle(30*M_PI/180),
+	roofOffset(0.2),
+	roofTexture(""),
+	roofTexZoom(1),
+	roofTexCoord(1, Point_2(0,0))
 {
 }
 
@@ -58,6 +63,10 @@ void ACT::ShapeTree::setOutputFilename(const string& _filename) {
 
 void ACT::ShapeTree::setTextureFile(const string& path) {
 	texturePath = path;
+}
+
+void ACT::ShapeTree::setRoofTexture(const string& path) {
+	roofTexture = path;
 }
 
 void ACT::ShapeTree::addTextureRect(const string& name, double x0, double y0, double x1, double y1) {
@@ -116,6 +125,7 @@ void ACT::ShapeTree::outputGeometryOBJ() {
   objStream << "o Building" << endl;
 
   map<vertex_descriptor, int> vInt;
+	map<vertex_descriptor, int> roofVInt;
   Mesh::Vertex_range::iterator v, v_end;
 
   int i = 1;
@@ -128,9 +138,23 @@ void ACT::ShapeTree::outputGeometryOBJ() {
     i++;
   }
 
+	for (boost::tie(v,v_end) = roof.vertices(); v != v_end ; v++) {
+    objStream << 'v' << ' ' << roof.point(*v).x() << ' ' <<
+                            	 roof.point(*v).y() << ' ' <<
+                            	 roof.point(*v).z() << std::endl;
+
+    roofVInt.insert(pair<vertex_descriptor, int>(*v,i));
+    i++;
+  }
+
 	for (unsigned int j = 0 ; j < texCoord.size() ; j++) {
 		objStream << "vt" << ' ' << texCoord[j].x() << ' ' <<
                             		texCoord[j].y() << std::endl;
+	}
+
+	for (unsigned int j = 0 ; j < roofTexCoord.size() ; j++) {
+		objStream << "vt" << ' ' << roofTexCoord[j].x() << ' ' <<
+                            		roofTexCoord[j].y() << std::endl;
 	}
 
   objStream << "usemtl Texture" << endl;
@@ -149,10 +173,24 @@ void ACT::ShapeTree::outputGeometryOBJ() {
     objStream << std::endl;
   }
 
+	objStream << "usemtl RoofTexture" << endl;
+  objStream << "s off" << endl;
+
+  for (boost::tie(f,f_end) = roof.faces(); f != f_end ; f++) {
+    objStream << 'f';
+    CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
+    for (boost::tie(v, v_end) = vertices_around_face(roof.halfedge(*f), roof);
+				v != v_end ; v++) {
+      objStream << ' ' << roofVInt[*v] << '/' << iRoofTexCoord[*f][*v] + texCoord.size() + 1;
+    }
+    objStream << std::endl;
+  }
+
   objStream.close();
   mtlStream.open(out + ".mtl", ios::trunc);
 
   mtlStream << "newmtl Texture" << endl << "map_Kd " << texturePath << endl;
+	mtlStream << "newmtl RoofTexture" << endl << "map_Kd " << roofTexture << endl;
 
   mtlStream.close();
 }
@@ -160,7 +198,7 @@ void ACT::ShapeTree::outputGeometryOBJ() {
 void ACT::ShapeTree::displayGeometryOBJ() {
 	outputGeometryOBJ();
 	if (execl("/usr/bin/meshlab", "meshlab", "./out.obj", NULL) == -1)
-		cerr << "Unable to launch mehslab: " << strerror(errno) << endl;
+		cerr << "Unable to launch meshlab: " << strerror(errno) << endl;
 }
 
 void ACT::ShapeTree::executeActions(const string& actions) {
@@ -258,7 +296,7 @@ int ACT::ShapeTree::executeRule() {
 		return -1;
 }
 
-void ACT::ShapeTree::split(char axis, const string& pattern) {
+void ACT::ShapeTree::split(char axis, const string& pattern, const string& actions) {
 	vector<Node*> resultNodes;
 	vector<string> resultActions;
 
@@ -277,7 +315,7 @@ void ACT::ShapeTree::split(char axis, const string& pattern) {
 
 	for (unsigned int i = 0 ; i < resultNodes.size() ; i++) {
 		affectedNode = resultNodes[i];
-		executeActions(resultActions[i]);
+		executeActions(resultActions[i] + " " + actions);
 	}
 
 	affectedNode = save;
@@ -369,16 +407,52 @@ void ACT::ShapeTree::computeRoof() {
 		    vector<vertex_descriptor> face;
 		    Ss::Halfedge_const_handle hbegin = f->halfedge();
 		    Ss::Halfedge_const_handle h = hbegin;
+				Ss::Halfedge_const_handle h_contour;
 		    do {
+					if (!h->is_bisector())
+						h_contour = h;
 		      face.push_back(vertices[h->vertex()]);
 		      h = h->prev();
 		    } while (h != hbegin);
 
-				roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
-		    // face_descriptor newf = roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
+		    face_descriptor newf = roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
 				// CstmCGAL::splitFace(roof, newf);
+
+				Point_2 origin = h_contour->opposite()->vertex()->point();
+				Vector_2 unit_contour = Vector_2(origin, h_contour->vertex()->point());
+				if (unit_contour.squared_length() == 0)
+					std::cerr << "Error in computeRoof(): HDS of straight skeleton is ill formed" << std::endl;
+				else {
+					unit_contour = unit_contour / sqrt(unit_contour.squared_length());
+
+					h = hbegin;
+					do {
+						Vector_2 OM = Vector_2(origin, h->vertex()->point());
+						iRoofTexCoord[newf][vertices[h->vertex()]] = insertRoofITex(Point_2(
+							OM * unit_contour / roofTexZoom,
+							h->vertex()->time() / cos(roofAngle) / roofTexZoom));
+
+						h = h->prev();
+					} while (h != hbegin);
+				}
 		  }
 		}
+	}
+}
+
+int ACT::ShapeTree::insertRoofITex(Point_2 point) {
+	if (roofTexture == "")
+		return 0;
+
+	else {
+		for (unsigned int i = 0 ; i < roofTexCoord.size() ; i++) {
+			if (roofTexCoord[i] == point)
+				return i;
+		}
+
+		roofTexCoord.push_back(point);
+
+		return roofTexCoord.size()-1;
 	}
 }
 

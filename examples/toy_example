@@ -1,9 +1,0 @@
-initFromFile "plane.off"
-setRoofAngle 30
-
-%%
-
-Playground --> split("x") {~1: TowerBlock | ~2:Trash | ~1: TowerBlock } ;;
-
-TowerBlock 2 --> selectFaces("ypos") extrude(2) TowerBlock ;;
-TowerBlock --> extrude(2) ;;

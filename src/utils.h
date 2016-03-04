@@ -8,6 +8,7 @@ typedef CGAL::Simple_cartesian<double>     	Kernel;
 typedef Kernel::Point_3											Point_3;
 typedef Kernel::Point_2											Point_2;
 typedef Kernel::Vector_3										Vector_3;
+typedef Kernel::Vector_2										Vector_2;
 
 typedef CGAL::Surface_mesh<Point_3>        	Mesh;
 typedef Mesh::Vertex_index 									vertex_descriptor;
