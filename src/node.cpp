@@ -634,7 +634,6 @@ string Node::getFaceString(face_descriptor f) {
 }
 
 void Node::selectFace(const string& face) {
-	firstTimeSelect = false;
 	bool clear = true;
 
 	Mesh::Face_range::iterator f, f_end;

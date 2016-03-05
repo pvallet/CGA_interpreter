@@ -36,6 +36,7 @@ public:
 	inline bool isVisible() {return visible;}
 	MeshResult getSubGeometry();
 	inline bool isFirstTimeSelect() {return firstTimeSelect;}
+	inline void selected() {firstTimeSelect = false;}
 	void getCeiling(vector<vector<Point_3> >& result);
 
 	Node* translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz);

@@ -5,6 +5,7 @@
 Rule::Rule (string _name) :
   name(_name),
   fallbackMode(false),
+  fallback(""),
   recDepth(-1) // infinity
   {}
 
@@ -29,7 +30,7 @@ void Rule::addNode(Node* node, const string& actions) {
 
 string Rule::getActions(Node* node) const {
   if (fallbackMode)
-    return fallback + additionalActions.at(node);
+    return fallback;
 
   else {
     double chosenAction = rand() * totalWeight / RAND_MAX;

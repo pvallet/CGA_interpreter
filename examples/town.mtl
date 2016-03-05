@@ -1,0 +1,4 @@
+newmtl Texture
+map_Kd ../res/house_south.png
+newmtl RoofTexture
+map_Kd ../res/roof_south.jpg

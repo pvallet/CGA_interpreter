@@ -1,0 +1,53 @@
+initFromRect 520 520
+setOutputFilename "examples/town_without_roof.obj"
+setTextureFile "../res/town_custom_roof.png"
+addTextureRect "roof" 0. 0. 0.5 0.45
+addTextureRect "wall" 0.5 0. 1. 0.5
+addTextureRect "window" 0. 0.51 0.5 1.
+addTextureRect "door" 0.51 0.5. 1. 1.
+addTextureRect "road" 0.82 0.75. 0.82001 0.75001
+
+%%
+
+Village --> split("x") {~10:VillageX | ~3:Road}* ;;
+VillageX --> split("z") {~10:House | ~3:Road}* ;;
+
+Road --> selectFaces("ypos") setTexture("road") ;;
+
+House --> Road ;;
+House 3 --> split("x") {~1: Garage | ~2: Center1 | ~1: EdgeZ } ;;
+
+Garage --> split("z") {2.5: GrowLevel Roof TextureGarage | ~1: EdgeZ} ;;
+
+Center1 --> split("z") {~1:Front | ~2: GrowLevel Center | ~1: EdgeX} ;;
+
+Front --> split("x") {~1: GrowLevel Roof TextureEntrance Room | ~1: Edge} ;;
+
+EdgeX --> split("x") {~2.5: Edge}* ;;
+EdgeZ --> split("z") {~2.5: Edge}* ;;
+RoomX --> split("x") {~2.5: Room}* ;;
+
+Edge --> Road ;;
+Edge --> Room ;;
+
+Room --> GrowLevel Roof TextureWall ;;
+Room --> GrowLevel TextureWall Room ;;
+
+Center --> split("z") {~2.5:RoomX}* ;;
+
+TextureGarage --> selectFaces("zneg") setTexture("window")
+                  selectFaces("") selectFaces("zpos") selectFaces("x") setTexture("wall") ;;
+
+TextureEntrance --> TextureWall selectFaces("") selectFaces("zneg") setTexture("door") ;;
+
+TextureWall --> selectFaces("x") selectFaces("z") setTexture("wall") PaintWindow ;;
+PaintWindow --> selectFaces("z") setTexture("window") ;;
+PaintWindow --> selectFaces("x") setTexture("window") ;;
+PaintWindow 2 --> selectFaces("x") selectFaces("z") setTexture("window") ;;
+
+GrowLevel --> selectFaces("") selectFaces("ypos") extrude(2.5) selectFaces("") ;;
+
+Roof --> selectFaces("") selectFaces("ypos") setTexture("roof") selectFaces("") ;;
+
+setRecDepth GrowLevel 9
+fallback GrowLevel --> Roof ;;

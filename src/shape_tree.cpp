@@ -121,8 +121,17 @@ void ACT::ShapeTree::outputGeometryOBJ() {
   objStream.open(out + ".obj", ios::trunc);
 
   objStream << "# CGA-_interpreter generated building" << endl;
-  objStream << "mtllib " << out << ".mtl" << endl;
-  objStream << "o Building" << endl;
+
+	string mtlFile;
+	size_t found = out.rfind("/");
+
+	if (found == string::npos)
+		mtlFile = out;
+	else
+		mtlFile = out.substr(found + 1);
+
+  objStream << "mtllib " << mtlFile << ".mtl" << endl;
+  objStream << "o Building " << endl;
 
   map<vertex_descriptor, int> vInt;
 	map<vertex_descriptor, int> roofVInt;
@@ -190,7 +199,8 @@ void ACT::ShapeTree::outputGeometryOBJ() {
   mtlStream.open(out + ".mtl", ios::trunc);
 
   mtlStream << "newmtl Texture" << endl << "map_Kd " << texturePath << endl;
-	mtlStream << "newmtl RoofTexture" << endl << "map_Kd " << roofTexture << endl;
+	if (roofTexture != "")
+		mtlStream << "newmtl RoofTexture" << endl << "map_Kd " << roofTexture << endl;
 
   mtlStream.close();
 }
@@ -282,8 +292,8 @@ int ACT::ShapeTree::executeRule() {
 		for (	auto it = activeRules.front()->getNodes().begin() ;
 					it != activeRules.front()->getNodes().end() ; it++) {
 			affectedNode = *it;
-			// std::cout << activeRules.front()->getName() << " " <<
-			// 						 activeRules.front()->getActions(*it) << std::endl;
+			std::cout << activeRules.front()->getName() << " " <<
+									 activeRules.front()->getActions(*it) << std::endl;
 			executeActions(activeRules.front()->getActions(*it));
 		}
 
@@ -315,15 +325,17 @@ void ACT::ShapeTree::split(char axis, const string& pattern, const string& actio
 
 	for (unsigned int i = 0 ; i < resultNodes.size() ; i++) {
 		affectedNode = resultNodes[i];
-		executeActions(resultActions[i] + " " + actions);
+		executeActions(resultActions[i]);// + " " + actions);
 	}
 
 	affectedNode = save;
 }
 
 void ACT::ShapeTree::selectFaces(const string& expression) {
-	if (affectedNode->isFirstTimeSelect())
+	if (affectedNode->isFirstTimeSelect()) {
 		affectedNode->selectFace("");
+		affectedNode->selected();
+	}
 
 	if (expression == "all")
 		affectedNode->selectAllFaces();

@@ -1,5 +1,5 @@
-initFromRect 10 10
-setOutputFilename "examples/house_south.obj"
+initFromRect 130 130
+setOutputFilename "examples/town.obj"
 setRoofAngle 20
 setRoofOffset 0.3
 setRoofZoom 2
@@ -9,10 +9,17 @@ addTextureRect "garage" 0. 0. 0.5 0.45
 addTextureRect "wall" 0.5 0. 1. 0.5
 addTextureRect "window" 0. 0.5 0.5 1.
 addTextureRect "door" 0.5 0.5. 1. 1.
+addTextureRect "road" 0.82 0.75. 0.82001 0.75001
 
 %%
 
-Foundations --> split("x") {~1: Garage | ~2: Center1 | ~1: EdgeZ } ;;
+Village --> split("x") {~10:VillageX | ~3:Road}* ;;
+VillageX --> split("z") {~10:House | ~3:Road}* ;;
+
+Road --> selectFaces("ypos") setTexture("road") ;;
+
+House --> Road ;;
+House 3 --> split("x") {~1: Garage | ~2: Center1 | ~1: EdgeZ } ;;
 
 Garage --> split("z") {2.5: GrowLevel roof() TextureGarage | ~1: EdgeZ} ;;
 
@@ -24,7 +31,7 @@ EdgeX --> split("x") {~2.5: Edge}* ;;
 EdgeZ --> split("z") {~2.5: Edge}* ;;
 RoomX --> split("x") {~2.5: Room}* ;;
 
-Edge --> Nothing ;;
+Edge --> Road ;;
 Edge --> Room ;;
 
 Room --> GrowLevel roof() TextureWall ;;
@@ -44,5 +51,5 @@ PaintWindow 2 --> selectFaces("all") setTexture("window") ;;
 
 GrowLevel --> selectFaces("") selectFaces("ypos") extrude(2.5) ;;
 
-setRecDepth GrowLevel 5
+setRecDepth GrowLevel 4
 fallback GrowLevel --> roof() ;;

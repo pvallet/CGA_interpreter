@@ -99,10 +99,7 @@ split:
 		{	char axis = $3[0];
 		 	st.split(axis, toStr($5) + toStr($6) + toStr($7));
 	 	}
-	| SPLIT '(' STRING ')' BEG_PTRN code END_PTRN ACTIONS
-		{	char axis = $3[0];
-		 	st.split(axis, toStr($5) + toStr($6) + toStr($7), toStr($8));
-	 	}
+
 	;
 
 selectFaces:
