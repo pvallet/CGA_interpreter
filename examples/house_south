@@ -44,5 +44,5 @@ PaintWindow 2 --> selectFaces("all") setTexture("window") ;;
 
 GrowLevel --> selectFaces("") selectFaces("ypos") extrude(2.5) ;;
 
-setRecDepth GrowLevel 5
+setRecDepth GrowLevel 6
 fallback GrowLevel --> roof() ;;

@@ -437,7 +437,7 @@ void Node::preserveTextures(Axis axis, const vector<Node*>& nodes,
 			nodes.back()->setTexture(iTexCoord[selectedFaces.front()]);
 			selectFace(""); nodes.back()->selectFace("");
 
-			selectFace("ypos"); selectFace("yneg"); selectFace("zpos"); selectFace("zpos");
+			selectFace("ypos"); selectFace("yneg"); selectFace("zpos"); selectFace("zneg");
 			break;
 		case Y:
 			selectFace("yneg"); nodes.front()->selectFace("yneg");
@@ -448,7 +448,7 @@ void Node::preserveTextures(Axis axis, const vector<Node*>& nodes,
 			nodes.back()->setTexture(iTexCoord[selectedFaces.front()]);
 			selectFace(""); nodes.back()->selectFace("");
 
-			selectFace("xpos"); selectFace("xneg"); selectFace("zpos"); selectFace("zpos");
+			selectFace("xpos"); selectFace("xneg"); selectFace("zpos"); selectFace("zneg");
 			break;
 		case Z:
 			selectFace("zneg"); nodes.front()->selectFace("zneg");
@@ -459,7 +459,7 @@ void Node::preserveTextures(Axis axis, const vector<Node*>& nodes,
 			nodes.back()->setTexture(iTexCoord[selectedFaces.front()]);
 			selectFace(""); nodes.back()->selectFace("");
 
-			selectFace("xpos"); selectFace("xpos"); selectFace("ypos"); selectFace("yneg");
+			selectFace("xpos"); selectFace("xneg"); selectFace("ypos"); selectFace("yneg");
 			break;
 	}
 

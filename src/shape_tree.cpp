@@ -258,7 +258,10 @@ void ACT::ShapeTree::setInitRule(const string& ruleName) {
 
 void ACT::ShapeTree::addToRule(const string& ruleName, const string& actions) {
 	bool active = false;
-	for (auto it = activeRules.begin() ; it != activeRules.end() ; it++) {
+	auto it = activeRules.begin();
+	// If the function calls itself, we have to put the rule another time in the
+	// queue, otherwise the recursion control would be broken
+	for ( it++ ; it != activeRules.end() ; it++) {
 		if ((*it)->getName() == ruleName) {
 			(*it)->addNode(affectedNode, actions);
 			active = true;
