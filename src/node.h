@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+
 #include <map>
 #include <list>
 #include <string>
@@ -10,7 +12,9 @@ using namespace std;
 
 typedef struct MeshResult {
 	Mesh mesh;
+	Mesh roof;
 	map<face_descriptor, int> iTexCoord;
+	map<face_descriptor, map<vertex_descriptor, int> > iRoofTexCoord;
 } MeshResult;
 
 enum Axis {X,Y,Z};
@@ -22,29 +26,31 @@ namespace ACT {
 class Node {
 
 public:
-	Node(ACT::ShapeTree* _shapeTree, Node* _parent, bool _visible);
+	Node(ACT::ShapeTree* _shapeTree, Node* _parent);
 	~Node();
 
 	void selectAllFaces();
 	void noTexture();
 	void load(const string& path);
 	void setShape(Mesh _shape);
-	void setVisible(bool _visible);
 	inline void setParent(Node* _parent) {parent = _parent;}
 	void addChild(Node* _child);
 
-	inline bool isVisible() {return visible;}
 	MeshResult getSubGeometry();
-	inline bool isFirstTimeSelect() {return firstTimeSelect;}
+	inline bool isFirstTimeSelect() const {return firstTimeSelect;}
 	inline void selected() {firstTimeSelect = false;}
-	void getCeiling(vector<vector<Point_3> >& result);
 
 	Node* translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz);
 	Node* extrude(Kernel::RT height); // Returns the new extruded shape, child of the saved old shape
 	void split(Axis axis, vector<Node*>& nodes, vector<string>& actions, string pattern);
 	void selectFace(const string& face); // Only (x|y|z)(pos|neg), otherwise unselect everything
 	void setTexture(int indexFirstCoord);
+	void addToRoof(const vector<vector<Point_3> >& ceiling);
+	void createRoof(double _roofAngle = 20*M_PI/180, double _roofOffset = 0.3);
 	Node* removeFaces();
+
+	void getCeiling(vector<vector<Point_3> >& result);
+	void computeRoof();
 
 private:
 
@@ -76,15 +82,22 @@ private:
 	ACT::ShapeTree* shapeTree;
 	Node* parent;
 	list<Node*> children;
-	bool visible;
+	bool hasRoof;
 
 	Mesh shape; // The shape is supposed to be a cube or a square
 	map<string, double> attributes;
 	map<face_descriptor, int> iTexCoord;
+
+	double roofAngle;
+	double roofOffset;
+	map<Kernel::FT, list<Polygon_with_holes_2> > roofLevels;
+	Mesh roof;
+	map<face_descriptor, map<vertex_descriptor, int> > iRoofTexCoord;
 
 	list<face_descriptor> selectedFaces;
 	bool firstTimeSelect;
 
 protected:
 	inline void setITexCoord(const map<face_descriptor, int>& _iTexCoord) {iTexCoord = _iTexCoord;}
+	void cancelRoof(); // Can be only called by createRoof()
 };

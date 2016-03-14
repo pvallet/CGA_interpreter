@@ -1,5 +1,4 @@
 #include "cgacode_driver.h"
-#include <cmath>
 #include <fstream>
 
 CC::CC_Driver::CC_Driver(ACT::ShapeTree* _shapeTree) :
@@ -69,14 +68,6 @@ void CC::CC_Driver::setTextureFile(const string& path) {
 
 void CC::CC_Driver::addTextureRect(const string& name, double x0, double y0, double x1, double y1) {
   shapeTree->addTextureRect(name, x0, y0, x1, y1);
-}
-
-void CC::CC_Driver::setRoofAngle(double angle) {
-  shapeTree->setRoofAngle(angle*M_PI/180);
-}
-
-void CC::CC_Driver::setRoofOffset(double offset) {
-  shapeTree->setRoofOffset(offset);
 }
 
 void CC::CC_Driver::setRoofZoom(double zoom) {

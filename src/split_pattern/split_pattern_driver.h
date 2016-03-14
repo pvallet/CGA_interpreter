@@ -12,7 +12,7 @@ enum DataType {RELWGHT, ABSWGHT, SCOPE};
 
 typedef struct Elmt{
   SP::DataType      type;
-  double             value; // Weight or # of scope if it is repeated
+  double            value; // Weight or # of scope if it is repeated
   std::string       actions;
   std::list<Elmt*>  subElmts;
 } Elmt;

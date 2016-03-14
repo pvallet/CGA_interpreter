@@ -50,6 +50,7 @@
 %token				SET_TEXTURE
 %token				REMOVE_FACES
 %token				ROOF
+%token				CREATE_ROOF
 %token <sval> BEG_PTRN
 %token <sval> END_PTRN
 %token <sval> RULE
@@ -72,6 +73,7 @@ action:
 	| setTexture
 	| selectFaces
 	| removeFaces
+	| createRoof
 	| ROOF '(' ')'		{st.addToRoof();}
 	| RULE						{st.addToRule(toStr($1));}
 	| RULE ACTIONS		{st.addToRule(toStr($1),toStr($2));}
@@ -102,6 +104,10 @@ split:
 
 	;
 
+setTexture:
+	SET_TEXTURE '(' STRING ')' { st.setTexture(toStr($3));}
+	;
+
 selectFaces:
 	SELECT_FACES '(' STRING ')' { st.selectFaces(toStr($3));}
 	;
@@ -110,8 +116,8 @@ removeFaces:
 	REMOVE_FACES '(' ')' { st.removeFaces();}
 	;
 
-setTexture:
-	SET_TEXTURE '(' STRING ')' { st.setTexture(toStr($3));}
+createRoof:
+	CREATE_ROOF '(' DOUBLE ',' DOUBLE ')' { st.createRoof($3, $5);}
 	;
 
 %%

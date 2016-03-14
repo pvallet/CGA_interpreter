@@ -1,3 +1,4 @@
+#include "custom_join.h"
 #include "node.h"
 
 #include <cstddef>
@@ -7,6 +8,7 @@
 #include <fstream>
 #include <map>
 
+#include <boost/make_shared.hpp>
 #include "shape_tree.h"
 #include "split_pattern/split_pattern_driver.h"
 
@@ -14,10 +16,10 @@ using namespace std;
 
 typedef pair<vertex_descriptor,vertex_descriptor> Match;
 
-Node::Node(ACT::ShapeTree* _shapeTree, Node* _parent, bool _visible) :
+Node::Node(ACT::ShapeTree* _shapeTree, Node* _parent) :
 	shapeTree(_shapeTree),
 	parent(_parent),
-	visible(_visible),
+	hasRoof(false),
 	firstTimeSelect(true)
 {}
 
@@ -54,20 +56,6 @@ void Node::setShape(Mesh _shape) {
 	noTexture();
 }
 
-void Node::setVisible(bool _visible) {
-	if (_visible) {
-		visible = true;
-		if (parent != NULL)
-			parent->setVisible(true);
-	}
-
-	else {
-		visible = false;
-		for (auto it = children.begin() ; it != children.end() ; it++)
-			(*it)->setVisible(false);
-	}
-}
-
 void Node::addChild(Node* _child) {
 	_child->setParent(this);
 	children.push_back(_child);
@@ -76,43 +64,58 @@ void Node::addChild(Node* _child) {
 MeshResult Node::getSubGeometry() {
 	MeshResult res;
 
+	if (hasRoof) {
+		res.roof = roof;
+		res.iRoofTexCoord = iRoofTexCoord;
+	}
+
 	if (children.empty()) {
 		res.mesh = shape;
 		res.iTexCoord = iTexCoord;
+
 		return res;
 	}
 
 	else {
-		bool hasVisibleChild = false;
 		for (auto chld = children.begin() ; chld != children.end() ; chld++) {
-			if ((*chld)->isVisible()) {
-				hasVisibleChild = true;
-				MeshResult partialRes = (*chld)->getSubGeometry();
+			MeshResult partialRes = (*chld)->getSubGeometry();
 
-				// Maps vertices to the appropriate texture coordinates
-				for (auto vd = partialRes.iTexCoord.begin() ;
-									vd != partialRes.iTexCoord.end() ; vd++) {
-					res.iTexCoord.insert(pair<face_descriptor, int>(
-						// This addition is specified in the CGAL doc
-						(face_descriptor) (vd->first +
-															 res.mesh.number_of_faces() +
-															 res.mesh.number_of_removed_faces()),
-															 vd->second));
+			// Maps vertices to the appropriate texture coordinates
+			for (auto fd = partialRes.iTexCoord.begin() ;
+								fd != partialRes.iTexCoord.end() ; fd++) {
+				res.iTexCoord.insert(pair<face_descriptor, int>(
+					// This addition is specified in the CGAL doc
+					(face_descriptor) (fd->first +
+														 res.mesh.number_of_faces() +
+														 res.mesh.number_of_removed_faces()),
+														 fd->second));
+			}
+
+			res.mesh += partialRes.mesh;
+
+			// Do the same for the roof
+			for (auto fd = partialRes.iRoofTexCoord.begin() ;
+									fd != partialRes.iRoofTexCoord.end() ; fd++) {
+				map<vertex_descriptor, int> tmpMap;
+				for (auto vd = fd->second.begin() ; vd != fd->second.end() ; vd++) {
+					tmpMap.insert(pair<vertex_descriptor, int>(
+						(vertex_descriptor)  (vd->first +
+																	res.roof.number_of_vertices() +
+																	res.roof.number_of_removed_vertices()),
+																	vd->second));
 				}
 
-				// add vertices
-				res.mesh += partialRes.mesh;
+				res.iRoofTexCoord.insert(pair<face_descriptor, map<vertex_descriptor, int> >(
+					(face_descriptor) (fd->first +
+														 res.roof.number_of_faces() +
+														 res.roof.number_of_removed_faces()),
+														 tmpMap));
 			}
+
+			res.roof += partialRes.roof;
 		}
 
-		if (hasVisibleChild)
-			return res;
-
-		else {
-			res.mesh = shape;
-			res.iTexCoord = iTexCoord;
-			return res;
-		}
+		return res;
  	}
 }
 
@@ -172,7 +175,7 @@ Node* Node::translate(Kernel::RT dx, Kernel::RT dy, Kernel::RT dz) {
 		nITexCoord.insert(pair<face_descriptor, int>( nFace, iTexCoord[*f] ));
 	}
 
-	Node* tr = new Node(shapeTree, this, true);
+	Node* tr = new Node(shapeTree, this);
 	tr->setShape(nShape);
 	tr->setITexCoord(nITexCoord);
 	addChild(tr);
@@ -220,8 +223,8 @@ Node* Node::extrude(Kernel::RT height) {
     nShape.add_face(iNewShapeExtr[0], iNewShapeExtr[1], iNewShapeExtr[2], iNewShapeExtr[3]);
   }
 
-	Node* save = new Node(shapeTree, this, true);
-	Node* extr = new Node(shapeTree, this, true);
+	Node* save = new Node(shapeTree, this);
+	Node* extr = new Node(shapeTree, this);
 	save->setShape(shape);
 	save->setITexCoord(iTexCoord);
 	extr->setShape(nShape);
@@ -582,13 +585,13 @@ void Node::split(Axis axis, vector<Node*>& nodes, vector<string>& actions, strin
 
 		// Store results
 
-		Node* subd = new Node(shapeTree, this, true);
+		Node* subd = new Node(shapeTree, this);
 		subd->setShape(shape);
 
 		nodes.resize(weights.size());
 
 		for (unsigned int i = 0 ; i < nShapes.size() ; i++) {
-			nodes[i] = new Node(shapeTree, subd, true);
+			nodes[i] = new Node(shapeTree, subd);
 			nodes[i]->setShape(nShapes[i]);
 			subd->addChild(nodes[i]);
 		}
@@ -687,11 +690,163 @@ Node* Node::removeFaces() {
 		}
 	}
 
-	Node* rm = new Node(shapeTree, this, true);
+	Node* rm = new Node(shapeTree, this);
 	rm->setShape(nShape);
 	rm->setITexCoord(nITexCoord);
 	addChild(rm);
 	return rm;
+}
+
+void Node::createRoof(double _roofAngle, double _roofOffset) {
+	roofAngle 	= _roofAngle;
+	roofOffset 	= _roofOffset;
+
+	hasRoof = true;
+
+	if (parent != NULL)
+		parent->cancelRoof();
+}
+
+void Node::cancelRoof() {
+	hasRoof = false;
+	if (parent != NULL)
+		parent->cancelRoof();
+}
+
+void Node::addToRoof(const vector<vector<Point_3> >& ceiling) {
+	if (hasRoof) {
+		for (unsigned int i = 0 ; i < ceiling.size() ; i++) {
+			Kernel::FT level = ceiling[i].front().y();
+
+			Polygon_2 newPieceOfRoof;
+
+			for (int j = ceiling[i].size()-1 ; j >= 0 ; j--) {
+				newPieceOfRoof.push_back(Point_2(ceiling[i][j].x(), ceiling[i][j].z()));
+			}
+
+			roofLevels[level].push_back(Polygon_with_holes_2(newPieceOfRoof));
+
+			// std::cout << "size " << roofLevels[level].size() << std::endl;
+			// std::cout << "vertices " << roofLevels[level].front().outer_boundary().size() << std::endl;
+
+			std::list<Polygon_with_holes_2> res, treated;
+			CstmCGAL::join (roofLevels[level], res);
+
+			for (auto it = res.begin() ; it != res.end() ; it++) {
+				std::list<Polygon_with_holes_2> splitted = CstmCGAL::splitPoly(*it);
+				if (splitted.size() > 1)
+					treated.splice(treated.end(),splitted);
+				else
+					treated.push_back(*it);
+			}
+
+			roofLevels[level] = treated;
+
+			auto it = roofLevels.find(level);
+			auto prev = it;
+
+			if (it != roofLevels.begin()) {
+				do {
+					it--;
+					list<Polygon_with_holes_2> res, treated;
+					CstmCGAL::join (it->second, prev->second,	res);
+
+					for (auto it2 = res.begin() ; it2 != res.end() ; it2++) {
+						std::list<Polygon_with_holes_2> splitted = CstmCGAL::splitPoly(*it2);
+						if (splitted.size() > 1)
+							treated.splice(treated.end(),splitted);
+						else
+							treated.push_back(*it2);
+					}
+
+					it->second = treated;
+					prev--;
+				} while (it != roofLevels.begin());
+			}
+		}
+	}
+
+	else {
+		if (parent == NULL)
+			std::cerr << "Error in addToRoof(): No parent with roof" << std::endl;
+		else
+			parent->addToRoof(ceiling);
+	}
+}
+
+void Node::computeRoof() {
+	if (hasRoof) {
+		// We run through the loop in reverse to be able to remove useless geometry in a future version
+		for (auto lvl = roofLevels.rbegin() ; lvl != roofLevels.rend() ; lvl++) {
+			for (auto it = lvl->second.begin() ; it != lvl->second.end() ; it++) {
+
+				PwhPtr itWithOffset;
+
+				if (roofOffset > 0)
+					itWithOffset = CstmCGAL::applyOffset(roofOffset, *it);
+				else
+					itWithOffset = boost::make_shared<Polygon_with_holes_2>(*it);
+
+				SsPtr iss = CGAL::create_interior_straight_skeleton_2(*itWithOffset);
+				map<Ss::Vertex_const_handle, vertex_descriptor> vertices;
+
+			  for ( Ss::Vertex_const_iterator v = iss->vertices_begin(); v != iss->vertices_end(); v++ ) {
+			    vertices.insert(pair<Ss::Vertex_const_handle, vertex_descriptor>(
+			      v, roof.add_vertex(Point_3(	v->point().x(),
+																				lvl->first + tan(roofAngle)*(v->time()-roofOffset),
+																				v->point().y())) ));
+
+						if (lvl->first + tan(roofAngle)*(v->time()-roofOffset) > 100 ) {
+						  std::cout << "Failed to compute straight skeleton on polygon:" << std::endl;
+
+							std::vector<Point_2> outerBoundary = std::vector<Point_2>(
+				        itWithOffset->outer_boundary().vertices_begin(), itWithOffset->outer_boundary().vertices_end());
+
+							for (unsigned int i = 0 ; i < outerBoundary.size() ; i++) {
+								std::cout << outerBoundary[i] << std::endl;
+							}
+						}
+			  }
+
+			  for ( Ss::Face_const_iterator f = iss->faces_begin(); f != iss->faces_end(); ++f ) {
+					vector<vertex_descriptor> face;
+			    Ss::Halfedge_const_handle hbegin = f->halfedge();
+			    Ss::Halfedge_const_handle h = hbegin;
+					Ss::Halfedge_const_handle h_contour;
+			    do {
+						if (!h->is_bisector())
+							h_contour = h;
+			      face.push_back(vertices[h->vertex()]);
+			      h = h->prev();
+			    } while (h != hbegin);
+
+			    face_descriptor newf = roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
+					// CstmCGAL::splitFace(roof, newf);
+
+					Point_2 origin = h_contour->opposite()->vertex()->point();
+					Vector_2 unit_contour = Vector_2(origin, h_contour->vertex()->point());
+					if (unit_contour.squared_length() == 0)
+						std::cerr << "Error in computeRoof(): HDS of straight skeleton is ill formed" << std::endl;
+					else {
+						unit_contour = unit_contour / sqrt(unit_contour.squared_length());
+
+						h = hbegin;
+						do {
+							Vector_2 OM = Vector_2(origin, h->vertex()->point());
+							iRoofTexCoord[newf][vertices[h->vertex()]] = shapeTree->insertRoofITex(Point_2(
+								OM * unit_contour / shapeTree->getRoofZoom(),
+								h->vertex()->time() / cos(roofAngle) / shapeTree->getRoofZoom()));
+
+							h = h->prev();
+						} while (h != hbegin);
+					}
+			  }
+			}
+		}
+	}
+
+	for (auto it = children.begin() ; it != children.end() ; it++)
+		(*it)->computeRoof();
 }
 
 Node::~Node() {

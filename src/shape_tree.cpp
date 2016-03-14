@@ -1,5 +1,4 @@
 #include "shape_tree.h"
-#include "custom_join.h"
 
 #include <cerrno>
 #include <cmath>
@@ -9,16 +8,15 @@
 using namespace std;
 
 ACT::ShapeTree::ShapeTree() :
-	root(this, NULL, true),
+	root(this, NULL),
 	outType(OFF),
 	filename("out.off"),
 	texCoord(4, Point_2(0,0)), // This stands for no texture
-	roofAngle(30*M_PI/180),
-	roofOffset(0.2),
 	roofTexture(""),
 	roofTexZoom(1),
 	roofTexCoord(1, Point_2(0,0))
 {
+	root.createRoof();
 }
 
 ACT::ShapeTree::~ShapeTree() {
@@ -65,10 +63,6 @@ void ACT::ShapeTree::setTextureFile(const string& path) {
 	texturePath = path;
 }
 
-void ACT::ShapeTree::setRoofTexture(const string& path) {
-	roofTexture = path;
-}
-
 void ACT::ShapeTree::addTextureRect(const string& name, double x0, double y0, double x1, double y1) {
 	textures[name] = texCoord.size();
 
@@ -100,7 +94,7 @@ void ACT::ShapeTree::outputGeometryOFF() {
   ofstream output;
 	output.open(filename, ios::trunc);
 	MeshResult res = root.getSubGeometry();
-	res.mesh += roof;
+	res.mesh += res.roof;
 	output << res.mesh;
 	output.close();
 }
@@ -147,10 +141,10 @@ void ACT::ShapeTree::outputGeometryOBJ() {
     i++;
   }
 
-	for (boost::tie(v,v_end) = roof.vertices(); v != v_end ; v++) {
-    objStream << 'v' << ' ' << roof.point(*v).x() << ' ' <<
-                            	 roof.point(*v).y() << ' ' <<
-                            	 roof.point(*v).z() << std::endl;
+	for (boost::tie(v,v_end) = res.roof.vertices(); v != v_end ; v++) {
+    objStream << 'v' << ' ' << res.roof.point(*v).x() << ' ' <<
+                            	 res.roof.point(*v).y() << ' ' <<
+                            	 res.roof.point(*v).z() << std::endl;
 
     roofVInt.insert(pair<vertex_descriptor, int>(*v,i));
     i++;
@@ -185,12 +179,12 @@ void ACT::ShapeTree::outputGeometryOBJ() {
 	objStream << "usemtl RoofTexture" << endl;
   objStream << "s off" << endl;
 
-  for (boost::tie(f,f_end) = roof.faces(); f != f_end ; f++) {
+  for (boost::tie(f,f_end) = res.roof.faces(); f != f_end ; f++) {
     objStream << 'f';
     CGAL::Vertex_around_face_iterator<Mesh> v, v_end;
-    for (boost::tie(v, v_end) = vertices_around_face(roof.halfedge(*f), roof);
+    for (boost::tie(v, v_end) = vertices_around_face(res.roof.halfedge(*f), res.roof);
 				v != v_end ; v++) {
-      objStream << ' ' << roofVInt[*v] << '/' << iRoofTexCoord[*f][*v] + texCoord.size() + 1;
+      objStream << ' ' << roofVInt[*v] << '/' << res.iRoofTexCoord[*f][*v] + texCoord.size() + 1;
     }
     objStream << std::endl;
   }
@@ -328,7 +322,7 @@ void ACT::ShapeTree::split(char axis, const string& pattern, const string& actio
 
 	for (unsigned int i = 0 ; i < resultNodes.size() ; i++) {
 		affectedNode = resultNodes[i];
-		executeActions(resultActions[i]);// + " " + actions);
+		executeActions(resultActions[i] + " " + actions);
 	}
 
 	affectedNode = save;
@@ -369,90 +363,11 @@ void ACT::ShapeTree::setTexture(const string& texture) {
 void ACT::ShapeTree::addToRoof() {
 	vector<vector<Point_3> > ceiling;
 	affectedNode->getCeiling(ceiling);
-
-	for (unsigned int i = 0 ; i < ceiling.size() ; i++) {
-		Kernel::FT level = ceiling[i].front().y();
-
-		Polygon_2 newPieceOfRoof;
-
-		for (int j = ceiling[i].size()-1 ; j >= 0 ; j--) {
-			newPieceOfRoof.push_back(Point_2(ceiling[i][j].x(), ceiling[i][j].z()));
-		}
-
-		roofLevels[level].push_back(Polygon_with_holes_2(newPieceOfRoof));
-
-		std::list<Polygon_with_holes_2> res;
-		CstmCGAL::join (roofLevels[level], res);
-
-		roofLevels[level] = res;
-
-		auto it = roofLevels.find(level);
-		auto prev = it;
-
-		if (it != roofLevels.begin()) {
-			do {
-				it--;
-				list<Polygon_with_holes_2> res;
-				CstmCGAL::join (it->second, prev->second,	res);
-				it->second = res;
-				prev--;
-			} while (it != roofLevels.begin());
-		}
-	}
+	affectedNode->addToRoof(ceiling);
 }
 
-void ACT::ShapeTree::computeRoof() {
-	// We run through the loop in reverse to be able to remove useless geometry in a future version
-	for (auto lvl = roofLevels.rbegin() ; lvl != roofLevels.rend() ; lvl++) {
-		for (auto it = lvl->second.begin() ; it != lvl->second.end() ; it++) {
-
-			PwhPtr itWithOffset = CstmCGAL::applyOffset(roofOffset, *it);
-
-			SsPtr iss = CGAL::create_interior_straight_skeleton_2(*itWithOffset);
-			map<Ss::Vertex_const_handle, vertex_descriptor> vertices;
-
-		  for ( Ss::Vertex_const_iterator v = iss->vertices_begin(); v != iss->vertices_end(); v++ ) {
-		    vertices.insert(pair<Ss::Vertex_const_handle, vertex_descriptor>(
-		      v, roof.add_vertex(Point_3(	v->point().x(),
-																			lvl->first + tan(roofAngle)*(v->time()-roofOffset),
-																			v->point().y())) ));
-		  }
-
-		  for ( Ss::Face_const_iterator f = iss->faces_begin(); f != iss->faces_end(); ++f ) {
-		    vector<vertex_descriptor> face;
-		    Ss::Halfedge_const_handle hbegin = f->halfedge();
-		    Ss::Halfedge_const_handle h = hbegin;
-				Ss::Halfedge_const_handle h_contour;
-		    do {
-					if (!h->is_bisector())
-						h_contour = h;
-		      face.push_back(vertices[h->vertex()]);
-		      h = h->prev();
-		    } while (h != hbegin);
-
-		    face_descriptor newf = roof.add_face(boost::make_iterator_range(face.begin(), face.end()));
-				// CstmCGAL::splitFace(roof, newf);
-
-				Point_2 origin = h_contour->opposite()->vertex()->point();
-				Vector_2 unit_contour = Vector_2(origin, h_contour->vertex()->point());
-				if (unit_contour.squared_length() == 0)
-					std::cerr << "Error in computeRoof(): HDS of straight skeleton is ill formed" << std::endl;
-				else {
-					unit_contour = unit_contour / sqrt(unit_contour.squared_length());
-
-					h = hbegin;
-					do {
-						Vector_2 OM = Vector_2(origin, h->vertex()->point());
-						iRoofTexCoord[newf][vertices[h->vertex()]] = insertRoofITex(Point_2(
-							OM * unit_contour / roofTexZoom,
-							h->vertex()->time() / cos(roofAngle) / roofTexZoom));
-
-						h = h->prev();
-					} while (h != hbegin);
-				}
-		  }
-		}
-	}
+void ACT::ShapeTree::createRoof(double roofAngle, double roofOffset) {
+	affectedNode->createRoof(roofAngle*M_PI/180, roofOffset);
 }
 
 int ACT::ShapeTree::insertRoofITex(Point_2 point) {

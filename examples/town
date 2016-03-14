@@ -1,7 +1,5 @@
-initFromRect 130 130
+initFromRect 65 65
 setOutputFilename "examples/town.obj"
-setRoofAngle 20
-setRoofOffset 0.3
 setRoofZoom 2
 setRoofTexture "../res/roof_south.jpg"
 setTextureFile "../res/house_south.png"
@@ -19,7 +17,7 @@ VillageX --> split("z") {~10:House | ~3:Road}* ;;
 Road --> selectFaces("ypos") setTexture("road") ;;
 
 House --> Road ;;
-House 3 --> split("x") {~1: Garage | ~2: Center1 | ~1: EdgeZ } ;;
+House 3 --> createRoof(20,0.3) split("x") {~1: Garage | ~2: Center1 | ~1: EdgeZ } ;;
 
 Garage --> split("z") {2.5: GrowLevel roof() TextureGarage | ~1: EdgeZ} ;;
 
@@ -51,5 +49,5 @@ PaintWindow 2 --> selectFaces("all") setTexture("window") ;;
 
 GrowLevel --> selectFaces("") selectFaces("ypos") extrude(2.5) ;;
 
-setRecDepth GrowLevel 4
+setRecDepth GrowLevel 7
 fallback GrowLevel --> roof() ;;

@@ -27,6 +27,12 @@ namespace CstmCGAL { // Custom CGAL
 
   PwhPtr applyOffset(double offset, const Polygon_with_holes_2& poly);
 
+  // Sometimes polygons can be the union of 2 polygons that have one vertex in common
+  // I should have used nef_polyhedron_2 to avoid this problem, but I only took
+  // the time to implement a simple fix. It does not handle holes.
+
+  std::list<Polygon_with_holes_2> splitPoly(const Polygon_with_holes_2& poly);
+
   /*  These were used to reduce polygons to triangles and square, which were the
     only ones supported by the original OFF viewer. However, the function did not
     always work when the face was concave, so I decided to change the viewer instead

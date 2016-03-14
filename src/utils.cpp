@@ -8,6 +8,7 @@
 
 #include <boost/make_shared.hpp>
 
+#include <algorithm>
 #include <vector>
 
 typedef Ss::Halfedge_iterator Halfedge_iterator;
@@ -53,6 +54,7 @@ PwhPtr CstmCGAL::applyOffset(double offset, const Polygon_with_holes_2& poly) {
     // We have to revert the orientation of the polygon
     std::vector<Point_2> outerBoundary = std::vector<Point_2>(
       poly.outer_boundary().vertices_begin(),poly.outer_boundary().vertices_end());
+
     ssb.enter_contour(outerBoundary.rbegin(), outerBoundary.rend());
 
     SsPtr ss = ssb.construct_skeleton();
@@ -93,7 +95,7 @@ PwhPtr CstmCGAL::applyOffset(double offset, const Polygon_with_holes_2& poly) {
 
         std::vector<PwhPtr> holeOffsets =
         CGAL::create_interior_skeleton_and_offset_polygons_with_holes_2(offset,
-          Polygon_with_holes_2(Polygon_2(hole.rbegin(), hole.rend())));
+          Polygon_with_holes_2(Polygon_2(hole.begin(), hole.end())));
 
         for (auto it2 = holeOffsets.begin() ; it2 != holeOffsets.end() ; it++) {
           std::vector<Point_2> revertNewHoles = std::vector<Point_2>(
@@ -108,6 +110,35 @@ PwhPtr CstmCGAL::applyOffset(double offset, const Polygon_with_holes_2& poly) {
   }
 
   return NULL;
+}
+
+std::list<Polygon_with_holes_2> CstmCGAL::splitPoly(const Polygon_with_holes_2& poly) {
+  std::vector<Point_2> outerBoundary = std::vector<Point_2>(
+    poly.outer_boundary().vertices_begin(),poly.outer_boundary().vertices_end());
+
+  std::list<Polygon_with_holes_2> result;
+
+  for (unsigned int i = 0 ; i < outerBoundary.size() ; i++) {
+    for (unsigned int j = i+1 ; j < outerBoundary.size() ; j++) {
+      if (outerBoundary[i] == outerBoundary[j]) {
+        result.splice(result.end(), splitPoly(Polygon_with_holes_2(
+          Polygon_2(outerBoundary.begin() + i, outerBoundary.begin() + j)
+        )));
+
+        for (unsigned int k = i+1 ; k < outerBoundary.size() ; k++) {
+          outerBoundary[k] = outerBoundary[k + j - i];
+        }
+
+        outerBoundary.resize(outerBoundary.size() - j + i);
+        break;
+      }
+    }
+  }
+
+  result.push_back(Polygon_with_holes_2(
+    Polygon_2(outerBoundary.begin(), outerBoundary.end())));
+
+  return result;
 }
 
 void CstmCGAL::splitFace(Mesh& mesh, face_descriptor f) {

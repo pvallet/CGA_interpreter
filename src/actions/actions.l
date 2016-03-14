@@ -46,6 +46,7 @@ selectFaces     { return token::SELECT_FACES; }
 setTexture      { return token::SET_TEXTURE; }
 removeFaces     { return token::REMOVE_FACES; }
 roof            { return token::ROOF; }
+createRoof      { return token::CREATE_ROOF; }
 \{              { pattern_count = 1; BEGIN(PATTERN); yylval->sval = strdup(yytext); return token::BEG_PTRN;}
 <PATTERN>\{     { pattern_count++; yylval->sval = strdup(yytext); return token::CODE; }
 <PATTERN>\}\*   { pattern_count--; yylval->sval = strdup(yytext);
