@@ -4,17 +4,17 @@ This program is a procedural architecture generator inspired by CGA and CGA++ gr
 https://www.cs.purdue.edu/homes/aliaga/cs535-12/lectures/grammars/proc-mod-bldgs.pdf
 http://research.michael-schwarz.com/publ/2015/cgapp/
 
-This is currently a WIP for a school project
+For more details read report.pdf
 
 This program requires :
-  flex
-  bison
-  libcgal-dev
-  meshlab (to visualize .obj files ; you need at least the 1.3.3 version)
+    flex
+    bison
+   libcgal-dev
+    meshlab (to visualize .obj files ; you need at least the 1.3.3 version)
 
 To compile, create the necessary obj folders for the first time
-  make obj
+   make obj
 
 Then run
-  make gen_parsers
-  make
+    make gen_parsers
+    make
