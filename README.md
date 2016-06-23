@@ -11,8 +11,9 @@ The current project is built only for GNU/Linux. It requires:
 flex  
 bison  
 libcgal-dev  
-meshlab (to visualize .obj files ; you need at least the 1.3.3 version)  
 ```
+
+You can also use `meshlab` for visualizing the `.obj` generated files. You'd need version 1.3.3 or higher as 1.3.2 importing of OBJs is broken.  
 
 To compile, create the necessary obj folders for the first time  
 ```
