@@ -15,7 +15,9 @@ meshlab (to visualize .obj files ; you need at least the 1.3.3 version)
 ```
 
 To compile, create the necessary obj folders for the first time  
-`make obj`  
+```
+make obj  
+```
 
 Then run  
 ```
