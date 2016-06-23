@@ -6,7 +6,7 @@ http://research.michael-schwarz.com/publ/2015/cgapp/
 
 For more details read report.pdf  
 
-This program requires:  
+The current project is built only for GNU/Linux. It requires:  
 ```
 flex  
 bison  
