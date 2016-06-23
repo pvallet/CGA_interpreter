@@ -1,4 +1,4 @@
-# CGA-_interpreter
+# CGA_interpreter
 
 This program is a procedural architecture generator inspired by CGA and CGA++ grammars  
 https://www.cs.purdue.edu/homes/aliaga/cs535-12/lectures/grammars/proc-mod-bldgs.pdf  
