@@ -13,9 +13,9 @@ bison
 libcgal-dev  
 ```
 
-You can also use `meshlab` for visualizing the `.obj` generated files. You'd need version 1.3.3 or higher as 1.3.2 importing of OBJs is broken.  
+You can also use `meshlab` to visualize the `.obj` generated files. You'll need version 1.3.3 or higher as in 1.3.2, the import of OBJs is broken.  
 
-To compile, create the necessary obj folders for the first time  
+To build, create the necessary object folders for the first time  
 ```
 make obj  
 ```
