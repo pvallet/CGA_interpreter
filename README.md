@@ -4,7 +4,7 @@ This program is a procedural architecture generator inspired by CGA and CGA++ gr
 https://www.cs.purdue.edu/homes/aliaga/cs535-12/lectures/grammars/proc-mod-bldgs.pdf  
 http://research.michael-schwarz.com/publ/2015/cgapp/  
 
-For more details read report.pdf  
+*For more details read report.pdf*
 
 The current project is built only for GNU/Linux. It requires:  
 ```
